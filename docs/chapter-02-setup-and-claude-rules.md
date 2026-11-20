@@ -4,8 +4,66 @@
 
 このチャプターでは、人と AI（Claude Code）の役割を明確に分けて開発環境を構築します。
 
+- 2-0（人が実施）: Rancher Desktop（Docker 互換）と mise をインストールし、Java 25・Node.js 26・pnpm 11 を揃えます。
 - 2-1（人が実施）: 作業ディレクトリの作成、環境構築スキル（`SKILL.md`）の作成、およびクリーンアーキテクチャの設計ルール（`CLAUDE.md` / `.claude/rules/`）の配置を行います。
 - 2-2（AI が実施）: 人が作成したスキルとルールを Claude Code に読み込ませ、PostgreSQL 18・Spring Boot 4・Next.js 16 の環境構築から初期ビルド確認までを AI に実行させます。以降のチャプターでも同様に Claude Code を活用して実装とテストを進めます。
+
+---
+
+## 2-0. 前提ツールのインストール（人が実施）
+
+本ハンズオンでは、コンテナ実行環境に Docker Desktop ではなく、Docker 互換の Rancher Desktop を使用します。また、Java・Node.js・pnpm のバージョン管理には mise を使用します。
+
+### 1. Rancher Desktop のインストール
+
+Rancher Desktop は Docker CLI（`docker` / `docker compose`）を同梱しており、コンテナエンジンに `dockerd (moby)` を選択すると Docker Desktop と同じコマンドで操作できます。
+
+```bash
+brew install --cask rancher
+```
+
+インストール後、Rancher Desktop を起動し、初回設定で以下を選択します。
+
+- Container Engine: `dockerd (moby)`
+- Configure PATH: `Automatic`
+
+起動完了後、次のコマンドで動作を確認します。
+
+```bash
+docker --version
+docker compose version
+```
+
+### 2. mise のインストール
+
+```bash
+brew install mise
+echo 'eval "$(mise activate zsh)"' >> ~/.zshrc  # bash / fish の場合はシェルに合わせて読み替える
+exec $SHELL -l
+```
+
+### 3. Java 25 / Node.js 26 / pnpm 11 の導入
+
+「2-1. 1」で作成するルートディレクトリ（`budget-app-handson`）で、ツールのバージョンを `mise.toml` に固定してインストールします。2-1 の 1 の直後に実施してください。
+
+```bash
+cat > mise.toml <<'EOF'
+[tools]
+java = "temurin-25"
+node = "26"
+pnpm = "11"
+EOF
+mise trust
+mise install
+```
+
+次のコマンドで、Java 25・Node.js 26・pnpm 11 が有効になっていることを確認します。
+
+```bash
+java -version   # 25.x
+node -v         # v26.x
+pnpm -v         # 11.x
+```
 
 ---
 
@@ -22,6 +80,8 @@ mkdir -p budget-app-handson/.claude/skills/setup-env
 mkdir -p budget-app-handson/.claude/rules
 cd budget-app-handson
 ```
+
+ここで 2-0 の 3 に進み、`mise.toml` の作成と `mise install` を実施してから、次の手順に進んでください。
 
 ### 2. 環境構築スキル（`.claude/skills/setup-env/SKILL.md`）の作成
 
@@ -42,7 +102,7 @@ disable-model-invocation: true
 
 ## 事前確認
 1. 現在の作業ディレクトリがプロジェクトのルート（`budget-app-handson`）であることを確認する。
-2. `docker --version`、`java -version`（Java 21以上、推奨 Java 25）、`node -v`（v26推奨）が利用可能か確認する。前提ツールが未インストールの場合は中断し、ユーザーにインストールを案内する。
+2. `docker --version`（Rancher Desktop の dockerd）、`java -version`（Java 25 必須）、`node -v`（v26）、`pnpm -v`（v11）が利用可能か確認する。Java が 25 でない場合や前提ツールが未インストールの場合は中断し、ユーザーに「2-0. 前提ツールのインストール」（mise による導入）を案内する。
 
 ## Step 1: PostgreSQL 18 の構築と起動
 1. ルートディレクトリ直下に `compose.yaml` を以下の内容で作成する。
@@ -144,8 +204,8 @@ INSERT INTO categories (name, type) VALUES ('副業', 'INCOME');
 5. `cd backend && ./gradlew test` を実行してビルドと初期テストの成功を確認する。その後、バックグラウンド等で `./gradlew bootRun` を起動し、Flyway マイグレーション（`now at version v1`）が適用されたことを確認したらプロセスを停止する。
 
 ## Step 3: フロントエンド（Next.js 16 / pnpm 11）のセットアップ
-1. ルートディレクトリに `.nvmrc`（内容: `26`）を作成する。
-2. `pnpm -v` を確認し、未導入または v11 未満の場合は `npm install -g pnpm@11` を実行する。
+1. ルートディレクトリの `mise.toml` に `node = "26"` と `pnpm = "11"` が定義されていることを確認する。未定義の場合は中断し、ユーザーに「2-0. 前提ツールのインストール」を案内する。
+2. `pnpm -v` を実行し、v11 であることを確認する。
 3. 非対話オプションを指定して `frontend` プロジェクトを生成する。
 
 ```bash
@@ -320,7 +380,7 @@ Claude Code が `.claude/skills/setup-env/SKILL.md` の手順に従い、以下�
 
 1. `compose.yaml` の生成と Docker による PostgreSQL 18 の起動・ヘルスチェック
 2. Spring Initializr からの `backend` プロジェクト生成、依存ライブラリの追加、`application.yml` と Flyway SQL の配置、起動およびマイグレーション確認
-3. `.nvmrc` の作成、`pnpm create next-app@latest` による `frontend` プロジェクト生成、テストライブラリの導入、4層用ディレクトリの作成、ビルド確認
+3. `mise.toml` の確認、`pnpm create next-app@latest` による `frontend` プロジェクト生成、テストライブラリの導入、4層用ディレクトリの作成、ビルド確認
 
 ### 3. AI による構築完了後の確認ポイント
 
