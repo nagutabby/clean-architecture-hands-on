@@ -119,6 +119,10 @@ disable-model-invocation: true
 ## 事前確認
 1. 現在の作業ディレクトリがプロジェクトのルート（`budget-app-handson`）であることを確認する。
 2. `docker --version`（Rancher Desktop の dockerd）、`java -version`（Java 25 必須）、`node -v`（v26）、`pnpm -v`（v11）が利用可能か確認する。Java が 25 でない場合や前提ツールが未インストールの場合は中断し、ユーザーに「2-0. 前提ツールのインストール」（mise による導入）を案内する。
+3. 使用するポート（PostgreSQL: 5432、Spring Boot: 8080、Next.js: 3000）が他のプロセスに使われていないか `lsof -nP -iTCP:<ポート> -sTCP:LISTEN` で確認する。使われている場合は、確認を取らずに既存のプロセスを終了して続行する。
+   - 占有しているのが Docker コンテナの場合（`docker ps` で公開ポートを確認）は、プロセスを kill せず `docker stop <コンテナ名>` で停止する。ホスト側に見える `ssh` や `com.docker` 等は Rancher Desktop の VM が転送しているプロセスであり、kill すると Docker 全体が停止するため対象にしない。コンテナの削除（`docker rm`）やボリュームの削除は行わない。
+   - 通常のプロセスの場合は `kill <PID>` で終了し、残っていれば `kill -9 <PID>` を使う。
+   - 終了したプロセス（PID・コマンド・ポート）またはコンテナ名は、Step 4 の完了報告に含める。
 
 ## Step 1: PostgreSQL 18 の構築と起動
 1. ルートディレクトリ直下に `compose.yaml` を以下の内容で作成する。
@@ -261,6 +265,7 @@ mkdir -p frontend/src/components/ui \
 - Docker コンテナ `budget-app-db` の稼働状況
 - Spring Boot プロジェクトの生成と Flyway v1 マイグレーション適用結果
 - Next.js プロジェクトの生成とディレクトリ構成の準備完了
+- ポート競合により終了したプロセスまたは停止したコンテナ（該当する場合）
 ````
 
 ### 3. プロジェクト共通ガイドライン（`CLAUDE.md`）の作成
