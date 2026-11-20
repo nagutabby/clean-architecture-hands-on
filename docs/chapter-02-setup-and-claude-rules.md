@@ -4,7 +4,7 @@
 
 このチャプターでは、人と AI（Claude Code）の役割を明確に分けて開発環境を構築します。
 
-- 2-0（人が実施）: Rancher Desktop（Docker 互換）と mise をインストールし、Java 25・Node.js 26・pnpm 11 を揃えます。
+- 2-0（人が実施）: Homebrew、Rancher Desktop（Docker 互換）と mise をインストールし、Java 25・Node.js 26・pnpm 11 を揃えます。
 - 2-1（人が実施）: 作業ディレクトリの作成、環境構築スキル（`SKILL.md`）の作成、およびクリーンアーキテクチャの設計ルール（`CLAUDE.md` / `.claude/rules/`）の配置を行います。
 - 2-2（AI が実施）: 人が作成したスキルとルールを Claude Code に読み込ませ、PostgreSQL 18・Spring Boot 4・Next.js 16 の環境構築から初期ビルド確認までを AI に実行させます。以降のチャプターでも同様に Claude Code を活用して実装とテストを進めます。
 
@@ -14,7 +14,23 @@
 
 本ハンズオンでは、コンテナ実行環境に Docker Desktop ではなく、Docker 互換の Rancher Desktop を使用します。また、Java・Node.js・pnpm のバージョン管理には mise を使用します。
 
-### 1. Rancher Desktop のインストール
+### 1. Homebrew のインストール確認
+
+以降のインストールは Homebrew を使用します。次のコマンドでインストール済みか確認します。
+
+```bash
+brew --version
+```
+
+`command not found` と表示された場合は、[Homebrew 公式サイト](https://brew.sh/)の手順でインストールします。
+
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+インストール完了時に表示される「Next steps」のコマンド（`brew` を PATH に追加する `eval "$(/opt/homebrew/bin/brew shellenv)"` など）を実行し、再度 `brew --version` でバージョンが表示されることを確認します。
+
+### 2. Rancher Desktop のインストール
 
 Rancher Desktop は Docker CLI（`docker` / `docker compose`）を同梱しており、コンテナエンジンに `dockerd (moby)` を選択すると Docker Desktop と同じコマンドで操作できます。
 
@@ -34,7 +50,7 @@ docker --version
 docker compose version
 ```
 
-### 2. mise のインストール
+### 3. mise のインストール
 
 ```bash
 brew install mise
@@ -42,7 +58,7 @@ echo 'eval "$(mise activate zsh)"' >> ~/.zshrc  # bash / fish の場合はシェ
 exec $SHELL -l
 ```
 
-### 3. Java 25 / Node.js 26 / pnpm 11 の導入
+### 4. Java 25 / Node.js 26 / pnpm 11 の導入
 
 「2-1. 1」で作成するルートディレクトリ（`budget-app-handson`）で、ツールのバージョンを `mise.toml` に固定してインストールします。2-1 の 1 の直後に実施してください。
 
@@ -81,7 +97,7 @@ mkdir -p budget-app-handson/.claude/rules
 cd budget-app-handson
 ```
 
-ここで 2-0 の 3 に進み、`mise.toml` の作成と `mise install` を実施してから、次の手順に進んでください。
+ここで 2-0 の 4 に進み、`mise.toml` の作成と `mise install` を実施してから、次の手順に進んでください。
 
 ### 2. 環境構築スキル（`.claude/skills/setup-env/SKILL.md`）の作成
 
