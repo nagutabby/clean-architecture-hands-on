@@ -4,15 +4,15 @@
 
 このチャプターでは、人と AI（Claude Code）の役割を明確に分けて開発環境を構築します。
 
-- 2-0（人が実施）: Homebrew、Rancher Desktop（Docker 互換）と mise をインストールし、Java 25・Node.js 26・pnpm 11 を揃えます。
-- 2-1（人が実施）: 作業ディレクトリの作成、環境構築スキル（`SKILL.md`）の作成、およびクリーンアーキテクチャの設計ルール（`CLAUDE.md` / `.claude/rules/`）の配置を行います。
-- 2-2（AI が実施）: 人が作成したスキルとルールを Claude Code に読み込ませ、PostgreSQL 18・Spring Boot 4・Next.js 16 の環境構築から初期ビルド確認までを AI に実行させます。以降のチャプターでも同様に Claude Code を活用して実装とテストを進めます。
+- 2-0（人が実施）: Homebrew、Rancher Desktop（Docker 互換）、mise をシステムにインストールします。
+- 2-1（人が実施）: 作業ディレクトリの作成、mise による言語・ランタイムの導入、環境構築スキル（`SKILL.md`）の作成、およびクリーンアーキテクチャの設計ルール（`CLAUDE.md` / `.claude/rules/`）の配置を行います。
+- 2-2（AI が実施）: 人が作成したスキルとルールを Claude Code に読み込ませ、PostgreSQL 18・Spring Boot 4・Next.js 16 の環境構築から初期ビルド・マイグレーション確認までを AI に実行させます。
 
 ---
 
 ## 2-0. 前提ツールのインストール（人が実施）
 
-本ハンズオンでは、コンテナ実行環境に Docker Desktop ではなく、Docker 互換の Rancher Desktop を使用します。また、Java・Node.js・pnpm のバージョン管理には mise を使用します。
+本ハンズオンでは、コンテナ実行環境に Docker 互換の Rancher Desktop を使用し、Java・Node.js・pnpm のバージョン管理に mise を使用します。
 
 ### 1. Homebrew のインストール確認
 
@@ -22,7 +22,7 @@
 brew --version
 ```
 
-`command not found` と表示された場合は、[Homebrew 公式サイト](https://brew.sh/)の手順でインストールします。
+`command not found` と表示された場合は、Homebrew 公式サイト（https://brew.sh/）の手順でインストールします。
 
 ```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -58,9 +58,25 @@ echo 'eval "$(mise activate zsh)"' >> ~/.zshrc  # bash / fish の場合はシェ
 exec $SHELL -l
 ```
 
-### 4. Java 25 / Node.js 26 / pnpm 11 の導入
+---
 
-「2-1. 1」で作成するルートディレクトリ（`budget-app-handson`）で、ツールのバージョンを `mise.toml` に固定してインストールします。2-1 の 1 の直後に実施してください。
+## 2-1. プロジェクト初期化と Claude Code 設定の作成（人が実施）
+
+ここからの手順は、学習者自身がターミナルおよびエディタで上から順に実施します。
+
+### 1. 作業用ルートディレクトリの作成
+
+ターミナルを開き、プロジェクト全体を格納するルートディレクトリと `.claude` 配下の設定用ディレクトリを作成し、移動します。
+
+```bash
+mkdir -p budget-app-handson/.claude/skills/setup-env
+mkdir -p budget-app-handson/.claude/rules
+cd budget-app-handson
+```
+
+### 2. Java 25 / Node.js 26 / pnpm 11 の導入（`mise.toml`）
+
+ルートディレクトリ（`budget-app-handson`）直下に `mise.toml` を作成し、プロジェクトで使用するツールバージョンを固定してインストールします。
 
 ```bash
 cat > mise.toml <<'EOF'
@@ -81,27 +97,9 @@ node -v         # v26.x
 pnpm -v         # 11.x
 ```
 
----
+### 3. 環境構築スキル（`.claude/skills/setup-env/SKILL.md`）の作成
 
-## 2-1. Claude Code スキルと設計ルールの作成（人が実施）
-
-ここからの手順は、学習者自身がターミナルおよびエディタで実施します。
-
-### 1. 作業用ルートディレクトリの作成
-
-ターミナルを開き、プロジェクト全体を格納するルートディレクトリと `.claude` 配下の設定用ディレクトリを作成します。
-
-```bash
-mkdir -p budget-app-handson/.claude/skills/setup-env
-mkdir -p budget-app-handson/.claude/rules
-cd budget-app-handson
-```
-
-ここで 2-0 の 4 に進み、`mise.toml` の作成と `mise install` を実施してから、次の手順に進んでください。
-
-### 2. 環境構築スキル（`.claude/skills/setup-env/SKILL.md`）の作成
-
-最初に、次の「2-2」で Claude Code に環境構築を実行させるためのスキルファイルを作成します。
+次の「2-2」で Claude Code に環境構築を実行させるためのスキルファイルを作成します。
 
 `.claude/skills/setup-env/SKILL.md` を新規作成し、以下の内容を記述してください。
 
@@ -114,15 +112,15 @@ disable-model-invocation: true
 
 # Budget App 環境構築手順
 
-ユーザーから `/setup-env` で呼び出された場合、以下の手順を上から順に実行し、各ステップの完了を確認しながら開発環境を構築してください。
+ユーザーから `/setup-env` で呼び出された場合、すべてのコマンドはプロジェクトルート（`budget-app-handson`）を基準に上から順に実行し、各ステップの完了を確認しながら開発環境を構築してください。
 
 ## 事前確認
 1. 現在の作業ディレクトリがプロジェクトのルート（`budget-app-handson`）であることを確認する。
-2. `docker --version`（Rancher Desktop の dockerd）、`java -version`（Java 25 必須）、`node -v`（v26）、`pnpm -v`（v11）が利用可能か確認する。Java が 25 でない場合や前提ツールが未インストールの場合は中断し、ユーザーに「2-0. 前提ツールのインストール」（mise による導入）を案内する。
-3. 使用するポート（PostgreSQL: 5432、Spring Boot: 8080、Next.js: 3000）が他のプロセスに使われていないか `lsof -nP -iTCP:<ポート> -sTCP:LISTEN` で確認する。使われている場合は、確認を取らずに既存のプロセスを終了して続行する。
-   - 占有しているのが Docker コンテナの場合（`docker ps` で公開ポートを確認）は、プロセスを kill せず `docker stop <コンテナ名>` で停止する。ホスト側に見える `ssh` や `com.docker` 等は Rancher Desktop の VM が転送しているプロセスであり、kill すると Docker 全体が停止するため対象にしない。コンテナの削除（`docker rm`）やボリュームの削除は行わない。
-   - 通常のプロセスの場合は `kill <PID>` で終了し、残っていれば `kill -9 <PID>` を使う。
-   - 終了したプロセス（PID・コマンド・ポート）またはコンテナ名は、Step 4 の完了報告に含める。
+2. `docker --version`（Rancher Desktop の dockerd）、`java -version`（Java 25 必須）、`node -v`（v26）、`pnpm -v`（v11）が利用可能か確認する。Java が 25 でない場合や前提ツールが未インストールの場合は中断し、ユーザーに「2-0 / 2-1 の前提ツール導入」を案内する。
+3. 使用するポート（PostgreSQL: 5432、Spring Boot: 8080、Next.js: 3000）が他のプロセスに使われていないか `lsof -nP -iTCP:<ポート> -sTCP:LISTEN` で確認する。
+   - 5432 を占有しているのが、このプロジェクト自身のコンテナ `budget-app-db`（`docker ps` で確認）である場合は、再実行とみなして中断せず Step 1 へ進む。
+   - それ以外でいずれかのポートがすでに使用されている場合は、既存のプロセスやコンテナを勝手に終了・削除せず、占有しているプロセス情報（PID・コマンド名・ポート番号）をユーザーに報告して処理を中断する。
+   - ユーザー自身で該当プロセスを停止した後に、再度 `/setup-env` を実行するよう案内する。
 
 ## Step 1: PostgreSQL 18 の構築と起動
 1. ルートディレクトリ直下に `compose.yaml` を以下の内容で作成する。
@@ -153,8 +151,8 @@ volumes:
 2. `docker compose up -d` を実行する。
 3. `docker compose ps` を実行し、`budget-app-db` の状態が `healthy` になるまで待機・確認する。
 
-## Step 2: バックエンド（Spring Boot 4 / Kotlin 2.4）のセットアップ
-1. ルートディレクトリで以下のコマンドを実行し、`backend` ディレクトリを生成する。
+## Step 2: バックエンド（Spring Boot 4 / Kotlin）のセットアップ
+1. ルートディレクトリで以下のコマンドを実行し、`backend` ディレクトリを生成する（Spring Initializr から最新の Spring Boot 4.x を取得する）。
 
 ```bash
 curl -fsSL https://start.spring.io/starter.tgz \
@@ -169,9 +167,10 @@ curl -fsSL https://start.spring.io/starter.tgz \
   | tar -xzf -
 ```
 
-2. `backend/build.gradle.kts` の `dependencies` ブロックに以下のテスト用ライブラリを追記する。
+2. `backend/build.gradle.kts` の `dependencies` ブロックを確認し、Flyway の PostgreSQL モジュールとテスト用ライブラリが含まれるよう以下を追記する（`flyway-database-postgresql` がすでに記載されている場合は重複させない）。
 
 ```kotlin
+	runtimeOnly("org.flywaydb:flyway-database-postgresql")
 	testImplementation("io.mockk:mockk:1.14.11")
 	testImplementation("com.lemonappdev:konsist:0.18.1")
 ```
@@ -190,9 +189,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
-    show-sql: true
-    properties:
-      "[hibernate.format_sql]": true
+    show-sql: false
 ```
 
 4. `backend/src/main/resources/db/migration/V1__create_tables.sql` を作成する。
@@ -201,14 +198,14 @@ spring:
 CREATE TABLE categories (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL,
-    type VARCHAR(10) NOT NULL
+    type VARCHAR(10) NOT NULL CHECK (type IN ('INCOME', 'EXPENSE'))
 );
 
 CREATE TABLE transactions (
     id BIGSERIAL PRIMARY KEY,
     category_id BIGINT NOT NULL,
     title VARCHAR(100) NOT NULL,
-    amount INT NOT NULL,
+    amount INT NOT NULL CHECK (amount >= 1),
     transaction_date DATE NOT NULL,
     memo TEXT,
     CONSTRAINT fk_categories FOREIGN KEY (category_id) REFERENCES categories(id)
@@ -221,33 +218,39 @@ INSERT INTO categories (name, type) VALUES ('給与', 'INCOME');
 INSERT INTO categories (name, type) VALUES ('副業', 'INCOME');
 ```
 
-5. `cd backend && ./gradlew test` を実行してビルドと初期テストの成功を確認する。その後、バックグラウンド等で `./gradlew bootRun` を起動し、Flyway マイグレーション（`now at version v1`）が適用されたことを確認したらプロセスを停止する。
+5. サブシェル `(cd backend && ./gradlew test)` を実行してビルドと初期テストの成功を確認する。
+6. サブシェル `(cd backend && ./gradlew bootRun)` でバックエンドを一時起動し、起動完了後にプロセスを停止する。その後、以下のコマンドで Flyway によるテーブル作成と初期データ投入を直接確認する。
+
+```bash
+docker compose exec -T db psql -U budget_user -d budget_db -c "\dt"
+docker compose exec -T db psql -U budget_user -d budget_db -c "SELECT * FROM categories;"
+```
 
 ## Step 3: フロントエンド（Next.js 16 / pnpm 11）のセットアップ
-1. ルートディレクトリの `mise.toml` に `node = "26"` と `pnpm = "11"` が定義されていることを確認する。未定義の場合は中断し、ユーザーに「2-0. 前提ツールのインストール」を案内する。
-2. `pnpm -v` を実行し、v11 であることを確認する。
-3. 非対話オプションを指定して `frontend` プロジェクトを生成する。
+1. ルートディレクトリの `mise.toml` に `node = "26"` と `pnpm = "11"` が定義されていることを確認する。
+2. 非対話オプションを指定してルートディレクトリ直下に `frontend` プロジェクトを生成する。
 
 ```bash
 pnpm create next-app@latest frontend \
-  --typescript \
-  --eslint \
-  --react-compiler \
+  --ts \
   --tailwind \
-  --src-dir \
+  --eslint \
   --app \
+  --src-dir \
   --import-alias "@/*" \
   --use-pnpm \
   --yes
 ```
 
-4. `frontend` ディレクトリに移動し、テスト関連パッケージをインストールする。
+   `create-next-app` は `frontend/.git` を生成するため、モノレポのルートで一括管理できるよう `rm -rf frontend/.git` で削除する。
+
+3. カレントディレクトリをルートに保ったまま、テスト関連パッケージをインストールする。
 
 ```bash
-cd frontend && pnpm add -D vitest @vitejs/plugin-react jsdom @testing-library/react @testing-library/dom @testing-library/jest-dom msw
+pnpm --dir frontend add -D vitest @vitejs/plugin-react jsdom @testing-library/react @testing-library/dom @testing-library/jest-dom msw
 ```
 
-5. クリーンアーキテクチャ構成用のディレクトリを作成する。
+4. クリーンアーキテクチャ構成用のディレクトリを作成する。
 
 ```bash
 mkdir -p frontend/src/components/ui \
@@ -258,17 +261,16 @@ mkdir -p frontend/src/components/ui \
   frontend/src/mocks
 ```
 
-6. `cd frontend && pnpm build` を実行し、Next.js のビルドがエラーなく完了することを確認する。
+5. `pnpm --dir frontend build` を実行し、Next.js のビルドがエラーなく完了することを確認する。
 
 ## Step 4: 完了報告
 すべてのステップが完了したら、以下の項目を確認結果とともにユーザーへ報告する。
 - Docker コンテナ `budget-app-db` の稼働状況
-- Spring Boot プロジェクトの生成と Flyway v1 マイグレーション適用結果
-- Next.js プロジェクトの生成とディレクトリ構成の準備完了
-- ポート競合により終了したプロセスまたは停止したコンテナ（該当する場合）
+- Spring Boot プロジェクトの生成と `categories` / `transactions` テーブルおよび初期マスタデータの作成結果
+- Next.js プロジェクトの生成とディレクトリ構成・ビルド完了結果
 ````
 
-### 3. プロジェクト共通ガイドライン（`CLAUDE.md`）の作成
+### 4. プロジェクト共通ガイドライン（`CLAUDE.md`）の作成
 
 Claude Code がセッション開始時に自動で読み込む共通ルールファイルを作成します。
 ルートディレクトリ直下に `CLAUDE.md` を新規作成し、以下の内容を記述してください。
@@ -280,9 +282,9 @@ Claude Code がセッション開始時に自動で読み込む共通ルール�
 すべての実装においてクリーンアーキテクチャの依存性ルール（外側の層から内側の層へのみ依存）を厳守してください。
 
 ## 技術スタック
-- Backend: Kotlin 2.4, Java 25, Spring Boot v4 (4.1), PostgreSQL v18, Flyway, JUnit 5, MockK 1.14, Konsist
-- Frontend: TypeScript, Next.js v16 (App Router), React 19, Tailwind CSS v4, Vitest v5, Testing Library, MSW v3, pnpm v11
-- Infra: Docker Compose (PostgreSQL 18)
+- Backend: Kotlin v2, Java 25 (LTS), Spring Boot v4, PostgreSQL v18, Flyway, JUnit 5, MockK, Konsist
+- Frontend: TypeScript, Next.js v16 (App Router), React 19, Tailwind CSS v4, Vitest, Testing Library, MSW, pnpm v11
+- Infra: Rancher Desktop / Docker Compose (PostgreSQL 18)
 
 ## 主要コマンド
 - DB起動: `docker compose up -d`
@@ -297,7 +299,7 @@ Claude Code がセッション開始時に自動で読み込む共通ルール�
 3. テストの維持: 新規クラスやユースケースを追加した際は、対応する単体テストまたは統合テストを必ず作成し、テストがパスすることを確認すること。
 ```
 
-### 4. 領域別アーキテクチャ規約（`.claude/rules/`）の作成
+### 5. 領域別アーキテクチャ規約（`.claude/rules/`）の作成
 
 対象ディレクトリのファイルを編集する際だけに自動適用される詳細ルールを作成します。
 
@@ -326,13 +328,12 @@ paths:
    - 禁止事項: `adapter`・`framework` パッケージおよび `jakarta.persistence.*` の import を禁止する。
 
 3. `adapter`（第3層：Interface Adapters）
-   - `adapter.controller`: REST Controller、リクエスト/レスポンス DTO、`GlobalExceptionHandler` を配置する。Controller は `usecase.input` のみを受け取り、`usecase.output` や `framework` を直接呼び出してはならない。
-   - `adapter.repository`: `usecase.output.*Repository` を実装する `*RepositoryImpl` を配置し、JPA Entity とドメインモデルの相互変換を行う。
+   - `adapter.controller`: REST Controller、リクエスト/レスポンス DTO、`GlobalExceptionHandler` を配置する。
+   - `adapter.repository`: `usecase.output.*Repository` を実装する `*RepositoryImpl`、JPA Entity（`adapter.repository.entity`）、Spring Data JPA インターフェース（`adapter.repository.jpa`）を配置し、JPA Entity とドメインモデルの相互変換を行う。
+   - 禁止事項: 外側の第4層（`framework` パッケージ）の import を一切禁止する。また、`adapter.controller` は `usecase.input` のみを受け取り、`usecase.output` や `adapter.repository`（JPA）を直接呼び出してはならない。
 
 4. `framework`（第4層：Frameworks & Drivers）
-   - `framework.jpa.entity`: `@Entity` を付与した JPA エンティティを配置する。
-   - `framework.jpa.repository`: Spring Data JPA インターフェース（`Jpa*Repository`）を配置する。
-   - `framework.config`: CORS などのフレームワーク設定クラスを配置する。
+   - `framework.config`: CORS などのフレームワーク全体設定クラスを配置する。
 ```
 
 #### `.claude/rules/frontend.md` の作成
@@ -363,6 +364,7 @@ paths:
 4. `presentation/`（第3層：Interface Adapters - UI表示）
    - UI コンポーネント（`*.tsx`）と表示用ユーティリティ（`presentation/utils/formatCurrency.ts` 等）を配置する。
    - コンポーネント内に `fetch` を直接記述してはならない。
+   - 純粋な表示コンポーネント（`BalanceSummaryCard`, `TransactionForm`, `TransactionList` 等）は `adapter/` を直接 import してはならない。`adapter/` の実装の注入（Composition Root）は機能ルートコンテナ（`TransactionSection.tsx`）のデフォルト引数でのみ行う。
 ```
 
 ここまでで人による準備は完了です。
@@ -399,16 +401,17 @@ CLAUDE.md と .claude/rules/ に定義された、バックエンドとフロン
 
 Claude Code が `.claude/skills/setup-env/SKILL.md` の手順に従い、以下の作業を順次実行します。コマンド実行の許可を求められた場合は内容を確認して承認してください。
 
-1. `compose.yaml` の生成と Docker による PostgreSQL 18 の起動・ヘルスチェック
-2. Spring Initializr からの `backend` プロジェクト生成、依存ライブラリの追加、`application.yml` と Flyway SQL の配置、起動およびマイグレーション確認
-3. `mise.toml` の確認、`pnpm create next-app@latest` による `frontend` プロジェクト生成、テストライブラリの導入、4層用ディレクトリの作成、ビルド確認
+1. ポート（5432, 8080, 3000）の空き状況確認
+2. `compose.yaml` の生成と Docker による PostgreSQL 18 の起動・ヘルスチェック
+3. Spring Initializr からの `backend` プロジェクト生成、依存ライブラリの追加、`application.yml` と Flyway SQL の配置、`psql` によるテーブルと初期マスタデータの作成確認
+4. `mise.toml` の確認、`pnpm create next-app@latest` による `frontend` プロジェクト生成、テストライブラリの導入、4層用ディレクトリの作成、ビルド確認
 
 ### 3. AI による構築完了後の確認ポイント
 
 Claude Code から完了報告が出力されたら、以下の状態になっていることを確認してください。
 
 - ルートディレクトリ直下に `compose.yaml`、`backend/`、`frontend/` が作成されていること。
-- PostgreSQL 18 コンテナ（`budget-app-db`）が稼働中であり、Flyway によるテーブル作成（`categories`, `transactions`）と初期マスタデータ投入が完了していること。
-- バックエンドの `./gradlew test` およびフロントエンドの `pnpm build` がエラーなく完了していること。
+- PostgreSQL 18 コンテナ（`budget-app-db`）が稼働中であり、`categories` テーブル（初期データ5件）と `transactions` テーブルが作成されていること。
+- バックエンドの `./gradlew test` およびフロントエンドの `pnpm --dir frontend build` がエラーなく完了していること。
 
 これで開発環境と AI 開発基盤のセットアップはすべて完了です。次の Chapter 3 以降も、Claude Code にアーキテクチャ規約を遵守させながら実装とテストを進めていきます。
