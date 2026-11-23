@@ -1,0 +1,929 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>クリーンアーキテクチャ実践ハンズオン 解説スライド</title>
+<style>
+  :root {
+    --ink: #17212f;
+    --muted: #5b6676;
+    --line: #d7dce4;
+    --bg: #f6f7fa;
+    --paper: #ffffff;
+    --navy: #0f1b33;
+    --l1: #2f9e44; --l1-bg: #d3f9d8;
+    --l2: #1c7ed6; --l2-bg: #d0ebff;
+    --l3: #e67700; --l3-bg: #ffe8cc;
+    --l4: #7048e8; --l4-bg: #e5dbff;
+    --ok: #2f9e44; --ng: #e03131;
+    --font: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", "Meiryo", sans-serif;
+    --mono: "SF Mono", "Menlo", "Consolas", "Noto Sans Mono CJK JP", monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: #0b0f17; font-family: var(--font); color: var(--ink); }
+
+  /* ---- 画面表示: 1920x1080 のスライドを窓に合わせて縮小し、1枚ずつ表示 ---- */
+  .deck { position: fixed; inset: 0; overflow: hidden; }
+  .slide {
+    position: absolute; left: 50%; top: 50%;
+    width: 1920px; height: 1080px; overflow: hidden;
+    transform: translate(-50%, -50%) scale(var(--s, 0.5));
+    background: var(--bg); display: none;
+    padding: 64px 110px 0; font-size: 32px; line-height: 1.55;
+  }
+  .slide.active { display: block; }
+  .ui-hint {
+    position: fixed; right: 16px; bottom: 12px; color: #9aa4b5; font-size: 13px;
+    font-family: var(--font); letter-spacing: .02em; user-select: none; transition: opacity .6s; pointer-events: none;
+  }
+
+  /* ---- 共通パーツ ---- */
+  .tag {
+    display: inline-block; font-size: 24px; font-weight: 700; letter-spacing: .04em;
+    color: #fff; background: var(--navy); border-radius: 999px; padding: 2px 22px; margin-bottom: 14px;
+  }
+  .tag.t-lec { background: #364fc7; } .tag.t-be { background: #1c7ed6; } .tag.t-test { background: #0b7285; }
+  .tag.t-fe { background: #e67700; } .tag.t-ai { background: #7048e8; } .tag.t-ops { background: #495057; }
+  h1.title { font-size: 60px; line-height: 1.25; font-weight: 800; margin-bottom: 8px; }
+  .lead { font-size: 32px; color: var(--muted); margin-bottom: 26px; }
+  .foot {
+    position: absolute; left: 110px; right: 110px; bottom: 26px; display: flex;
+    justify-content: space-between; font-size: 20px; color: #8a94a6;
+  }
+  .cols { display: flex; gap: 48px; }
+  .cols > * { flex: 1; min-width: 0; }
+  .card { background: var(--paper); border: 2px solid var(--line); border-radius: 18px; padding: 24px 30px; }
+  .card h3 { font-size: 30px; margin-bottom: 8px; }
+  .card.l1 { border-color: var(--l1); background: var(--l1-bg); }
+  .card.l2 { border-color: var(--l2); background: var(--l2-bg); }
+  .card.l3 { border-color: var(--l3); background: var(--l3-bg); }
+  .card.l4 { border-color: var(--l4); background: var(--l4-bg); }
+  ul.pts { list-style: none; }
+  ul.pts li { position: relative; padding-left: 34px; margin: 10px 0; }
+  ul.pts li::before { content: ""; position: absolute; left: 6px; top: 18px; width: 12px; height: 12px; border-radius: 50%; background: var(--navy); }
+  ol.steps { list-style: none; counter-reset: s; }
+  ol.steps li { counter-increment: s; position: relative; padding-left: 62px; margin: 14px 0; }
+  ol.steps li::before {
+    content: counter(s); position: absolute; left: 0; top: 2px; width: 42px; height: 42px; border-radius: 50%;
+    background: var(--navy); color: #fff; font-weight: 800; font-size: 26px; text-align: center; line-height: 42px;
+  }
+  code, .mono { font-family: var(--mono); }
+  code.i { background: #e9edf4; border-radius: 6px; padding: 1px 9px; font-size: .86em; }
+  pre.code {
+    font-family: var(--mono); font-size: 25px; line-height: 1.5; background: #101826; color: #e8edf5;
+    border-radius: 16px; padding: 22px 30px; white-space: pre; overflow: hidden;
+  }
+  pre.code .c { color: #7f8ea6; } pre.code .k { color: #ffa94d; } pre.code .s { color: #8ce99a; }
+  pre.tree { font-family: var(--mono); font-size: 23px; line-height: 1.42; background: var(--paper); border: 2px solid var(--line); border-radius: 16px; padding: 18px 26px; white-space: pre; }
+  pre.tree .l1 { color: var(--l1); font-weight: 700; } pre.tree .l2 { color: var(--l2); font-weight: 700; }
+  pre.tree .l3 { color: var(--l3); font-weight: 700; } pre.tree .l4 { color: var(--l4); font-weight: 700; }
+  pre.tree .cm { color: #7a8597; }
+  table.t { border-collapse: collapse; width: 100%; background: var(--paper); font-size: 28px; }
+  table.t th { background: var(--navy); color: #fff; text-align: left; padding: 12px 20px; font-weight: 700; }
+  table.t td { border-bottom: 2px solid var(--line); padding: 12px 20px; vertical-align: top; }
+  table.t.tight td, table.t.tight th { padding-top: 8px; padding-bottom: 8px; }
+  table.t td.n { white-space: nowrap; font-weight: 700; }
+  .note { border-left: 8px solid var(--l3); background: #fff9ef; padding: 16px 26px; border-radius: 0 14px 14px 0; font-size: 28px; }
+  .note.ok { border-color: var(--ok); background: #f0fbf2; }
+  .note.ng { border-color: var(--ng); background: #fff5f5; }
+  .pill { display: inline-block; border-radius: 999px; padding: 0 16px; font-weight: 700; font-size: 24px; color: #fff; }
+  .pill.l1 { background: var(--l1); } .pill.l2 { background: var(--l2); } .pill.l3 { background: var(--l3); } .pill.l4 { background: var(--l4); }
+  svg text { font-family: var(--font); }
+
+  /* ---- タイトル/まとめ(濃色) ---- */
+  .slide.dark { background: var(--navy); color: #fff; padding: 0; }
+  .slide.dark .foot { color: #8c9bb8; }
+  .hero { position: absolute; left: 130px; top: 270px; right: 130px; }
+  .hero h1 { font-size: 92px; line-height: 1.2; font-weight: 800; }
+  .hero .sub { font-size: 40px; color: #b8c4dc; margin-top: 28px; }
+  .hero .meta { margin-top: 56px; font-size: 30px; color: #8fa3c7; }
+
+  /* ---- 印刷(PDF保存): 1920x1080px を1ページとして全スライドを出力 ---- */
+  @page { size: 1920px 1080px; margin: 0; }
+  @media print {
+    html, body { background: #fff; height: auto; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .deck { position: static; overflow: visible; }
+    .slide, .slide.active {
+      position: relative; left: 0; top: 0; transform: none; display: block;
+      break-after: page; page-break-after: always; break-inside: avoid;
+    }
+    .slide:last-child { break-after: auto; page-break-after: auto; }
+    .ui-hint { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+<!-- 1. タイトル -->
+<section class="slide dark" data-title="タイトル">
+  <div class="hero">
+    <div class="tag" style="background:#364fc7">120分ハンズオン</div>
+    <h1>クリーンアーキテクチャ実践ハンズオン</h1>
+    <div class="sub">Claude Code に規約を守らせて、Spring Boot と Next.js の家計簿アプリを 4 層で作る</div>
+    <div class="meta">Chapter 0〜7 ／ 所要 120 分 ／ 解説スライド</div>
+  </div>
+  <svg style="position:absolute;right:130px;top:660px" width="300" height="300" viewBox="0 0 360 360" aria-hidden="true">
+    <circle cx="180" cy="180" r="170" fill="#7048e8" opacity=".9"/><circle cx="180" cy="180" r="130" fill="#e67700"/>
+    <circle cx="180" cy="180" r="90" fill="#1c7ed6"/><circle cx="180" cy="180" r="50" fill="#2f9e44"/>
+  </svg>
+</section>
+
+<!-- 2. 進め方と役割分担 -->
+<section class="slide" data-title="進め方">
+  <span class="tag">オープニング</span>
+  <h1 class="title">このハンズオンの進め方：人は「規約」、AI は「実装」</h1>
+  <p class="lead">1 行ずつ手打ちはしません。人が設計ルールを定義し、Claude Code に層ごとに実装させ、結果を検証します。</p>
+  <svg viewBox="0 0 1700 520" width="1700" height="520" role="img" aria-label="人とAIの役割分担">
+    <defs><marker id="a1" markerUnits="userSpaceOnUse" markerWidth="20" markerHeight="20" refX="18" refY="10" orient="auto"><path d="M0,0 L20,10 L0,20 z" fill="#17212f"/></marker></defs>
+    <rect x="0" y="20" width="520" height="470" rx="22" fill="#fff" stroke="#364fc7" stroke-width="4"/>
+    <text x="260" y="76" text-anchor="middle" font-size="36" font-weight="800" fill="#364fc7">人（あなた）</text>
+    <g font-size="29" fill="#17212f">
+      <text x="44" y="140">・アーキテクチャ規約を定義</text><text x="62" y="180" fill="#5b6676" font-size="24">CLAUDE.md / .claude/rules/</text>
+      <text x="44" y="236">・スキルとフックを作成</text><text x="62" y="276" fill="#5b6676" font-size="24">SKILL.md / verify-changes.mjs</text>
+      <text x="44" y="332">・プロンプトを投げる</text>
+      <text x="44" y="388">・出力を検証し、ズレを指摘</text><text x="62" y="428" fill="#5b6676" font-size="24">依存方向・テスト結果・動作</text>
+    </g>
+    <rect x="1180" y="20" width="520" height="470" rx="22" fill="#fff" stroke="#7048e8" stroke-width="4"/>
+    <text x="1440" y="76" text-anchor="middle" font-size="36" font-weight="800" fill="#7048e8">Claude Code（AI）</text>
+    <g font-size="29" fill="#17212f">
+      <text x="1204" y="140">・環境構築（/setup-env）</text>
+      <text x="1204" y="196">・層ごとの実装</text><text x="1222" y="228" fill="#5b6676" font-size="23">domain → usecase →</text><text x="1222" y="258" fill="#5b6676" font-size="23">adapter → framework</text>
+      <text x="1204" y="292">・単体／統合／アーキテクチャテスト</text>
+      <text x="1204" y="348">・機能追加（/add-usecase）</text>
+      <text x="1204" y="404">・フックの検証結果で自己修正</text>
+    </g>
+    <rect x="590" y="150" width="500" height="220" rx="22" fill="#eef1fb" stroke="#17212f" stroke-width="3"/>
+    <text x="840" y="210" text-anchor="middle" font-size="32" font-weight="800">規約が AI の設計書</text>
+    <text x="840" y="262" text-anchor="middle" font-size="26" fill="#5b6676">層構造と依存禁止ルールを</text>
+    <text x="840" y="302" text-anchor="middle" font-size="26" fill="#5b6676">自動で守らせる仕組み</text>
+    <line x1="520" y1="260" x2="586" y2="260" stroke="#17212f" stroke-width="4" marker-end="url(#a1)"/>
+    <line x1="1094" y1="260" x2="1176" y2="260" stroke="#17212f" stroke-width="4" marker-end="url(#a1)"/>
+  </svg>
+  <div class="note" style="margin-top:12px">各章に「プロンプト」と「実装コード例」があります。基本はプロンプトで生成し、ズレたとき・時間短縮したいときはコード例を「正解リファレンス」として使います。</div>
+  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+</section>
+
+<!-- 3. タイムスケジュール -->
+<section class="slide" data-title="タイムスケジュール">
+  <span class="tag">全体像</span>
+  <h1 class="title">タイムスケジュール（120 分）</h1>
+  <svg viewBox="0 0 1700 190" width="1700" height="190" role="img" aria-label="120分のタイムライン">
+    <g font-size="23" font-weight="700" fill="#fff" text-anchor="middle">
+      <rect x="0" y="40" width="141.7" height="90" fill="#495057"/><text x="70.8" y="92">準備</text>
+      <rect x="141.7" y="40" width="212.5" height="90" fill="#364fc7"/><text x="248" y="92">講義 Ch0・1</text>
+      <rect x="354.2" y="40" width="354.2" height="90" fill="#1c7ed6"/><text x="531" y="92">Ch3 バックエンド実装</text>
+      <rect x="708.3" y="40" width="283.3" height="90" fill="#0b7285"/><text x="850" y="92">Ch4 テスト</text>
+      <rect x="991.7" y="40" width="70.8" height="90" fill="#adb5bd"/><text x="1027" y="92" fill="#17212f">休憩</text>
+      <rect x="1062.5" y="40" width="354.2" height="90" fill="#e67700"/><text x="1239" y="92">Ch5・6 フロント</text>
+      <rect x="1416.7" y="40" width="212.5" height="90" fill="#7048e8"/><text x="1523" y="92">Ch7 Skills×Hooks</text>
+      <rect x="1629.2" y="40" width="70.8" height="90" fill="#495057"/><text x="1664" y="92">まとめ</text>
+    </g>
+    <g font-size="21" fill="#5b6676" text-anchor="middle">
+      <text x="0" y="170" text-anchor="start">0:00</text><text x="141.7" y="170">0:10</text><text x="354.2" y="170">0:25</text>
+      <text x="708.3" y="170">0:50</text><text x="991.7" y="170">1:10</text><text x="1062.5" y="170">1:15</text>
+      <text x="1416.7" y="170">1:40</text><text x="1629.2" y="170">1:55</text><text x="1700" y="170" text-anchor="end">2:00</text>
+    </g>
+  </svg>
+  <table class="t tight" style="margin-top:4px;font-size:26px">
+    <tr><th style="width:190px">時間</th><th style="width:130px">分</th><th style="width:260px">対象</th><th>ゴール</th></tr>
+    <tr><td class="n">0:00–0:10</td><td>10</td><td>Ch2（確認）</td><td>DB コンテナ起動、<code class="i">backend</code>・<code class="i">frontend</code> 生成済みの確認</td></tr>
+    <tr><td class="n">0:10–0:25</td><td>15</td><td>Ch0・1 講義</td><td>4 つの同心円・依存性ルール・DIP・ディレクトリ構成</td></tr>
+    <tr><td class="n">0:25–0:50</td><td>25</td><td>Ch3</td><td>バックエンド 4 層の段階実装と API 疎通</td></tr>
+    <tr><td class="n">0:50–1:10</td><td>20</td><td>Ch4</td><td>単体・MockMvc・Konsist アーキテクチャテスト</td></tr>
+    <tr><td class="n">1:10–1:15</td><td>5</td><td>休憩</td><td>サーバー起動状態の確認・個別フォロー</td></tr>
+    <tr><td class="n">1:15–1:40</td><td>25</td><td>Ch5・6</td><td>フロント 4 層実装、フルスタック動作確認、Vitest + MSW</td></tr>
+    <tr><td class="n">1:40–1:55</td><td>15</td><td>Ch7</td><td><code class="i">add-usecase</code> スキルと <code class="i">PostToolUse</code> フックで明細更新機能を実装</td></tr>
+    <tr><td class="n">1:55–2:00</td><td>5</td><td>まとめ</td><td>振り返り・質疑応答</td></tr>
+  </table>
+  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+</section>
+
+<!-- 4. 作るもの -->
+<section class="slide" data-title="作るアプリ">
+  <span class="tag">オープニング</span>
+  <h1 class="title">作るもの：シンプル家計簿アプリ（Budget App）</h1>
+  <p class="lead">収入・支出の明細を登録・削除（最終章で編集）し、総収入・総支出・残高を表示します。</p>
+  <svg viewBox="0 0 1700 330" width="1700" height="330" role="img" aria-label="システム構成">
+    <defs><marker id="a2" markerUnits="userSpaceOnUse" markerWidth="20" markerHeight="20" refX="18" refY="10" orient="auto"><path d="M0,0 L20,10 L0,20 z" fill="#17212f"/></marker></defs>
+    <g font-weight="800" text-anchor="middle">
+      <rect x="0" y="60" width="330" height="170" rx="20" fill="#fff" stroke="#17212f" stroke-width="3"/>
+      <text x="165" y="130" font-size="34">ブラウザ</text><text x="165" y="176" font-size="24" fill="#5b6676" font-weight="500">/transactions</text>
+      <rect x="450" y="60" width="360" height="170" rx="20" fill="var(--l4-bg)" stroke="#7048e8" stroke-width="4"/>
+      <text x="630" y="124" font-size="34">Next.js 16</text><text x="630" y="164" font-size="24" fill="#5b6676" font-weight="500">React 19 / TypeScript</text><text x="630" y="200" font-size="24" fill="#5b6676" font-weight="500">localhost:3000</text>
+      <rect x="930" y="60" width="360" height="170" rx="20" fill="var(--l2-bg)" stroke="#1c7ed6" stroke-width="4"/>
+      <text x="1110" y="124" font-size="34">Spring Boot 4</text><text x="1110" y="164" font-size="24" fill="#5b6676" font-weight="500">Kotlin / REST API</text><text x="1110" y="200" font-size="24" fill="#5b6676" font-weight="500">localhost:8080</text>
+      <rect x="1410" y="60" width="290" height="170" rx="20" fill="#fff" stroke="#17212f" stroke-width="3"/>
+      <text x="1555" y="124" font-size="30">PostgreSQL 18</text><text x="1555" y="164" font-size="24" fill="#5b6676" font-weight="500">Docker / Flyway</text><text x="1555" y="200" font-size="24" fill="#5b6676" font-weight="500">localhost:5432</text>
+    </g>
+    <g stroke="#17212f" stroke-width="4" marker-end="url(#a2)">
+      <line x1="334" y1="145" x2="446" y2="145"/><line x1="814" y1="145" x2="926" y2="145"/><line x1="1294" y1="145" x2="1406" y2="145"/>
+    </g>
+    <text x="390" y="118" text-anchor="middle" font-size="22" fill="#5b6676">HTTP</text>
+    <text x="870" y="118" text-anchor="middle" font-size="22" fill="#5b6676">fetch / JSON</text>
+    <text x="1350" y="118" text-anchor="middle" font-size="22" fill="#5b6676">JPA</text>
+    <text x="630" y="290" text-anchor="middle" font-size="24" fill="#364fc7">テスト時は MSW が API をモック</text>
+    <text x="1110" y="290" text-anchor="middle" font-size="24" fill="#364fc7">テスト時は MockK / MockMvc</text>
+  </svg>
+  <div class="cols" style="margin-top:6px">
+    <div class="card"><h3>API</h3><code class="i">GET /api/categories</code><br><code class="i">GET・POST /api/transactions</code><br><code class="i">PUT・DELETE /api/transactions/{id}</code></div>
+    <div class="card"><h3>業務ルール</h3>金額は 1 円以上の整数<br>タイトルは必須・100 文字以内<br>残高 ＝ 総収入 − 総支出</div>
+  </div>
+  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+</section>
+
+<!-- 5. 事前準備確認 -->
+<section class="slide" data-title="事前準備の確認">
+  <span class="tag t-ops">0:00 – 0:10 ・ 事前準備の確認</span>
+  <h1 class="title">まず全員の環境を揃える</h1>
+  <p class="lead">Chapter 2 は事前準備です。この場では「できているか」の確認だけを行います。</p>
+  <div class="cols">
+    <div>
+      <ol class="steps">
+        <li><code class="i">docker compose ps</code> を実行し、<code class="i">budget-app-db</code> が <b>healthy</b> であること</li>
+        <li><code class="i">backend/</code> と <code class="i">frontend/</code> が存在すること</li>
+        <li><code class="i">CLAUDE.md</code> と <code class="i">.claude/rules/</code> が配置されていること</li>
+        <li><code class="i">java -version</code> が 25、<code class="i">node -v</code> が v26 であること</li>
+      </ol>
+    </div>
+    <div>
+      <pre class="code"><span class="c"># 全員で実行して画面を見せ合う</span>
+docker compose ps
+ls
+java -version
+node -v
+pnpm -v</pre>
+      <div class="note ng" style="margin-top:22px"><b>未完了の参加者</b>は、その場で環境構築を始めさせません。<br>チェックポイント <code class="i">step/chapter-02-done</code> をチェックアウトして合流させます。</div>
+    </div>
+  </div>
+  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+</section>
+
+<!-- 6. なぜCA -->
+<section class="slide" data-title="なぜクリーンアーキテクチャか">
+  <span class="tag t-lec">0:10 – 0:25 ・ 講義（Chapter 0・1）</span>
+  <h1 class="title">なぜクリーンアーキテクチャを採用するのか</h1>
+  <p class="lead">ビジネスロジックと、フレームワーク・DB のコードが混ざると起きること。</p>
+  <svg viewBox="0 0 1700 470" width="1700" height="470" role="img" aria-label="課題と解決">
+    <defs><marker id="a3" markerUnits="userSpaceOnUse" markerWidth="20" markerHeight="20" refX="18" refY="10" orient="auto"><path d="M0,0 L20,10 L0,20 z" fill="#17212f"/></marker></defs>
+    <g font-size="27">
+      <rect x="0" y="10" width="780" height="130" rx="16" fill="#fff5f5" stroke="#e03131" stroke-width="3"/>
+      <text x="30" y="62" font-weight="800" fill="#e03131">① 乗り換えに弱い</text><text x="30" y="108">DB・ライブラリの更新でロジックまで修正が必要</text>
+      <rect x="0" y="170" width="780" height="130" rx="16" fill="#fff5f5" stroke="#e03131" stroke-width="3"/>
+      <text x="30" y="222" font-weight="800" fill="#e03131">② テストが遅い</text><text x="30" y="268">単体テストのたびに Web サーバーや DB を起動</text>
+      <rect x="0" y="330" width="780" height="130" rx="16" fill="#fff5f5" stroke="#e03131" stroke-width="3"/>
+      <text x="30" y="382" font-weight="800" fill="#e03131">③ 責務が曖昧</text><text x="30" y="428">1 クラス・1 コンポーネントが肥大化</text>
+    </g>
+    <line x1="800" y1="235" x2="900" y2="235" stroke="#17212f" stroke-width="5" marker-end="url(#a3)"/>
+    <rect x="920" y="10" width="780" height="450" rx="20" fill="#fff" stroke="#2f9e44" stroke-width="4"/>
+    <text x="1310" y="76" text-anchor="middle" font-size="34" font-weight="800" fill="#2f9e44">関心事を分離する</text>
+    <rect x="960" y="110" width="700" height="150" rx="16" fill="#d3f9d8"/>
+    <text x="1310" y="164" text-anchor="middle" font-size="30" font-weight="800">変わりにくいもの</text>
+    <text x="1310" y="214" text-anchor="middle" font-size="27">ビジネスルール</text>
+    <rect x="960" y="290" width="700" height="150" rx="16" fill="#ffe8cc"/>
+    <text x="1310" y="344" text-anchor="middle" font-size="30" font-weight="800">変わりやすいもの</text>
+    <text x="1310" y="394" text-anchor="middle" font-size="27">DB・画面・フレームワーク</text>
+  </svg>
+  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+</section>
+
+<!-- 7. 同心円 -->
+<section class="slide" data-title="4つの同心円">
+  <span class="tag t-lec">0:10 – 0:25 ・ 講義（Chapter 0・1）</span>
+  <h1 class="title">4 つの同心円：中心ほどビジネスの本質</h1>
+  <div class="cols" style="align-items:center;gap:40px">
+    <svg viewBox="0 0 760 760" width="740" height="740" style="flex:none" role="img" aria-label="4つの同心円">
+      <circle cx="380" cy="380" r="370" fill="#e5dbff" stroke="#7048e8" stroke-width="4"/>
+      <circle cx="380" cy="380" r="290" fill="#ffe8cc" stroke="#e67700" stroke-width="4"/>
+      <circle cx="380" cy="380" r="205" fill="#d0ebff" stroke="#1c7ed6" stroke-width="4"/>
+      <circle cx="380" cy="380" r="115" fill="#d3f9d8" stroke="#2f9e44" stroke-width="4"/>
+      <g text-anchor="middle" font-weight="800">
+        <text x="380" y="66" font-size="34" fill="#5f3dc4">第4層</text>
+        <text x="380" y="144" font-size="34" fill="#d9480f">第3層</text>
+        <text x="380" y="232" font-size="34" fill="#1864ab">第2層</text>
+        <text x="380" y="372" font-size="32" fill="#2b8a3e">第1層</text><text x="380" y="410" font-size="30" fill="#2b8a3e">Entities</text>
+      </g>
+    </svg>
+    <div>
+      <table class="t" style="font-size:26px">
+        <tr><th>層</th><th>バックエンド</th><th>フロントエンド</th></tr>
+        <tr><td class="n"><span class="pill l1">1</span> Entities</td><td><code class="i">domain</code></td><td><code class="i">domain/</code></td></tr>
+        <tr><td class="n"><span class="pill l2">2</span> Use Cases</td><td><code class="i">usecase</code></td><td><code class="i">usecase/</code></td></tr>
+        <tr><td class="n"><span class="pill l3">3</span> Adapters</td><td><code class="i">adapter</code></td><td><code class="i">adapter/</code><br><code class="i">presentation/</code></td></tr>
+        <tr><td class="n"><span class="pill l4">4</span> Frameworks</td><td><code class="i">framework</code></td><td><code class="i">app/</code></td></tr>
+      </table>
+      <div class="note" style="margin-top:22px">フロントの <code class="i">adapter</code>（API 通信）と <code class="i">presentation</code>（UI）は、どちらも「内側と外の世界をつなぐ」ため同じ第 3 層です。</div>
+    </div>
+  </div>
+  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+</section>
+
+<!-- 8. 依存性ルール -->
+<section class="slide" data-title="依存性のルール">
+  <span class="tag t-lec">0:10 – 0:25 ・ 講義（Chapter 0・1）</span>
+  <h1 class="title">依存性のルール：矢印は常に外側から内側へ</h1>
+  <p class="lead">ここでの「依存」は、自分たちが書いたパッケージ間の <code class="i">import</code> を指します。</p>
+  <svg viewBox="0 0 1700 300" width="1700" height="300" role="img" aria-label="層の依存方向">
+    <defs><marker id="a4" markerUnits="userSpaceOnUse" markerWidth="20" markerHeight="20" refX="18" refY="10" orient="auto"><path d="M0,0 L20,10 L0,20 z" fill="#17212f"/></marker></defs>
+    <g font-weight="800" text-anchor="middle">
+      <rect x="0" y="40" width="340" height="150" rx="18" fill="#e5dbff" stroke="#7048e8" stroke-width="4"/><text x="170" y="100" font-size="32">framework</text><text x="170" y="144" font-size="23" fill="#5b6676" font-weight="500">第4層・起動と設定</text>
+      <rect x="454" y="40" width="340" height="150" rx="18" fill="#ffe8cc" stroke="#e67700" stroke-width="4"/><text x="624" y="100" font-size="32">adapter</text><text x="624" y="144" font-size="23" fill="#5b6676" font-weight="500">第3層・変換</text>
+      <rect x="908" y="40" width="340" height="150" rx="18" fill="#d0ebff" stroke="#1c7ed6" stroke-width="4"/><text x="1078" y="100" font-size="32">usecase</text><text x="1078" y="144" font-size="23" fill="#5b6676" font-weight="500">第2層・操作手順</text>
+      <rect x="1362" y="40" width="338" height="150" rx="18" fill="#d3f9d8" stroke="#2f9e44" stroke-width="4"/><text x="1531" y="100" font-size="32">domain</text><text x="1531" y="144" font-size="23" fill="#5b6676" font-weight="500">第1層・ルール</text>
+    </g>
+    <g stroke="#17212f" stroke-width="5" marker-end="url(#a4)"><line x1="344" y1="115" x2="450" y2="115"/><line x1="798" y1="115" x2="904" y2="115"/><line x1="1252" y1="115" x2="1358" y2="115"/></g>
+    <text x="850" y="262" text-anchor="middle" font-size="28" fill="#17212f" font-weight="700">import の向き ＝ 依存の向き（逆向きは禁止）</text>
+  </svg>
+  <div class="cols" style="margin-top:8px">
+    <div class="card l1"><h3>domain は孤立</h3>他の層も、Spring・JPA も参照しない。<code class="i">@Entity</code> も付けない。</div>
+    <div class="card l2"><h3>usecase は domain のみ</h3>adapter・framework は参照しない。<br>（<code class="i">@Service</code> / <code class="i">@Transactional</code> は実用上の例外）</div>
+    <div class="card l3"><h3>adapter は内側のみ</h3>domain と usecase のみ参照。JPA Entity・Repository 実装もここ。framework は参照しない。</div>
+  </div>
+  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+</section>
+
+<!-- 9. DIP -->
+<section class="slide" data-title="依存性逆転 DIP">
+  <span class="tag t-lec">0:10 – 0:25 ・ 講義（Chapter 0・1）</span>
+  <h1 class="title">依存性逆転（DIP）：実行時の流れと import の向きは逆</h1>
+  <svg viewBox="0 0 1700 560" width="1700" height="560" role="img" aria-label="実行時の流れと依存の向き">
+    <defs><marker id="a5" markerUnits="userSpaceOnUse" markerWidth="20" markerHeight="20" refX="18" refY="10" orient="auto"><path d="M0,0 L20,10 L0,20 z" fill="#17212f"/></marker></defs>
+    <text x="0" y="34" font-size="28" font-weight="800" fill="#17212f">実行時の処理の流れ</text>
+    <g font-size="26" font-weight="800" text-anchor="middle">
+      <rect x="0" y="56" width="270" height="86" rx="14" fill="#ffe8cc" stroke="#e67700" stroke-width="3"/><text x="135" y="110">Controller</text>
+      <rect x="357" y="56" width="270" height="86" rx="14" fill="#d0ebff" stroke="#1c7ed6" stroke-width="3"/><text x="492" y="110">Interactor</text>
+      <rect x="714" y="56" width="270" height="86" rx="14" fill="#ffe8cc" stroke="#e67700" stroke-width="3"/><text x="849" y="110">RepositoryImpl</text>
+      <rect x="1071" y="56" width="270" height="86" rx="14" fill="#ffe8cc" stroke="#e67700" stroke-width="3"/><text x="1206" y="110">JpaRepository</text>
+      <rect x="1428" y="56" width="272" height="86" rx="14" fill="#fff" stroke="#17212f" stroke-width="3"/><text x="1564" y="110">PostgreSQL</text>
+    </g>
+    <g stroke="#17212f" stroke-width="4" marker-end="url(#a5)"><line x1="274" y1="99" x2="353" y2="99"/><line x1="631" y1="99" x2="710" y2="99"/><line x1="988" y1="99" x2="1067" y2="99"/><line x1="1345" y1="99" x2="1424" y2="99"/></g>
+
+    <text x="0" y="262" font-size="28" font-weight="800" fill="#17212f">ソースコードの依存方向（import の向き）</text>
+    <g font-size="26" font-weight="800" text-anchor="middle">
+      <rect x="0" y="290" width="250" height="86" rx="14" fill="#ffe8cc" stroke="#e67700" stroke-width="3"/><text x="125" y="344">Controller</text>
+      <rect x="326" y="290" width="250" height="86" rx="14" fill="#d0ebff" stroke="#1c7ed6" stroke-width="3"/><text x="451" y="344">InputPort</text>
+      <rect x="652" y="290" width="250" height="86" rx="14" fill="#d0ebff" stroke="#1c7ed6" stroke-width="3"/><text x="777" y="344">Interactor</text>
+      <rect x="978" y="290" width="250" height="86" rx="14" fill="#d0ebff" stroke="#1c7ed6" stroke-width="3"/><text x="1103" y="344">OutputPort</text>
+      <rect x="1304" y="290" width="396" height="86" rx="14" fill="#ffe8cc" stroke="#e67700" stroke-width="3"/><text x="1502" y="344">RepositoryImpl</text>
+    </g>
+    <g stroke="#17212f" stroke-width="4" marker-end="url(#a5)">
+      <line x1="254" y1="333" x2="322" y2="333"/>
+      <line x1="648" y1="333" x2="580" y2="333"/>
+      <line x1="906" y1="333" x2="974" y2="333"/>
+      <line x1="1300" y1="333" x2="1232" y2="333"/>
+    </g>
+    <text x="288" y="412" text-anchor="middle" font-size="21" fill="#5b6676">呼ぶ</text>
+    <text x="614" y="412" text-anchor="middle" font-size="21" fill="#5b6676">実装する</text>
+    <text x="940" y="412" text-anchor="middle" font-size="21" fill="#5b6676">呼ぶ</text>
+    <text x="1266" y="412" text-anchor="middle" font-size="21" fill="#5b6676">実装する</text>
+    <text x="1502" y="412" text-anchor="middle" font-size="22" fill="#5b6676">→ JpaRepository（adapter 内）</text>
+    <path d="M326 436 L326 454 L1228 454 L1228 436" fill="none" stroke="#1c7ed6" stroke-width="4"/>
+    <text x="777" y="504" text-anchor="middle" font-size="28" font-weight="800" fill="#1864ab">この 3 つが usecase 層：インターフェースを内側に置く</text>
+  </svg>
+  <div class="cols" style="margin-top:6px">
+    <div class="note ok" style="font-size:27px"><b>利点 1</b> Interactor のテストは Repository を MockK に差し替えるだけ。DB 不要。</div>
+    <div class="note ok" style="font-size:27px"><b>利点 2</b> 保存先を変えても <code class="i">RepositoryImpl</code> の差し替えだけで済む。</div>
+  </div>
+  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+</section>
+
+<!-- 10. バックエンド構成 + DB -->
+<section class="slide" data-title="バックエンド構成とDB">
+  <span class="tag t-lec">0:10 – 0:25 ・ 講義（Chapter 0・1）</span>
+  <h1 class="title">バックエンドの構成と DB 設計</h1>
+  <div class="cols" style="gap:40px">
+<pre class="tree" style="flex:1.08"><span class="cm">com.example.budgetapp/</span>
+├ <span class="l1">domain/</span>
+│  ├ model/ Amount・Category・Transaction・
+│  │         TransactionType・BalanceSummary
+│  └ exception/ DomainException
+├ <span class="l2">usecase/</span>
+│  ├ input/  *UseCase（入口の契約）
+│  ├ output/ *Repository（出口の契約）
+│  └ interactor/ *Interactor
+├ <span class="l3">adapter/</span>
+│  ├ controller/ Controller・dto/・advice/
+│  └ repository/ *RepositoryImpl
+│       ├ entity/ *JpaEntity
+│       └ jpa/    Jpa*Repository
+└ <span class="l4">framework/</span>
+   └ config/ CorsConfig</pre>
+    <svg viewBox="0 0 760 560" width="760" height="560" style="flex:.92" role="img" aria-label="ER図">
+      <g font-size="23">
+        <rect x="0" y="40" width="300" height="250" rx="12" fill="#fff" stroke="#17212f" stroke-width="3"/>
+        <rect x="0" y="40" width="300" height="52" rx="12" fill="#17212f"/><text x="150" y="76" text-anchor="middle" fill="#fff" font-weight="800" font-size="26">categories</text>
+        <text x="20" y="130">id <tspan fill="#5b6676">BIGSERIAL PK</tspan></text>
+        <text x="20" y="170">name <tspan fill="#5b6676">VARCHAR(50)</tspan></text>
+        <text x="20" y="210">type <tspan fill="#5b6676">VARCHAR(10)</tspan></text>
+        <text x="20" y="252" font-size="18" fill="#c92a2a">CHECK (INCOME / EXPENSE)</text>
+        <rect x="400" y="0" width="360" height="400" rx="12" fill="#fff" stroke="#17212f" stroke-width="3"/>
+        <rect x="400" y="0" width="360" height="52" rx="12" fill="#17212f"/><text x="580" y="36" text-anchor="middle" fill="#fff" font-weight="800" font-size="26">transactions</text>
+        <text x="420" y="90">id <tspan fill="#5b6676">BIGSERIAL PK</tspan></text>
+        <text x="420" y="130">category_id <tspan fill="#5b6676">BIGINT FK</tspan></text>
+        <text x="420" y="170">title <tspan fill="#5b6676">VARCHAR(100)</tspan></text>
+        <text x="420" y="210">amount <tspan fill="#5b6676">INT</tspan></text>
+        <text x="420" y="250">transaction_date <tspan fill="#5b6676">DATE</tspan></text>
+        <text x="420" y="290">memo <tspan fill="#5b6676">TEXT（NULL可）</tspan></text>
+        <text x="420" y="340" font-size="20" fill="#c92a2a">CHECK amount &gt;= 1</text>
+        <line x1="300" y1="130" x2="400" y2="130" stroke="#17212f" stroke-width="3"/>
+        <text x="312" y="120" font-size="22" font-weight="800">1</text><text x="372" y="120" font-size="22" font-weight="800">N</text>
+      </g>
+      <text x="0" y="470" font-size="23" fill="#5b6676">マイグレーション：</text>
+      <text x="0" y="506" font-size="22" font-family="monospace">db/migration/V1__create_tables.sql</text>
+      <text x="0" y="540" font-size="22" fill="#5b6676">DB の制約でも整合性を担保</text>
+    </svg>
+  </div>
+  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+</section>
+
+<!-- 11. フロント構成 -->
+<section class="slide" data-title="フロントエンド構成">
+  <span class="tag t-lec">0:10 – 0:25 ・ 講義（Chapter 0・1）</span>
+  <h1 class="title">フロントエンドも同じ 4 層：<code class="i" style="font-size:.8em">features/transaction</code></h1>
+  <div class="cols" style="gap:40px">
+<pre class="tree" style="flex:1"><span class="cm">src/</span>
+├ <span class="l4">app/</span>  page.tsx・transactions/page.tsx
+├ components/ui/  Button・Input
+├ features/transaction/
+│  ├ <span class="l1">domain/</span>
+│  │   types.ts・validateTransaction.ts
+│  ├ <span class="l2">usecase/</span>
+│  │   TransactionRepository.ts
+│  │   useTransactions.ts
+│  ├ <span class="l3">adapter/</span>
+│  │   transactionApi.ts
+│  └ <span class="l3">presentation/</span>
+│      TransactionSection.tsx（組み立て役）
+│      Form・List・SummaryCard
+│      utils/formatCurrency.ts
+└ mocks/  handlers.ts・server.ts（MSW）</pre>
+    <div>
+      <div class="card l1" style="margin-bottom:18px"><h3>domain に置くもの</h3>型定義と入力バリデーション（業務ルール）。React・fetch・表示整形は入れない。</div>
+      <div class="card l3" style="margin-bottom:18px"><h3>presentation に置くもの</h3>UI と表示整形。通貨フォーマット <code class="i">formatCurrency</code> はここ。</div>
+      <div class="card l2"><h3>usecase のフック</h3><code class="i">useTransactions</code> は <code class="i">adapter</code> を import せず、<code class="i">TransactionRepository</code>（interface）経由で通信する。</div>
+    </div>
+  </div>
+  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+</section>
+
+<!-- 12. ガードレール -->
+<section class="slide" data-title="AIへのガードレール">
+  <span class="tag t-ai">0:10 – 0:25 ・ 講義（Chapter 0・1）</span>
+  <h1 class="title">AI へのガードレール：4 つの仕組みで守らせる</h1>
+  <p class="lead">指示が曖昧だと「domain に JPA アノテーション」「Controller から Repository を直接呼ぶ」が起きます。</p>
+  <svg viewBox="0 0 1700 480" width="1700" height="480" role="img" aria-label="ガードレール">
+    <defs><marker id="a6" markerUnits="userSpaceOnUse" markerWidth="20" markerHeight="20" refX="18" refY="10" orient="auto"><path d="M0,0 L20,10 L0,20 z" fill="#17212f"/></marker></defs>
+    <g text-anchor="middle">
+      <rect x="0" y="20" width="390" height="300" rx="18" fill="#fff" stroke="#7048e8" stroke-width="4"/>
+      <text x="195" y="76" font-size="30" font-weight="800">CLAUDE.md</text>
+      <text x="195" y="124" font-size="25">共通ルール</text><text x="195" y="164" font-size="23" fill="#5b6676">常に読み込まれる</text><text x="195" y="204" font-size="23" fill="#5b6676">依存の向き・テスト必須</text>
+      <rect x="436" y="20" width="390" height="300" rx="18" fill="#fff" stroke="#7048e8" stroke-width="4"/>
+      <text x="631" y="76" font-size="30" font-weight="800">.claude/rules/</text>
+      <text x="631" y="124" font-size="25">領域別の詳細規約</text><text x="631" y="164" font-size="23" fill="#5b6676">backend.md / frontend.md</text><text x="631" y="204" font-size="23" fill="#5b6676">対象ファイル編集時に適用</text>
+      <rect x="872" y="20" width="390" height="300" rx="18" fill="#fff" stroke="#7048e8" stroke-width="4"/>
+      <text x="1067" y="76" font-size="30" font-weight="800">Skills</text>
+      <text x="1067" y="124" font-size="25">作業手順書</text><text x="1067" y="164" font-size="23" fill="#5b6676">/setup-env（Ch2）</text><text x="1067" y="204" font-size="23" fill="#5b6676">/add-usecase（Ch7）</text>
+      <rect x="1308" y="20" width="392" height="300" rx="18" fill="#fff" stroke="#7048e8" stroke-width="4"/>
+      <text x="1504" y="76" font-size="30" font-weight="800">Hooks</text>
+      <text x="1504" y="124" font-size="25">自動検証</text><text x="1504" y="164" font-size="23" fill="#5b6676">編集の直後に実行</text><text x="1504" y="204" font-size="23" fill="#5b6676">失敗は AI へ返る</text>
+      <rect x="0" y="352" width="1700" height="110" rx="18" fill="#eef1fb" stroke="#17212f" stroke-width="3"/>
+      <text x="850" y="402" font-size="28" font-weight="800">＋ Konsist アーキテクチャテスト（Ch4）</text>
+      <text x="850" y="442" font-size="25" fill="#5b6676">ルール違反を <code>./gradlew test</code> の失敗として検出する</text>
+    </g>
+    <text x="195" y="270" text-anchor="middle" font-size="22" fill="#7048e8" font-weight="700">教える</text>
+    <text x="631" y="270" text-anchor="middle" font-size="22" fill="#7048e8" font-weight="700">教える</text>
+    <text x="1067" y="270" text-anchor="middle" font-size="22" fill="#7048e8" font-weight="700">段取りを渡す</text>
+    <text x="1504" y="270" text-anchor="middle" font-size="22" fill="#7048e8" font-weight="700">検証して守らせる</text>
+  </svg>
+  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+</section>
+
+<!-- 13. Ch3 進行 -->
+<section class="slide" data-title="Chapter 3 進行">
+  <span class="tag t-be">0:25 – 0:50 ・ Chapter 3 バックエンド実装</span>
+  <h1 class="title">内側の層から順に、プロンプトを 1 つずつ実行</h1>
+  <p class="lead">4 層を一度に作らせません。各ステップで依存ルールを確認します。</p>
+  <svg viewBox="0 0 1700 520" width="1700" height="520" role="img" aria-label="Chapter 3 の手順">
+    <defs><marker id="a7" markerUnits="userSpaceOnUse" markerWidth="20" markerHeight="20" refX="18" refY="10" orient="auto"><path d="M0,0 L20,10 L0,20 z" fill="#17212f"/></marker></defs>
+    <g text-anchor="middle">
+      <rect x="0" y="20" width="300" height="330" rx="18" fill="#d3f9d8" stroke="#2f9e44" stroke-width="4"/>
+      <text x="150" y="68" font-size="26" font-weight="800">3-1 domain</text>
+      <text x="150" y="116" font-size="23">Amount・Transaction</text><text x="150" y="150" font-size="23">BalanceSummary</text>
+      <text x="150" y="226" font-size="22" fill="#2b8a3e" font-weight="700">確認</text><text x="150" y="262" font-size="22">Spring / JPA の</text><text x="150" y="294" font-size="22">import がない</text>
+      <rect x="350" y="20" width="300" height="330" rx="18" fill="#d0ebff" stroke="#1c7ed6" stroke-width="4"/>
+      <text x="500" y="68" font-size="26" font-weight="800">3-2 usecase</text>
+      <text x="500" y="116" font-size="23">Input / Output Port</text><text x="500" y="150" font-size="23">Interactor</text>
+      <text x="500" y="226" font-size="22" fill="#1864ab" font-weight="700">確認</text><text x="500" y="262" font-size="22">adapter・JPA を</text><text x="500" y="294" font-size="22">import していない</text>
+      <rect x="700" y="20" width="300" height="330" rx="18" fill="#ffe8cc" stroke="#e67700" stroke-width="4"/>
+      <text x="850" y="68" font-size="26" font-weight="800">3-3 adapter</text>
+      <text x="850" y="116" font-size="23">JPA Entity / Repository</text><text x="850" y="150" font-size="23">DTO・Controller</text>
+      <text x="850" y="226" font-size="22" fill="#d9480f" font-weight="700">確認</text><text x="850" y="262" font-size="22">framework を</text><text x="850" y="294" font-size="22">参照していない</text>
+      <rect x="1050" y="20" width="300" height="330" rx="18" fill="#e5dbff" stroke="#7048e8" stroke-width="4"/>
+      <text x="1200" y="68" font-size="26" font-weight="800">3-4 framework</text>
+      <text x="1200" y="116" font-size="23">CorsConfig</text>
+      <text x="1200" y="226" font-size="22" fill="#5f3dc4" font-weight="700">確認</text><text x="1200" y="262" font-size="22">:3000 からの</text><text x="1200" y="294" font-size="22">CORS 許可</text>
+      <rect x="1400" y="20" width="300" height="330" rx="18" fill="#fff" stroke="#17212f" stroke-width="4"/>
+      <text x="1550" y="68" font-size="26" font-weight="800">3-5 検証</text>
+      <text x="1550" y="116" font-size="23">AI が自己レビュー</text><text x="1550" y="150" font-size="23">compileKotlin</text><text x="1550" y="184" font-size="23">curl 疎通</text>
+    </g>
+    <g stroke="#17212f" stroke-width="4" marker-end="url(#a7)"><line x1="304" y1="185" x2="346" y2="185"/><line x1="654" y1="185" x2="696" y2="185"/><line x1="1004" y1="185" x2="1046" y2="185"/><line x1="1354" y1="185" x2="1396" y2="185"/></g>
+    <rect x="0" y="390" width="1700" height="110" rx="16" fill="#fff9ef" stroke="#e67700" stroke-width="3"/>
+    <text x="40" y="440" font-size="28" font-weight="800">進め方</text>
+    <text x="40" y="480" font-size="26">プロンプト実行 → 生成物を確認 → 次へ。ズレたら「コード例」を参照して修正を指示。</text>
+  </svg>
+  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+</section>
+
+<!-- 14. Ch3 ポイント -->
+<section class="slide" data-title="Chapter 3 ポイント">
+  <span class="tag t-be">0:25 – 0:50 ・ Chapter 3 バックエンド実装</span>
+  <h1 class="title">ドメインに業務ルールを閉じ込める</h1>
+  <div class="cols">
+<pre class="code" style="font-size:22px"><span class="k">@JvmInline</span>
+<span class="k">value class</span> Amount(<span class="k">val</span> value: Int) {
+    <span class="k">init</span> {
+        <span class="k">if</span> (value &lt;= 0) {
+            <span class="k">throw</span> DomainException(
+              <span class="s">"金額は1円以上に設定してください。"</span>)
+        }
+    }
+}
+
+<span class="k">data class</span> Transaction(
+    <span class="k">val</span> id: Long?,
+    <span class="k">val</span> category: Category,
+    <span class="k">val</span> title: String,
+    <span class="k">val</span> amount: Amount, <span class="c">/* … */</span>
+) {
+    <span class="k">init</span> {
+        <span class="k">if</span> (title.isBlank()) <span class="k">throw</span> DomainException(<span class="s">"…"</span>)
+        <span class="k">if</span> (title.length &gt; 100) <span class="k">throw</span> DomainException(<span class="s">"…"</span>)
+    }
+}</pre>
+    <div>
+      <ul class="pts">
+        <li><b>不変条件</b>：不正な状態の <code class="i">Transaction</code> は、どの経路でも作れない</li>
+        <li><b>値オブジェクト</b>：<code class="i">Int</code> のまま放置せず <code class="i">Amount</code> に</li>
+        <li><b>二重検証は役割分担</b>：DTO の <code class="i">@NotBlank</code>・<code class="i">@Positive</code> は HTTP 境界、domain は自身の不変条件</li>
+        <li><b>JPA Entity は別物</b>：テーブル構造がドメイン設計に影響しないよう分離し、adapter で相互変換</li>
+      </ul>
+      <div class="note ng" style="margin-top:18px;font-size:26px"><b>NG 例</b> domain に <code class="i">@Entity</code> や <code class="i">@Component</code> を付ける → 第 1 層が汚染される</div>
+    </div>
+  </div>
+  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+</section>
+
+<!-- 15. Ch3 疎通 -->
+<section class="slide" data-title="Chapter 3 API疎通">
+  <span class="tag t-be">0:25 – 0:50 ・ Chapter 3 バックエンド実装</span>
+  <h1 class="title">最後に curl で 4 パターンの API 疎通を確認</h1>
+  <table class="t">
+    <tr><th style="width:90px">#</th><th>リクエスト</th><th style="width:190px">期待</th><th>見るポイント</th></tr>
+    <tr><td class="n">1</td><td><code class="i">GET /api/categories</code></td><td class="n" style="color:var(--ok)">200</td><td>初期マスタ 5 件が返る</td></tr>
+    <tr><td class="n">2</td><td><code class="i">POST /api/transactions</code>（正常）</td><td class="n" style="color:var(--ok)">201 Created</td><td>登録された明細 JSON</td></tr>
+    <tr><td class="n">3</td><td><code class="i">POST</code>（<code class="i">amount: 0</code>）</td><td class="n" style="color:var(--ng)">400</td><td><code class="i">GlobalExceptionHandler</code> の統一エラー JSON <code class="i">{message, details}</code></td></tr>
+    <tr><td class="n">4</td><td><code class="i">DELETE /api/transactions/{id}</code></td><td class="n" style="color:var(--ok)">204</td><td>本文なしで削除成功</td></tr>
+  </table>
+  <div class="cols" style="margin-top:30px">
+<pre class="code" style="font-size:23px"><span class="c"># 3 の例</span>
+curl -s -X POST localhost:8080/api/transactions \
+  -H 'Content-Type: application/json' \
+  -d '{"categoryId":1,"title":"x","amount":0,
+       "transactionDate":"2026-11-20"}'</pre>
+<pre class="code" style="font-size:23px"><span class="c"># 返ってくる JSON</span>
+{
+  "message": "入力内容に誤りがあります。",
+  "details": ["amount: 金額は1円以上の
+              正の整数で入力してください。"]
+}</pre>
+  </div>
+  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+</section>
+
+<!-- 16. Ch4 テスト4種 -->
+<section class="slide" data-title="Chapter 4 テストの種類">
+  <span class="tag t-test">0:50 – 1:10 ・ Chapter 4 バックエンドのテスト</span>
+  <h1 class="title">性質の異なる 4 種類のテストを層ごとに配置</h1>
+  <div class="cols" style="gap:36px;align-items:center">
+    <svg viewBox="0 0 800 640" width="760" height="610" style="flex:none" role="img" aria-label="テストの層">
+      <g text-anchor="middle" font-weight="800">
+        <polygon points="400,10 540,140 260,140" fill="#e5dbff" stroke="#7048e8" stroke-width="4"/>
+        <text x="400" y="106" font-size="26">Konsist</text>
+        <polygon points="260,150 540,150 650,270 150,270" fill="#ffe8cc" stroke="#e67700" stroke-width="4"/>
+        <text x="400" y="222" font-size="26">MockMvc（Controller）</text>
+        <polygon points="150,280 650,280 760,400 40,400" fill="#d0ebff" stroke="#1c7ed6" stroke-width="4"/>
+        <text x="400" y="352" font-size="26">MockK（Interactor）</text>
+        <polygon points="40,410 760,410 800,530 0,530" fill="#d3f9d8" stroke="#2f9e44" stroke-width="4"/>
+        <text x="400" y="480" font-size="26">JUnit 5（domain）</text>
+      </g>
+      <text x="400" y="590" text-anchor="middle" font-size="24" fill="#5b6676">下ほど速く・外部に依存しない</text>
+    </svg>
+    <table class="t" style="font-size:26px">
+      <tr><th>テスト</th><th>検証すること</th></tr>
+      <tr><td class="n"><span class="pill l1">domain</span></td><td>Amount・Transaction・BalanceSummary。モック不要</td></tr>
+      <tr><td class="n"><span class="pill l2">usecase</span></td><td>Repository を MockK でモック。<br>存在しない ID は例外、<code class="i">save</code> は呼ばれない</td></tr>
+      <tr><td class="n"><span class="pill l3">controller</span></td><td><code class="i">@WebMvcTest</code>。ステータス・バリデーション・例外ハンドリング。UseCase は <code class="i">@TestConfiguration</code> でモック</td></tr>
+      <tr><td class="n"><span class="pill l4">arch</span></td><td>ソースの <code class="i">import</code> を走査し、依存ルール違反を検出</td></tr>
+    </table>
+  </div>
+  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+</section>
+
+<!-- 17. Konsist -->
+<section class="slide" data-title="Konsist アーキテクチャテスト">
+  <span class="tag t-test">0:50 – 1:10 ・ Chapter 4 バックエンドのテスト</span>
+  <h1 class="title">Konsist：<code class="i" style="font-size:.8em">dependsOn</code> だけでは逆向き依存を防げない</h1>
+  <div class="cols">
+<pre class="code" style="font-size:24px">domain.dependsOnNothing()
+usecase.dependsOn(domain)
+usecase.<span class="k">doesNotDependOn</span>(adapter, framework)
+adapter.dependsOn(domain, usecase)
+adapter.<span class="k">doesNotDependOn</span>(framework)
+framework.dependsOn(domain, usecase, adapter)</pre>
+    <div>
+      <div class="note ng" style="font-size:27px"><b>落とし穴</b><br><code class="i">dependsOn</code> は「依存してよい層」の宣言で、宣言外の層への依存は禁止しない。<br>禁止は <code class="i">dependsOnNothing</code> と <code class="i">doesNotDependOn</code> だけ。</div>
+    </div>
+  </div>
+  <table class="t" style="margin-top:28px;font-size:26px">
+    <tr><th>注入する違反</th><th style="width:480px">検出</th></tr>
+    <tr><td>domain → usecase の <code class="i">import</code></td><td style="color:var(--ok);font-weight:700">検出（元から）</td></tr>
+    <tr><td>usecase → adapter の <code class="i">import</code></td><td style="color:var(--ok);font-weight:700"><code class="i">doesNotDependOn</code> で検出</td></tr>
+    <tr><td>adapter → framework の <code class="i">import</code></td><td style="color:var(--ok);font-weight:700"><code class="i">doesNotDependOn</code> で検出</td></tr>
+  </table>
+  <div class="note" style="margin-top:22px;font-size:26px"><b>早く終わった人の演習</b>：<code class="i">Category.kt</code> に <code class="i">@Component</code> を付けてテストを失敗させる。※ <code class="i">Amount.kt</code>（value class）に付けるとコンパイルエラーでテストまで進みません。</div>
+  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+</section>
+
+<!-- 18. Ch5 進行 -->
+<section class="slide" data-title="Chapter 5 進行">
+  <span class="tag t-fe">1:15 – 1:40 ・ Chapter 5・6 フロントエンド</span>
+  <h1 class="title">Chapter 5：フロントも内側から外側へ</h1>
+  <svg viewBox="0 0 1700 330" width="1700" height="330" role="img" aria-label="Chapter 5 の手順">
+    <defs><marker id="a8" markerUnits="userSpaceOnUse" markerWidth="20" markerHeight="20" refX="18" refY="10" orient="auto"><path d="M0,0 L20,10 L0,20 z" fill="#17212f"/></marker></defs>
+    <g text-anchor="middle" font-weight="800">
+      <rect x="0" y="20" width="250" height="230" rx="16" fill="#fff" stroke="#17212f" stroke-width="3"/><text x="125" y="64" font-size="24">5-0</text><text x="125" y="104" font-size="26">共通 UI</text><text x="125" y="150" font-size="21" fill="#5b6676" font-weight="500">Button</text><text x="125" y="180" font-size="21" fill="#5b6676" font-weight="500">Input</text>
+      <rect x="290" y="20" width="250" height="230" rx="16" fill="#d3f9d8" stroke="#2f9e44" stroke-width="4"/><text x="415" y="64" font-size="24">5-1</text><text x="415" y="104" font-size="26">domain</text><text x="415" y="150" font-size="21" fill="#5b6676" font-weight="500">types</text><text x="415" y="180" font-size="21" fill="#5b6676" font-weight="500">validate</text>
+      <rect x="580" y="20" width="250" height="230" rx="16" fill="#d0ebff" stroke="#1c7ed6" stroke-width="4"/><text x="705" y="64" font-size="24">5-2</text><text x="705" y="104" font-size="26">usecase</text><text x="705" y="150" font-size="21" fill="#5b6676" font-weight="500">Repository</text><text x="705" y="180" font-size="21" fill="#5b6676" font-weight="500">useTransactions</text>
+      <rect x="870" y="20" width="250" height="230" rx="16" fill="#ffe8cc" stroke="#e67700" stroke-width="4"/><text x="995" y="64" font-size="24">5-3</text><text x="995" y="104" font-size="26">adapter</text><text x="995" y="150" font-size="21" fill="#5b6676" font-weight="500">transactionApi</text>
+      <rect x="1160" y="20" width="250" height="230" rx="16" fill="#ffe8cc" stroke="#e67700" stroke-width="4"/><text x="1285" y="64" font-size="24">5-4</text><text x="1285" y="104" font-size="26">presentation</text><text x="1285" y="150" font-size="21" fill="#5b6676" font-weight="500">UI ・ formatCurrency</text>
+      <rect x="1450" y="20" width="250" height="230" rx="16" fill="#e5dbff" stroke="#7048e8" stroke-width="4"/><text x="1575" y="64" font-size="24">5-5</text><text x="1575" y="104" font-size="26">app</text><text x="1575" y="150" font-size="21" fill="#5b6676" font-weight="500">page.tsx</text>
+    </g>
+    <g stroke="#17212f" stroke-width="4" marker-end="url(#a8)"><line x1="254" y1="135" x2="286" y2="135"/><line x1="544" y1="135" x2="576" y2="135"/><line x1="834" y1="135" x2="866" y2="135"/><line x1="1124" y1="135" x2="1156" y2="135"/><line x1="1414" y1="135" x2="1446" y2="135"/></g>
+    <text x="850" y="302" text-anchor="middle" font-size="26" fill="#5b6676">各ステップで「フックが adapter を直接 import していない」ことを確認</text>
+  </svg>
+  <div class="cols" style="margin-top:14px">
+    <div class="card"><h3>プロンプトの工夫</h3>日付の初期値は UTC でなくローカルタイム基準、<code class="i">Input</code> は <code class="i">useId()</code>、エラーは画面全体を消さずバナー表示、と<b>仕様をプロンプトに明記</b>している。</div>
+    <div class="card"><h3>終わったら</h3>5-6 で AI に依存ルール違反を検査させ、<code class="i">pnpm build</code> が通ることを確認。</div>
+  </div>
+  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+</section>
+
+<!-- 19. フロントDIP -->
+<section class="slide" data-title="フロントの依存性逆転">
+  <span class="tag t-fe">1:15 – 1:40 ・ Chapter 5・6 フロントエンド</span>
+  <h1 class="title">フロントの DIP：組み立て役は <code class="i" style="font-size:.8em">TransactionSection</code> だけ</h1>
+  <svg viewBox="0 0 1700 540" width="1700" height="540" role="img" aria-label="フロントの依存性逆転">
+    <defs><marker id="a9" markerUnits="userSpaceOnUse" markerWidth="20" markerHeight="20" refX="18" refY="10" orient="auto"><path d="M0,0 L20,10 L0,20 z" fill="#17212f"/></marker>
+    <marker id="a9b" markerUnits="userSpaceOnUse" markerWidth="20" markerHeight="20" refX="18" refY="10" orient="auto"><path d="M0,0 L20,10 L0,20 z" fill="#e67700"/></marker></defs>
+    <g font-size="25" font-weight="800" text-anchor="middle">
+      <rect x="0" y="30" width="400" height="120" rx="16" fill="#ffe8cc" stroke="#e67700" stroke-width="4"/><text x="200" y="82">TransactionSection</text><text x="200" y="120" font-size="21" font-weight="500" fill="#5b6676">Composition Root（presentation）</text>
+      <rect x="520" y="30" width="400" height="120" rx="16" fill="#d0ebff" stroke="#1c7ed6" stroke-width="4"/><text x="720" y="82">useTransactions</text><text x="720" y="120" font-size="21" font-weight="500" fill="#5b6676">画面ユースケース（usecase）</text>
+      <rect x="1040" y="30" width="400" height="120" rx="16" fill="#d0ebff" stroke="#1c7ed6" stroke-width="4" stroke-dasharray="10 6"/><text x="1240" y="82">TransactionRepository</text><text x="1240" y="120" font-size="21" font-weight="500" fill="#5b6676">interface（usecase）</text>
+      <rect x="1040" y="300" width="400" height="120" rx="16" fill="#ffe8cc" stroke="#e67700" stroke-width="4"/><text x="1240" y="352">transactionApi</text><text x="1240" y="390" font-size="21" font-weight="500" fill="#5b6676">fetch 実装（adapter）</text>
+      <rect x="1500" y="300" width="200" height="120" rx="16" fill="#fff" stroke="#17212f" stroke-width="3"/><text x="1600" y="372">fetch</text>
+    </g>
+    <g stroke="#17212f" stroke-width="4" marker-end="url(#a9)">
+      <line x1="404" y1="90" x2="516" y2="90"/><line x1="924" y1="90" x2="1036" y2="90"/>
+      <line x1="1240" y1="296" x2="1240" y2="154"/>
+      <line x1="1444" y1="360" x2="1496" y2="360"/>
+    </g>
+    <path d="M200 154 L200 360 L1036 360" fill="none" stroke="#e67700" stroke-width="5" stroke-dasharray="12 8" marker-end="url(#a9b)"/>
+    <text x="620" y="342" text-anchor="middle" font-size="24" fill="#d9480f" font-weight="700">既定の引数で具体実装を注入</text>
+    <text x="1262" y="232" font-size="22" fill="#5b6676">実装する</text>
+    <text x="470" y="72" text-anchor="middle" font-size="22" fill="#5b6676">呼ぶ</text>
+    <rect x="0" y="450" width="1700" height="80" rx="14" fill="#fff9ef" stroke="#e67700" stroke-width="3"/>
+    <text x="30" y="500" font-size="26">Server Component は関数を含むオブジェクトを Client Component に渡せないため、注入は <tspan font-family="monospace">TransactionSection</tspan> の既定引数で行う。</text>
+  </svg>
+  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+</section>
+
+<!-- 20. フルスタック確認 -->
+<section class="slide" data-title="フルスタック動作確認">
+  <span class="tag t-fe">1:15 – 1:40 ・ Chapter 5・6 フロントエンド</span>
+  <h1 class="title">全員でフルスタック動作確認（登録 → 残高更新 → 削除）</h1>
+  <div class="cols" style="gap:44px">
+    <div>
+      <p style="font-weight:800;margin-bottom:8px">3 つのプロセスを起動</p>
+<pre class="code" style="font-size:24px"><span class="c"># 1) DB（起動済みか確認）</span>
+docker compose ps
+<span class="c"># 2) バックエンド :8080</span>
+cd backend &amp;&amp; ./gradlew bootRun
+<span class="c"># 3) フロントエンド :3000</span>
+cd frontend &amp;&amp; pnpm dev</pre>
+      <div class="note" style="margin-top:20px;font-size:26px">ブラウザで <code class="i">http://localhost:3000/transactions</code></div>
+    </div>
+    <div>
+      <table class="t" style="font-size:26px">
+        <tr><th>操作</th><th>期待する表示</th></tr>
+        <tr><td>給与 <b>300000</b> 円を登録</td><td>総収入・残高 <b>￥300,000</b></td></tr>
+        <tr><td>食費 <b>1500</b> 円を登録</td><td>総支出 <b>￥1,500</b><br>残高 <b>￥298,500</b></td></tr>
+        <tr><td>空のまま登録</td><td>タイトル・金額のエラー表示</td></tr>
+        <tr><td>「削除」を押す</td><td>明細が消え、サマリー再計算</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+</section>
+
+<!-- 21. Ch6 -->
+<section class="slide" data-title="Chapter 6 テスト戦略">
+  <span class="tag t-test">1:15 – 1:40 ・ Chapter 5・6 フロントエンド</span>
+  <h1 class="title">Chapter 6：バックエンドなしで画面結合テスト</h1>
+  <svg viewBox="0 0 1700 300" width="1700" height="300" role="img" aria-label="MSWによる結合テスト">
+    <defs><marker id="a10" markerUnits="userSpaceOnUse" markerWidth="20" markerHeight="20" refX="18" refY="10" orient="auto"><path d="M0,0 L20,10 L0,20 z" fill="#17212f"/></marker></defs>
+    <g font-size="24" font-weight="800" text-anchor="middle">
+      <rect x="0" y="40" width="250" height="110" rx="14" fill="#fff" stroke="#0b7285" stroke-width="4"/><text x="125" y="86">Testing Library</text><text x="125" y="120" font-size="20" font-weight="500" fill="#5b6676">render / click</text>
+      <rect x="340" y="40" width="270" height="110" rx="14" fill="#ffe8cc" stroke="#e67700" stroke-width="3"/><text x="475" y="86">TransactionSection</text><text x="475" y="120" font-size="20" font-weight="500" fill="#5b6676">presentation</text>
+      <rect x="700" y="40" width="250" height="110" rx="14" fill="#d0ebff" stroke="#1c7ed6" stroke-width="3"/><text x="825" y="86">useTransactions</text><text x="825" y="120" font-size="20" font-weight="500" fill="#5b6676">usecase</text>
+      <rect x="1040" y="40" width="250" height="110" rx="14" fill="#ffe8cc" stroke="#e67700" stroke-width="3"/><text x="1165" y="86">transactionApi</text><text x="1165" y="120" font-size="20" font-weight="500" fill="#5b6676">adapter（fetch）</text>
+      <rect x="1380" y="40" width="320" height="110" rx="14" fill="#0b7285" stroke="#0b7285"/><text x="1540" y="86" fill="#fff">MSW サーバー</text><text x="1540" y="120" font-size="20" font-weight="500" fill="#d3f2f7">インメモリのハンドラー</text>
+    </g>
+    <g stroke="#17212f" stroke-width="4" marker-end="url(#a10)"><line x1="254" y1="95" x2="336" y2="95"/><line x1="614" y1="95" x2="696" y2="95"/><line x1="954" y1="95" x2="1036" y2="95"/><line x1="1294" y1="95" x2="1376" y2="95"/></g>
+    <text x="850" y="230" text-anchor="middle" font-size="27" fill="#17212f" font-weight="700">Spring Boot を起動せずに、実際のユーザー操作に近い形で検証</text>
+  </svg>
+  <div class="cols" style="margin-top:6px">
+    <div class="card"><h3>ファイル</h3><code class="i">vitest.config.ts</code> / <code class="i">vitest.setup.ts</code><br><code class="i">mocks/handlers.ts</code> / <code class="i">server.ts</code><br><code class="i">*.test.ts(x)</code></div>
+    <div class="card"><h3>検証する操作</h3>初期表示・登録・バリデーション・削除・API エラー表示</div>
+    <div class="card"><h3>MSW v3 の注意</h3><code class="i">server.listen({ onUnhandledFrame: 'error' })</code><br>旧名 <code class="i">onUnhandledRequest</code> は型エラー</div>
+  </div>
+  <div class="note ok" style="margin-top:20px;font-size:27px">実行：<code class="i">cd frontend &amp;&amp; pnpm vitest run</code> ／ 13 件のテストが通ればOK</div>
+  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+</section>
+
+<!-- 22. Skills x Hooks -->
+<section class="slide" data-title="Skills × Hooks">
+  <span class="tag t-ai">1:40 – 1:55 ・ Chapter 7 Skills × Hooks</span>
+  <h1 class="title">ファイルを編集するたびに、裏で自動検証が走る</h1>
+  <svg viewBox="0 0 1700 580" width="1700" height="580" role="img" aria-label="フックによる自動検証">
+    <defs><marker id="a11" markerUnits="userSpaceOnUse" markerWidth="20" markerHeight="20" refX="18" refY="10" orient="auto"><path d="M0,0 L20,10 L0,20 z" fill="#17212f"/></marker>
+    <marker id="a11r" markerUnits="userSpaceOnUse" markerWidth="20" markerHeight="20" refX="18" refY="10" orient="auto"><path d="M0,0 L20,10 L0,20 z" fill="#e03131"/></marker></defs>
+    <g font-size="25" font-weight="800" text-anchor="middle">
+      <rect x="0" y="40" width="320" height="120" rx="16" fill="#e5dbff" stroke="#7048e8" stroke-width="4"/><text x="160" y="92">/add-usecase</text><text x="160" y="130" font-size="21" font-weight="500" fill="#5b6676">スキルが手順を提示</text>
+      <rect x="400" y="40" width="320" height="120" rx="16" fill="#fff" stroke="#17212f" stroke-width="3"/><text x="560" y="92">Edit / Write</text><text x="560" y="130" font-size="21" font-weight="500" fill="#5b6676">AI がファイルを編集</text>
+      <rect x="800" y="40" width="320" height="120" rx="16" fill="#fff" stroke="#7048e8" stroke-width="4"/><text x="960" y="92">PostToolUse</text><text x="960" y="130" font-size="21" font-weight="500" fill="#5b6676">フックが起動</text>
+      <rect x="1200" y="40" width="500" height="120" rx="16" fill="#eef1fb" stroke="#17212f" stroke-width="3"/><text x="1450" y="92">verify-changes.mjs</text><text x="1450" y="130" font-size="21" font-weight="500" fill="#5b6676">拡張子で検証を切り替え</text>
+    </g>
+    <g stroke="#17212f" stroke-width="4" marker-end="url(#a11)"><line x1="324" y1="100" x2="396" y2="100"/><line x1="724" y1="100" x2="796" y2="100"/><line x1="1124" y1="100" x2="1196" y2="100"/></g>
+    <rect x="1000" y="230" width="700" height="100" rx="14" fill="#d0ebff" stroke="#1c7ed6" stroke-width="3"/>
+    <text x="1350" y="276" text-anchor="middle" font-size="26" font-weight="800">.kt を編集</text>
+    <text x="1350" y="312" text-anchor="middle" font-size="22" font-family="monospace">gradlew cleanTest test --tests *ArchitectureTest</text>
+    <rect x="1000" y="360" width="700" height="100" rx="14" fill="#ffe8cc" stroke="#e67700" stroke-width="3"/>
+    <text x="1350" y="406" text-anchor="middle" font-size="26" font-weight="800">.ts / .tsx を編集</text>
+    <text x="1350" y="442" text-anchor="middle" font-size="22" font-family="monospace">pnpm exec tsc --noEmit</text>
+    <line x1="1450" y1="164" x2="1450" y2="226" stroke="#17212f" stroke-width="4" marker-end="url(#a11)"/>
+    <g font-size="24" font-weight="800">
+      <rect x="0" y="230" width="640" height="100" rx="14" fill="#f0fbf2" stroke="#2f9e44" stroke-width="3"/><text x="320" y="288" text-anchor="middle" fill="#2b8a3e">成功：exit 0 → そのまま次の作業へ</text>
+      <rect x="0" y="360" width="640" height="100" rx="14" fill="#fff5f5" stroke="#e03131" stroke-width="3"/><text x="320" y="406" text-anchor="middle" fill="#c92a2a">失敗：exit 2 ＋ stderr</text><text x="320" y="442" text-anchor="middle" font-size="22" font-weight="500" fill="#5b6676">エラー内容が AI へ返り、AI が自分で修正</text>
+      <rect x="745" y="290" width="190" height="100" rx="14" fill="#fff" stroke="#17212f" stroke-width="3"/><text x="840" y="348" text-anchor="middle">検証結果</text>
+    </g>
+    <line x1="996" y1="285" x2="940" y2="325" stroke="#17212f" stroke-width="4" marker-end="url(#a11)"/>
+    <line x1="996" y1="410" x2="940" y2="365" stroke="#17212f" stroke-width="4" marker-end="url(#a11)"/>
+    <line x1="741" y1="318" x2="646" y2="284" stroke="#2f9e44" stroke-width="4" marker-end="url(#a11)"/>
+    <line x1="741" y1="362" x2="646" y2="408" stroke="#e03131" stroke-width="4" marker-end="url(#a11r)"/>
+    <rect x="0" y="500" width="1700" height="68" rx="12" fill="#fff9ef" stroke="#e67700" stroke-width="3"/>
+    <text x="30" y="545" font-size="25">スクリプトは <tspan font-family="monospace">$CLAUDE_PROJECT_DIR</tspan> 基準で実行し、stdout と stderr を結合して stderr に出力する。</text>
+  </svg>
+  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+</section>
+
+<!-- 23. 更新機能演習 -->
+<section class="slide" data-title="更新機能の演習">
+  <span class="tag t-ai">1:40 – 1:55 ・ Chapter 7 Skills × Hooks</span>
+  <h1 class="title">演習：明細の編集（更新）機能を全層に追加</h1>
+  <p class="lead">プロンプトは <code class="i">/add-usecase 家計簿明細の編集（更新）機能を追加…</code> の 1 回。AI が全層を実装します。</p>
+  <table class="t" style="font-size:26px">
+    <tr><th style="width:250px">層</th><th>追加・変更するもの</th></tr>
+    <tr><td class="n"><span class="pill l2">usecase</span></td><td><code class="i">UpdateTransactionUseCase</code> / <code class="i">UpdateTransactionInteractor</code></td></tr>
+    <tr><td class="n"><span class="pill l3">adapter</span></td><td><code class="i">PUT /api/transactions/{id}</code>、DTO から入力への変換</td></tr>
+    <tr><td class="n"><span class="pill l3">frontend</span></td><td><code class="i">TransactionRepository</code> に <code class="i">updateTransaction</code>、<code class="i">useTransactions</code>、「編集」ボタンと編集フォーム</td></tr>
+    <tr><td class="n"><span class="pill l1">テスト</span></td><td>Interactor（MockK）、Controller（MockMvc）、MSW の PUT ハンドラーと結合テスト</td></tr>
+  </table>
+  <div class="cols" style="margin-top:26px">
+    <div class="note" style="font-size:26px"><b>注目 1</b> 更新は <code class="i">save()</code> の前に <code class="i">findById</code> で存在確認。しないと存在しない ID でも INSERT される可能性がある。</div>
+    <div class="note" style="font-size:26px"><b>注目 2</b> Controller に UseCase を足すと、<b>既存の <code class="i">TransactionControllerTest</code> が Bean 不足で落ちる</b>。TestConfig の更新もスキルで指示済み。</div>
+  </div>
+  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+</section>
+
+<!-- 24. 運営バッファ -->
+<section class="slide" data-title="時間調整の基準">
+  <span class="tag t-ops">運営ガイド</span>
+  <h1 class="title">時間が押したときの調整基準</h1>
+  <svg viewBox="0 0 1700 330" width="1700" height="330" role="img" aria-label="時間調整の判断点">
+    <defs><marker id="a12" markerUnits="userSpaceOnUse" markerWidth="20" markerHeight="20" refX="18" refY="10" orient="auto"><path d="M0,0 L20,10 L0,20 z" fill="#17212f"/></marker></defs>
+    <line x1="30" y1="120" x2="1670" y2="120" stroke="#17212f" stroke-width="5"/>
+    <g text-anchor="middle" font-weight="800">
+      <circle cx="30" cy="120" r="16" fill="#17212f"/><text x="30" y="80" font-size="24">0:00</text>
+      <circle cx="600" cy="120" r="22" fill="#e03131"/><text x="600" y="76" font-size="30" fill="#e03131">1:10</text><text x="600" y="176" font-size="24" fill="#17212f">バックエンド完了？</text>
+      <circle cx="1210" cy="120" r="22" fill="#e03131"/><text x="1210" y="76" font-size="30" fill="#e03131">1:40</text><text x="1210" y="176" font-size="24" fill="#17212f">フロントエンド完了？</text>
+      <circle cx="1670" cy="120" r="16" fill="#17212f"/><text x="1670" y="80" font-size="24">2:00</text>
+    </g>
+    <rect x="260" y="210" width="680" height="110" rx="14" fill="#fff5f5" stroke="#e03131" stroke-width="3"/>
+    <text x="280" y="258" font-size="25" font-weight="800">押している場合</text>
+    <text x="280" y="296" font-size="23">Ch4 は 4-1 と 4-4 のみ実施</text>
+    <rect x="900" y="210" width="780" height="110" rx="14" fill="#fff5f5" stroke="#e03131" stroke-width="3"/>
+    <text x="920" y="258" font-size="25" font-weight="800">押している場合</text>
+    <text x="920" y="296" font-size="23">Ch6 は設定と domain テストの実行まで</text>
+  </svg>
+  <table class="t" style="margin-top:6px;font-size:26px">
+    <tr><th style="width:360px">判断点</th><th>対応</th></tr>
+    <tr><td class="n">1:10 時点でバックエンドが押している</td><td>4-2・4-3 は資料のコード例をそのまま配置して先へ進む</td></tr>
+    <tr><td class="n">1:40 時点でフロントが押している</td><td>最後の 15 分は<b>必ず Chapter 7</b> の演習に充てる</td></tr>
+    <tr><td class="n">途中で止まった参加者</td><td>チェックポイント <code class="i">step/chapter-04-done</code> / <code class="i">step/chapter-06-done</code> で合流</td></tr>
+  </table>
+  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+</section>
+
+<!-- 25. トラブルシュート -->
+<section class="slide" data-title="つまずきやすい点">
+  <span class="tag t-ops">運営ガイド</span>
+  <h1 class="title">つまずきやすい点と対処</h1>
+  <table class="t" style="font-size:25px">
+    <tr><th style="width:470px">症状</th><th>原因と対処</th></tr>
+    <tr><td>5432 / 8080 / 3000 が使用中</td><td><code class="i">/setup-env</code> は占有元を報告して中断する。自分で停止して再実行。自分の <code class="i">budget-app-db</code> なら続行</td></tr>
+    <tr><td>Flyway のチェックサム不一致で起動しない</td><td>旧 V1 が適用済みの DB。ボリュームを破棄して作り直す（<code class="i">docker compose down -v</code>）</td></tr>
+    <tr><td><code class="i">pnpm build</code> / <code class="i">tsc</code> が <code class="i">onUnhandledRequest</code> で失敗</td><td>MSW v3 では <code class="i">onUnhandledFrame</code> に名称変更</td></tr>
+    <tr><td><code class="i">TransactionControllerTest</code> が <code class="i">NoSuchBeanDefinition</code></td><td>Controller に追加した UseCase の Bean を <code class="i">TestConfig</code> に追加</td></tr>
+    <tr><td>Konsist が違反を検出しない</td><td><code class="i">doesNotDependOn</code> を宣言する／フックは <code class="i">cleanTest</code> 付きで実行</td></tr>
+    <tr><td>フックが実装の途中で失敗する</td><td>未実装の間のコンパイルエラーは想定内。実装クラスまで進めば成功に戻る</td></tr>
+    <tr><td>Vite が CommonJS 警告を出す</td><td><code class="i">vitest.config.ts</code> の ESM 構文による警告。動作には影響しない</td></tr>
+  </table>
+  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+</section>
+
+<!-- 26. まとめ -->
+<section class="slide" data-title="まとめ">
+  <span class="tag">1:55 – 2:00 ・ まとめ</span>
+  <h1 class="title">まとめ：今日実践した 4 つのこと</h1>
+  <div class="cols" style="gap:30px;margin-top:10px">
+    <div class="card l1" style="min-height:340px"><h3>① 4 層の分離</h3>ビジネスルール・手順・変換・技術詳細を分け、依存は外側から内側へ一方向。</div>
+    <div class="card l2" style="min-height:340px"><h3>② 依存性逆転</h3>usecase にインターフェースを置き、実装を外側から注入。バックエンドもフロントも同じ形。</div>
+    <div class="card l3" style="min-height:340px"><h3>③ 多層の自動テスト</h3>JUnit・MockK・MockMvc・Vitest・MSW、そして Konsist でルール違反を自動検出。</div>
+    <div class="card l4" style="min-height:340px"><h3>④ AI のガードレール</h3>CLAUDE.md・rules・Skills・Hooks で、AI に規約を守らせながら実装と検証を進める。</div>
+  </div>
+  <div class="note" style="margin-top:34px">最も効いた学び：<b>ルールは「書く」だけでなく「テストで検出させる」</b>。<code class="i">dependsOn</code> の落とし穴のように、実際に違反を注入して検出を確かめるまでは安心できない。</div>
+  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+</section>
+
+<!-- 27. Q&A -->
+<section class="slide dark" data-title="質疑応答">
+  <div class="hero" style="top:360px">
+    <h1>質疑応答・振り返り</h1>
+    <div class="sub">うまくいった点・詰まった点を共有しましょう</div>
+    <div class="meta">次のステップ：別のユースケース追加（カテゴリ管理・月別集計）を <code style="font-family:var(--mono)">/add-usecase</code> で試す</div>
+  </div>
+  <div class="foot" style="left:130px;right:130px"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+</section>
+
+</div>
+<div class="ui-hint" id="hint">← → / Space で移動 ・ Ctrl/⌘+P で PDF 保存（1920×1080）</div>
+
+<script>
+(function () {
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var total = slides.length;
+  slides.forEach(function (s, i) {
+    var pn = s.querySelector('.pn');
+    if (pn) pn.textContent = (i + 1) + ' / ' + total;
+  });
+  var idx = 0;
+  function fit() {
+    var s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+    document.documentElement.style.setProperty('--s', s);
+  }
+  function show(n) {
+    idx = Math.max(0, Math.min(total - 1, n));
+    slides.forEach(function (s, i) { s.classList.toggle('active', i === idx); });
+    try { history.replaceState(null, '', '#' + (idx + 1)); } catch (e) {}
+  }
+  window.addEventListener('resize', fit);
+  window.addEventListener('keydown', function (e) {
+    var k = e.key;
+    if (k === 'ArrowRight' || k === 'PageDown' || k === ' ' || k === 'Enter') { e.preventDefault(); show(idx + 1); }
+    else if (k === 'ArrowLeft' || k === 'PageUp' || k === 'Backspace') { e.preventDefault(); show(idx - 1); }
+    else if (k === 'Home') show(0);
+    else if (k === 'End') show(total - 1);
+  });
+  document.getElementById('deck').addEventListener('click', function (e) {
+    show(e.clientX > window.innerWidth / 2 ? idx + 1 : idx - 1);
+  });
+  window.addEventListener('hashchange', function () { show((parseInt(location.hash.slice(1), 10) || 1) - 1); });
+  setTimeout(function () { document.getElementById('hint').style.opacity = 0; }, 5000);
+  fit();
+  show((parseInt(location.hash.slice(1), 10) || 1) - 1);
+})();
+</script>
+</body>
+</html>
