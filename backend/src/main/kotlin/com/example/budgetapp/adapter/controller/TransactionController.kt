@@ -4,6 +4,7 @@ import com.example.budgetapp.adapter.controller.dto.*
 import com.example.budgetapp.usecase.input.CreateTransactionUseCase
 import com.example.budgetapp.usecase.input.DeleteTransactionUseCase
 import com.example.budgetapp.usecase.input.GetTransactionsUseCase
+import com.example.budgetapp.usecase.input.UpdateTransactionUseCase
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*
 class TransactionController(
     private val getTransactionsUseCase: GetTransactionsUseCase,
     private val createTransactionUseCase: CreateTransactionUseCase,
+    private val updateTransactionUseCase: UpdateTransactionUseCase,
     private val deleteTransactionUseCase: DeleteTransactionUseCase
 ) {
     @GetMapping
@@ -29,6 +31,12 @@ class TransactionController(
     fun create(@Valid @RequestBody request: TransactionRequest): TransactionItemResponse {
         val created = createTransactionUseCase.execute(request.toUseCaseInput())
         return TransactionItemResponse.fromDomain(created)
+    }
+
+    @PutMapping("/{id}")
+    fun update(@PathVariable id: Long, @Valid @RequestBody request: TransactionRequest): TransactionItemResponse {
+        val updated = updateTransactionUseCase.execute(request.toUpdateInput(id))
+        return TransactionItemResponse.fromDomain(updated)
     }
 
     @DeleteMapping("/{id}")

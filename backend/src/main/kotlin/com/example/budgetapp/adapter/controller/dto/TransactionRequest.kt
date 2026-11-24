@@ -1,6 +1,7 @@
 package com.example.budgetapp.adapter.controller.dto
 
 import com.example.budgetapp.usecase.input.CreateTransactionInput
+import com.example.budgetapp.usecase.input.UpdateTransactionInput
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Positive
@@ -25,6 +26,15 @@ data class TransactionRequest(
     val memo: String?
 ) {
     fun toUseCaseInput(): CreateTransactionInput = CreateTransactionInput(
+        categoryId = categoryId!!,
+        title = title!!,
+        amount = amount!!,
+        transactionDate = transactionDate!!,
+        memo = memo
+    )
+
+    fun toUpdateInput(id: Long): UpdateTransactionInput = UpdateTransactionInput(
+        id = id,
         categoryId = categoryId!!,
         title = title!!,
         amount = amount!!,
