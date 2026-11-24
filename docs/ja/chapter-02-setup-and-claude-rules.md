@@ -126,6 +126,12 @@ disable-model-invocation: true
 
 CLAUDE.md の「チェックポイント運用」に従い、1つの CP を終えるたびに結果を報告して停止し、ユーザーが「次のチェックポイントに進む」と入力するまで次の CP に着手しないこと。最初は CP2-1 だけを実施する。
 
+## 冪等性の原則
+`/setup-env` は何度実行しても成功し、2 回目以降に既存の成果物を壊さないこと。各手順は「現状を確認し、足りない分だけ実行する」。
+- 作成済みのファイル・ディレクトリは上書きしない。内容が手順と異なる場合も上書きせず、差分を報告してユーザーの判断を待つ（後の章で編集したファイルを壊さないため）。
+- すでに目的の状態になっている手順は実行せずスキップする。スキップはエラーではなく、成功として扱う。
+- 各 CP の報告に、実行した手順とスキップした手順（理由つき）を分けて書く。
+
 ## CP2-1 〔設計〕事前確認
 1. 現在の作業ディレクトリがプロジェクトのルート（`budget-app-handson`）であることを確認する。
 2. `docker --version`（Rancher Desktop の dockerd）、`java -version`（Java 25 必須）、`node -v`（v26）、`pnpm -v`（v11）が利用可能か確認する。Java が 25 でない場合や前提ツールが未インストールの場合は中断し、ユーザーに「2-0 / 2-1 の前提ツール導入」を案内する。
@@ -137,7 +143,7 @@ CLAUDE.md の「チェックポイント運用」に従い、1つの CP を終�
 ## CP2-2 〔実装・動作確認〕PostgreSQL 18 の構築と起動
 1. ルートディレクトリ直下に、配布された `.env.example` があることを確認する。`.env` が無ければ `cp .env.example .env` で作成する（`.env` が既にある場合は上書きしない）。`.env.example` が無い場合は中断し、ユーザーにファイルの配置を依頼する。DB のユーザー名・パスワード・DB 名はこの `.env` にだけ置き、`compose.yaml` や `application.yml` には書かない。
 2. Git で管理している場合は、`.gitignore` に `.env` が含まれていることを確認し、無ければ追記する。
-3. ルートディレクトリ直下に `compose.yaml` を以下の内容で作成する。
+3. ルートディレクトリ直下に `compose.yaml` を以下の内容で作成する。すでに存在して内容が同じならスキップする。内容が異なる場合は上書きせず、差分を報告して確認を待つ。
 
 ```yaml
 services:
@@ -162,11 +168,11 @@ volumes:
   postgres_data:
 ```
 
-4. `docker compose up -d` を実行する。
+4. `docker compose up -d` を実行する（コンテナがすでに稼働中なら、何も変更されない）。
 5. `docker compose ps` を実行し、`budget-app-db` の状態が `healthy` になるまで待機・確認する。
 
 ## CP2-3 〔実装・動作確認〕バックエンド（Spring Boot 4 / Kotlin）のセットアップ
-1. ルートディレクトリで以下のコマンドを実行し、`backend` ディレクトリを生成する（Spring Initializr から最新の Spring Boot 4.x を取得する）。
+1. `backend/build.gradle.kts` がすでに存在する場合は、この手順をスキップする（`tar` が既存のソースを上書きするため、実行してはならない）。存在しない場合は、ルートディレクトリで以下のコマンドを実行し、`backend` ディレクトリを生成する（Spring Initializr から最新の Spring Boot 4.x を取得する）。
 
 ```bash
 curl -fsSL https://start.spring.io/starter.tgz \
@@ -181,7 +187,7 @@ curl -fsSL https://start.spring.io/starter.tgz \
   | tar -xzf -
 ```
 
-2. `backend/build.gradle.kts` の `dependencies` ブロックを確認し、Flyway の PostgreSQL モジュールとテスト用ライブラリが含まれるよう以下を追記する（`flyway-database-postgresql` がすでに記載されている場合は重複させない）。
+2. `backend/build.gradle.kts` の `dependencies` ブロックを確認し、Flyway の PostgreSQL モジュールとテスト用ライブラリが含まれるよう以下を追記する（すでに記載されている行は重複させない）。
 
 ```kotlin
 	runtimeOnly("org.flywaydb:flyway-database-postgresql")
@@ -189,7 +195,7 @@ curl -fsSL https://start.spring.io/starter.tgz \
 	testImplementation("com.lemonappdev:konsist:0.18.1")
 ```
 
-3. `backend/src/main/resources/application.properties` を削除し、`backend/src/main/resources/application.yml` を作成する。
+3. `backend/src/main/resources/application.properties` が存在する場合のみ削除し、`backend/src/main/resources/application.yml` を作成する。`application.yml` がすでに存在する場合は上書きせず、DB 接続情報が `${DB_NAME}` などの変数参照になっていることだけを確認する（認証情報が直書きなら報告する）。
 
 ```yaml
 spring:
@@ -208,7 +214,7 @@ spring:
     show-sql: false
 ```
 
-4. `backend/src/main/resources/db/migration/V1__create_tables.sql` を作成する。
+4. `backend/src/main/resources/db/migration/V1__create_tables.sql` が存在しない場合のみ作成する。存在する場合は変更しない（適用済みの Flyway マイグレーションを変更すると、チェックサム不一致で起動に失敗する）。
 
 ```sql
 CREATE TABLE categories (
@@ -235,7 +241,7 @@ INSERT INTO categories (name, type) VALUES ('副業', 'INCOME');
 ```
 
 5. サブシェル `(cd backend && ./gradlew test)` を実行してビルドと初期テストの成功を確認する。
-6. サブシェル `(cd backend && ./gradlew bootRun)` でバックエンドを一時起動し、起動完了後にプロセスを停止する。その後、以下のコマンドで Flyway によるテーブル作成と初期データ投入を直接確認する。
+6. 8080 が使用中でないことを確認したうえで、サブシェル `(cd backend && ./gradlew bootRun)` でバックエンドを一時起動し、起動完了後にプロセスを停止する（`lsof` で 8080 にプロセスが残っていないことを確認する）。マイグレーションは適用済みなら再実行されない。その後、以下のコマンドで Flyway によるテーブル作成と初期データ投入を直接確認する。
 
 ```bash
 docker compose exec -T db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "\dt"'
@@ -244,7 +250,7 @@ docker compose exec -T db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "
 
 ## CP2-4 〔実装・動作確認〕フロントエンド（Next.js 16 / pnpm 11）のセットアップ
 1. ルートディレクトリの `mise.toml` に `node = "26"` と `pnpm = "11"` が定義されていることを確認する。
-2. 非対話オプションを指定してルートディレクトリ直下に `frontend` プロジェクトを生成する。
+2. `frontend/package.json` がすでに存在する場合は、この手順（生成と `.git` の削除）をスキップする（`create-next-app` は空でないディレクトリに生成できない）。存在しない場合は、非対話オプションを指定してルートディレクトリ直下に `frontend` プロジェクトを生成する。
 
 ```bash
 pnpm create next-app@latest frontend \
@@ -258,9 +264,9 @@ pnpm create next-app@latest frontend \
   --yes
 ```
 
-   `create-next-app` は `frontend/.git` を生成するため、モノレポのルートで一括管理できるよう `rm -rf frontend/.git` で削除する。
+   `create-next-app` は `frontend/.git` を生成するため、モノレポのルートで一括管理できるよう、生成した場合に限り `rm -rf frontend/.git` で削除する。
 
-3. カレントディレクトリをルートに保ったまま、テスト関連パッケージをインストールする。
+3. `frontend/package.json` の `devDependencies` を確認し、未導入のパッケージだけを追加する（導入済みのパッケージを再度 `add` して、バージョンを更新しない）。カレントディレクトリはルートに保ったまま、以下を実行する。
 
 ```bash
 pnpm --dir frontend add -D vitest @vitejs/plugin-react jsdom @testing-library/react @testing-library/dom @testing-library/jest-dom msw
@@ -284,6 +290,7 @@ mkdir -p frontend/src/components/ui \
 - Docker コンテナ `budget-app-db` の稼働状況
 - Spring Boot プロジェクトの生成と `categories` / `transactions` テーブルおよび初期マスタデータの作成結果
 - Next.js プロジェクトの生成とディレクトリ構成・ビルド完了結果
+- 実行した手順とスキップした手順の一覧（再実行の場合は、スキップした理由を含める）
 ````
 
 ### 4. プロジェクト共通ガイドライン（`CLAUDE.md`）の作成

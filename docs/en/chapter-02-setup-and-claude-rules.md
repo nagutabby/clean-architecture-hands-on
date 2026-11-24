@@ -126,6 +126,12 @@ When invoked by the user with `/setup-env`, run every command relative to the pr
 
 Follow "Checkpoint operation" in CLAUDE.md: after finishing each CP, report the result and stop, and do not start the next CP until the user types "Proceed to the next checkpoint". Perform only CP2-1 at first.
 
+## Idempotency principle
+`/setup-env` must succeed no matter how many times it is run, and must not break existing artifacts on the second and later runs. Each step is "check the current state, then do only what is missing".
+- Do not overwrite files or directories that already exist. Even if their content differs from the step, do not overwrite them; report the difference and wait for the user's decision (so that files edited in later chapters are not destroyed).
+- Skip a step that has already reached its goal. A skip is not an error and counts as success.
+- In each CP report, separate the steps that were run from the steps that were skipped (with the reason).
+
 ## CP2-1 [Design] Preliminary checks
 1. Confirm that the current working directory is the project root (`budget-app-handson`).
 2. Check that `docker --version` (dockerd from Rancher Desktop), `java -version` (Java 25 required), `node -v` (v26), and `pnpm -v` (v11) are available. If Java is not 25 or a prerequisite tool is not installed, stop and direct the user to "install the prerequisite tools in 2-0 / 2-1".
@@ -137,7 +143,7 @@ Follow "Checkpoint operation" in CLAUDE.md: after finishing each CP, report the 
 ## CP2-2 [Implementation + Verification] Build and start PostgreSQL 18
 1. Check that the distributed `.env.example` exists directly under the root directory. If `.env` does not exist, create it with `cp .env.example .env` (do not overwrite an existing `.env`). If `.env.example` is missing, stop and ask the user to place it. Keep the DB user name, password and DB name only in this `.env`, and never write them in `compose.yaml` or `application.yml`.
 2. If the project is managed with Git, check that `.gitignore` contains `.env` and add it if missing.
-3. Create `compose.yaml` directly under the root directory with the following content.
+3. Create `compose.yaml` directly under the root directory with the following content. If it already exists with the same content, skip this step. If the content differs, do not overwrite it; report the difference and wait for confirmation.
 
 ```yaml
 services:
@@ -162,11 +168,11 @@ volumes:
   postgres_data:
 ```
 
-4. Run `docker compose up -d`.
+4. Run `docker compose up -d` (if the container is already running, nothing changes).
 5. Run `docker compose ps` and wait until the status of `budget-app-db` becomes `healthy`, then confirm it.
 
 ## CP2-3 [Implementation + Verification] Set up the backend (Spring Boot 4 / Kotlin)
-1. Run the following command in the root directory to generate the `backend` directory (this fetches the latest Spring Boot 4.x from Spring Initializr).
+1. If `backend/build.gradle.kts` already exists, skip this step (`tar` would overwrite the existing sources, so never run it). If it does not exist, run the following command in the root directory to generate the `backend` directory (this fetches the latest Spring Boot 4.x from Spring Initializr).
 
 ```bash
 curl -fsSL https://start.spring.io/starter.tgz \
@@ -181,7 +187,7 @@ curl -fsSL https://start.spring.io/starter.tgz \
   | tar -xzf -
 ```
 
-2. Check the `dependencies` block of `backend/build.gradle.kts` and add the following so that the Flyway PostgreSQL module and the test libraries are included (do not duplicate `flyway-database-postgresql` if it is already listed).
+2. Check the `dependencies` block of `backend/build.gradle.kts` and add the following so that the Flyway PostgreSQL module and the test libraries are included (do not duplicate lines that are already listed).
 
 ```kotlin
 	runtimeOnly("org.flywaydb:flyway-database-postgresql")
@@ -189,7 +195,7 @@ curl -fsSL https://start.spring.io/starter.tgz \
 	testImplementation("com.lemonappdev:konsist:0.18.1")
 ```
 
-3. Delete `backend/src/main/resources/application.properties` and create `backend/src/main/resources/application.yml`.
+3. Delete `backend/src/main/resources/application.properties` only if it exists, and create `backend/src/main/resources/application.yml`. If `application.yml` already exists, do not overwrite it; only check that the DB connection settings are variable references such as `${DB_NAME}` (report it if credentials are hard-coded).
 
 ```yaml
 spring:
@@ -208,7 +214,7 @@ spring:
     show-sql: false
 ```
 
-4. Create `backend/src/main/resources/db/migration/V1__create_tables.sql`.
+4. Create `backend/src/main/resources/db/migration/V1__create_tables.sql` only if it does not exist. If it exists, do not change it (changing an applied Flyway migration causes a checksum mismatch and startup fails).
 
 ```sql
 CREATE TABLE categories (
@@ -235,7 +241,7 @@ INSERT INTO categories (name, type) VALUES ('副業', 'INCOME');
 ```
 
 5. Run the subshell `(cd backend && ./gradlew test)` and confirm that the build and the initial tests succeed.
-6. Start the backend temporarily with the subshell `(cd backend && ./gradlew bootRun)`, and stop the process once startup completes. Then directly verify the table creation and initial data insertion by Flyway with the following commands.
+6. After confirming that 8080 is not in use, start the backend temporarily with the subshell `(cd backend && ./gradlew bootRun)`, and stop the process once startup completes (confirm with `lsof` that no process remains on 8080). Migrations that are already applied are not run again. Then directly verify the table creation and initial data insertion by Flyway with the following commands.
 
 ```bash
 docker compose exec -T db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "\dt"'
@@ -244,7 +250,7 @@ docker compose exec -T db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "
 
 ## CP2-4 [Implementation + Verification] Set up the frontend (Next.js 16 / pnpm 11)
 1. Confirm that `node = "26"` and `pnpm = "11"` are defined in `mise.toml` in the root directory.
-2. Generate the `frontend` project directly under the root directory with non-interactive options.
+2. If `frontend/package.json` already exists, skip this step (generation and removing `.git`), because `create-next-app` cannot generate into a non-empty directory. If it does not exist, generate the `frontend` project directly under the root directory with non-interactive options.
 
 ```bash
 pnpm create next-app@latest frontend \
@@ -258,9 +264,9 @@ pnpm create next-app@latest frontend \
   --yes
 ```
 
-   `create-next-app` generates `frontend/.git`, so delete it with `rm -rf frontend/.git` to allow the monorepo to be managed as a whole from the root.
+   `create-next-app` generates `frontend/.git`, so, only when you generated it, delete it with `rm -rf frontend/.git` to allow the monorepo to be managed as a whole from the root.
 
-3. Install the test-related packages while keeping the current directory at the root.
+3. Check `devDependencies` in `frontend/package.json` and add only the packages that are not installed yet (do not run `add` again for installed packages, which could change their versions). Keep the current directory at the root and run the following.
 
 ```bash
 pnpm --dir frontend add -D vitest @vitejs/plugin-react jsdom @testing-library/react @testing-library/dom @testing-library/jest-dom msw
@@ -284,6 +290,7 @@ When all CPs are complete, report the following items to the user together with 
 - Running status of the Docker container `budget-app-db`
 - Result of generating the Spring Boot project and creating the `categories` / `transactions` tables and the initial master data
 - Result of generating the Next.js project, its directory structure, and the build completion
+- A list of the steps that were run and the steps that were skipped (on a re-run, include the reason for each skip)
 ````
 
 ### 4. Create the Project-Wide Guidelines (`CLAUDE.md`)
