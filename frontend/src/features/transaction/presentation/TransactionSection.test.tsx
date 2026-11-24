@@ -81,4 +81,27 @@ describe('TransactionSection', () => {
 
     expect(await screen.findByRole('alert')).toHaveTextContent(/エラーが発生しました/);
   });
+
+  it('編集ボタンから明細を更新すると一覧とサマリーが更新されること', async () => {
+    render(<TransactionSection/>);
+
+    await waitFor(() => {
+      expect(screen.getByText('テストランチ')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: '編集' }));
+    expect(screen.getByRole('heading', { name: '明細の編集' })).toBeInTheDocument();
+    expect(screen.getByLabelText('タイトル')).toHaveValue('テストランチ');
+
+    fireEvent.change(screen.getByLabelText('タイトル'), { target: { value: '豪華ランチ' } });
+    fireEvent.change(screen.getByLabelText('金額（円）'), { target: { value: '2500' } });
+    fireEvent.click(screen.getByRole('button', { name: '保存する' }));
+
+    await waitFor(() => {
+      expect(screen.getByText('豪華ランチ')).toBeInTheDocument();
+    });
+    expect(screen.queryByText('テストランチ')).not.toBeInTheDocument();
+    expect(screen.getByText('総支出').nextElementSibling).toHaveTextContent(/^[¥￥]2,500$/);
+    expect(screen.getByRole('heading', { name: '明細の追加' })).toBeInTheDocument();
+  });
 });

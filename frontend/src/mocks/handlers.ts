@@ -77,6 +77,24 @@ export const handlers = [
     return HttpResponse.json(created, { status: 201 });
   }),
 
+  http.put('http://localhost:8080/api/transactions/:id', async ({ params, request }) => {
+    const id = Number(params.id);
+    const body = (await request.json()) as CreateTransactionInput;
+    const category = MOCK_CATEGORIES.find((c) => c.id === body.categoryId) ?? MOCK_CATEGORIES[0];
+    const updated: TransactionItem = {
+      id,
+      categoryId: category.id,
+      categoryName: category.name,
+      categoryType: category.type,
+      title: body.title,
+      amount: body.amount,
+      transactionDate: body.transactionDate,
+      memo: body.memo,
+    };
+    mockTransactions = mockTransactions.map((t) => (t.id === id ? updated : t));
+    return HttpResponse.json(updated);
+  }),
+
   http.delete('http://localhost:8080/api/transactions/:id', ({ params }) => {
     const id = Number(params.id);
     mockTransactions = mockTransactions.filter((t) => t.id !== id);
