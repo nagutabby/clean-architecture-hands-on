@@ -6,14 +6,23 @@
 
 この最終チャプターでは、Claude Code の拡張機能である Agent Skills（`.claude/skills/`）と Hooks（`.claude/settings.json`）を構築し、設計ルールとテストを自動担保しながら新機能「家計簿明細の編集（更新）機能」をフルスタックで追加します。
 
-1. 7-1. ユースケース追加スキル（`.claude/skills/add-usecase/SKILL.md`）の作成
-2. 7-2. Hooks（`.claude/hooks/verify-changes.mjs` と `.claude/settings.json`）による自動検証の設定
-3. 7-3. 実践演習：`/add-usecase` スキルを使った「明細更新機能」の実装
-4. 7-4. フルスタック動作確認とハンズオンのまとめ
+7-1・7-2 は人が実施する準備です。7-3 で `/add-usecase` スキルを実行すると、Claude Code が CP7-1〜CP7-7 を1つずつ進めます。
+
+| CP | 種別 | 内容 |
+| :--- | :--- | :--- |
+| 7-1 | 準備（人） | `add-usecase` スキルの作成 |
+| 7-2 | 準備（人） | フック（`verify-changes.mjs`・`settings.json`）の設定 |
+| CP7-1 | 設計 | 変更対象の全層のファイル一覧（実装計画）を提示させ、承認する |
+| CP7-2 | 実装 | バックエンド：domain → usecase → adapter（更新 API） |
+| CP7-3 | テスト | バックエンドのテスト：Interactor 単体・Controller 統合・全テスト |
+| CP7-4 | 実装 | フロントエンド：domain → usecase → adapter → presentation（編集 UI） |
+| CP7-5 | テスト | フロントエンドのテスト：MSW ハンドラー・結合テスト・ビルド |
+| CP7-6 | 動作確認 | 更新 API の動作確認（curl） |
+| CP7-7 | 動作確認 | 画面での最終確認（新規登録 → 編集 → 削除）と全テストの実行 |
 
 ---
 
-## 7-1. ユースケース追加スキル（`SKILL.md`）の作成
+## 7-1. 準備（人が実施）：ユースケース追加スキル（`SKILL.md`）の作成
 
 Chapter 2 で作成した `setup-env` スキルと同様に、新しいユースケースをクリーンアーキテクチャの4層すべてに漏れなく実装するための手順書をスキルとして定義します。
 
@@ -37,37 +46,54 @@ description: クリーンアーキテクチャの4層構造（バックエンド
 
 # 新規ユースケース実装手順
 
-ユーザーから `/add-usecase <機能概要>` で呼び出された場合、`.claude/rules/backend.md` および `.claude/rules/frontend.md` の依存制約を厳守し、以下の手順で実装とテストを行ってください。
+ユーザーから `/add-usecase <機能概要>` で呼び出された場合、`.claude/rules/backend.md` および `.claude/rules/frontend.md` の依存制約を厳守し、以下のチェックポイント（CP）を順に進めてください。
 
-## Step 1: 実装計画の提示
-コードを書く前に、以下の4層で新規作成・変更するファイルの一覧をユーザーに提示する。
+CLAUDE.md の「チェックポイント運用」に従い、1つの CP を終えるたびに結果を報告して停止し、ユーザーが「次のチェックポイントに進む」と入力するまで次の CP に着手しないこと。最初は CP7-1 だけを実施する。
+
+## CP7-1 〔設計〕実装計画の提示
+コードを書く前に、以下の4層で新規作成・変更するファイルの一覧をユーザーに提示して停止する。
 1. Backend 第1層（domain）: 必要なドメインルールやメソッドの追加
 2. Backend 第2層（usecase）: `usecase/input/*UseCase.kt`、`usecase/interactor/*Interactor.kt`、必要に応じた `usecase/output/*Repository.kt` のメソッド追加
 3. Backend 第3層（adapter）: `*RepositoryImpl.kt`、DTO、`*Controller.kt`
 4. Frontend 第1〜3層: `domain/types.ts`、`usecase/TransactionRepository.ts`、`usecase/useTransactions.ts`、`adapter/transactionApi.ts`、`presentation/` コンポーネント
 
-## Step 2: バックエンドの実装とテスト
+## CP7-2 〔実装〕バックエンドの実装
 1. 内側の層（domain → usecase → adapter）の順に実装する。
 2. 更新・削除系ユースケースの Interactor では、永続化メソッドを呼ぶ前に必ず `findById` で対象レコードの存在検証を行い、存在しない場合は `DomainException` をスローする。
 3. Controller は必ず `usecase/input` のインターフェースのみを受け取り、`usecase/output` や `adapter/repository`（JPA）を直接参照しない。また、`adapter` から `framework` を import しない。
-4. 以下のテストを作成・更新する。
+4. `cd backend && ./gradlew compileKotlin` が成功することを確認する。
+
+## CP7-3 〔テスト〕バックエンドのテスト
+1. 以下のテストを作成・更新する。
    - Interactor の単体テスト（MockK を使用）
    - Controller の統合テスト（MockMvc を使用）。Controller のコンストラクタに UseCase を追加した場合は、既存の `TransactionControllerTest` の `TestConfig` にも対応する Bean を追加する（追加しないと既存テストが `NoSuchBeanDefinitionException` で失敗する）
-5. `cd backend && ./gradlew test` を実行し、Konsist アーキテクチャテストを含む全テストがパスすることを確認する。
+2. `cd backend && ./gradlew test` を実行し、Konsist アーキテクチャテストを含む全テストがパスすることを確認する。
 
-## Step 3: フロントエンドの実装とテスト
+## CP7-4 〔実装〕フロントエンドの実装
 1. 内側の層（domain → usecase → adapter → presentation）の順に実装する。
 2. `usecase/useTransactions.ts` は `adapter` を直接 import せず、`TransactionRepository` インターフェース経由で通信する。
-3. MSW ハンドラー（`src/mocks/handlers.ts`）と結合テスト（`TransactionSection.test.tsx`）に新機能のテストケースを追加する。
-4. `cd frontend && pnpm vitest run` と `cd frontend && pnpm build` を実行し、テストと型チェックがパスすることを確認する。
+3. `cd frontend && pnpm exec tsc --noEmit` が成功することを確認する。
 
-## Step 4: 完了報告
-追加・変更したファイル一覧と、バックエンド・フロントエンド双方のテスト実行結果をユーザーに報告する。
+## CP7-5 〔テスト〕フロントエンドのテスト
+1. MSW ハンドラー（`src/mocks/handlers.ts`）と結合テスト（`TransactionSection.test.tsx`）に新機能のテストケースを追加する。
+2. `cd frontend && pnpm vitest run` と `cd frontend && pnpm build` を実行し、テストと型チェックがパスすることを確認する。
+
+## CP7-6 〔動作確認〕API の動作確認
+1. PostgreSQL（`budget-app-db`）が稼働していることを確認し、バックエンドを `bootRun` でバックグラウンド起動する。
+2. curl で、新機能の API について正常系と異常系（存在しない ID・カテゴリなど）を確認し、結果を報告する。確認のために登録したデータは、確認後にすべて削除する。
+3. バックエンドは CP7-7 のために起動したままにする。
+
+## CP7-7 〔動作確認〕画面での最終確認と完了報告
+1. バックエンドが起動していなければ起動し、フロントエンド（`cd frontend && pnpm dev`）をバックグラウンドで起動する。
+2. `cd backend && ./gradlew test` と `cd frontend && pnpm vitest run` を実行し、全テストの結果を報告する。
+3. 追加・変更したファイルの一覧と、手順 2 のテスト結果を完了報告としてまとめ、ブラウザ（`http://localhost:3000/transactions`）での確認をユーザーに依頼して待機する。
 ```
+
+このスキルは、チェックポイントごとに停止する進め方そのものを手順書に埋め込んでいます。`CLAUDE.md` の「チェックポイント運用」と合わせて、機能追加でも1つずつ確認しながら進められます。
 
 ---
 
-## 7-2. Hooks（`.claude/settings.json`）による自動検証の設定
+## 7-2. 準備（人が実施）：Hooks（`.claude/settings.json`）による自動検証の設定
 
 Claude Code の Hooks 機能を使うと、ツール実行の前後（`PreToolUse` / `PostToolUse`）や応答完了時（`Stop`）に任意のコマンドを自動実行できます。
 
@@ -156,7 +182,7 @@ if (filePath.endsWith('.kt')) {
 
 ここまでで、設計ルール（`CLAUDE.md` / `.claude/rules/`）、実装手順スキル（`add-usecase`）、そして自動検証フック（`PostToolUse`）がすべて揃いました。
 
-実際に Claude Code を起動し、新しいユースケースとして「登録済みの家計簿明細を編集・更新する機能」を追加します。
+実際に Claude Code を起動し、新しいユースケースとして「登録済みの家計簿明細を編集・更新する機能」を追加します。進め方は Chapter 3〜6 と同じで、CP を1つ終えるたびに Claude Code が停止するので、確認して「次のチェックポイントに進む」と入力します。
 
 ### 1. Claude Code の起動（または設定の再読み込み）
 
@@ -168,45 +194,66 @@ claude
 
 ### 2. `/add-usecase` スキルの実行
 
-チャット欄に以下のコマンドを入力して実行します。
+チャット欄に以下のコマンドを入力して実行します。Claude Code は CP7-1（設計）だけを実施して停止します。
 
 ```text
 /add-usecase 家計簿明細の編集（更新）機能を追加してください。バックエンドには PUT /api/transactions/{id} エンドポイント（UpdateTransactionUseCase / UpdateTransactionInteractor）を追加し、存在しないカテゴリIDや存在しない明細IDの場合は DomainException をスローしてください。フロントエンドでは明細一覧の各行に「編集」ボタンを追加し、クリックするとその明細の内容を編集して保存できるUIを実装してください。
 ```
 
-### 3. AI による実装と自動検証の観察
+### 3. チェックポイントごとの確認
 
-プロンプトを実行すると、Claude Code は以下の流れで作業を進めます。
+各 CP で Claude Code が停止したら、次の内容を確認して「次のチェックポイントに進む」と入力します。実装系の CP（CP7-2・CP7-4）では、ファイルを作成・編集するたびに `PostToolUse` フックが起動し、`ArchitectureTest`（`.kt`）と `tsc --noEmit`（`.ts` / `.tsx`）が自動実行されます。
 
-1. `add-usecase` スキルの Step 1 に従い、変更対象となる全層のファイル一覧を提示します。
-2. 各層のファイルを作成・編集するたびに `PostToolUse` フックが起動し、`ArchitectureTest` と `tsc --noEmit` が自動実行されます。
-3. `UpdateTransactionInteractor` では、最初に `transactionRepository.findById(input.id)` と `categoryRepository.findById(input.categoryId)` を呼び出して対象の存在を検証し、存在しない場合は `DomainException` をスローします。存在が確認された明細に対してのみ、既存の `id` を保持した `Transaction` エンティティを構築して `transactionRepository.save()` を呼び出すことでレコードを更新します。
-4. スキルの Step 2・Step 3 に従い、バックエンドの単体・統合テストおよびフロントエンドの MSW 結合テストが追加・実行されます。
+#### CP7-1 〔設計〕実装計画の提示
+
+Claude Code は、変更対象となる全層のファイル一覧を提示して停止します。コードはまだ書かれません。
+
+- バックエンドの `domain` / `usecase` / `adapter`、フロントエンドの `domain` / `usecase` / `adapter` / `presentation` のすべてが一覧に含まれていること
+- `UpdateTransactionUseCase`（Input Port）、`UpdateTransactionInteractor`、`TransactionRepository` の利用（`save` による更新）が計画されていること
+- Controller が `usecase/input` のみに依存する計画になっていること
+
+#### CP7-2 〔実装〕バックエンドの実装
+
+- 内側の層から順にファイルが作成・編集され、`UpdateTransactionInteractor` が、最初に `transactionRepository.findById(input.id)` と `categoryRepository.findById(input.categoryId)` で対象の存在を検証し、存在しない場合に `DomainException` をスローしていること
+- 存在が確認された場合のみ、既存の `id` を保持した `Transaction` を構築して `transactionRepository.save()` を呼び出していること
+- フックが失敗した場合は、Claude Code が自動で修正して再実行していること（途中の一時的な失敗は想定内です）
+- `compileKotlin` が成功していること
+
+#### CP7-3 〔テスト〕バックエンドのテスト
+
+- `UpdateTransactionInteractorTest`（MockK）と、`PUT /api/transactions/{id}` の MockMvc テストが追加されていること
+- 既存の `TransactionControllerTest` の `TestConfig` に `UpdateTransactionUseCase` の Bean が追加されていること
+- `./gradlew test` が、`ArchitectureTest` を含めてすべてパスしていること
+
+#### CP7-4 〔実装〕フロントエンドの実装
+
+- 内側の層から順に、型・`TransactionRepository.updateTransaction`・`useTransactions`・`transactionApi`・編集 UI が実装されていること
+- `useTransactions.ts` が `adapter` を import していないこと
+- `tsc --noEmit` が成功していること
+
+#### CP7-5 〔テスト〕フロントエンドのテスト
+
+- MSW ハンドラーに `PUT` が追加され、`TransactionSection.test.tsx` に編集のテストケースが追加されていること
+- `pnpm vitest run` と `pnpm build` が成功していること
+
+#### CP7-6 〔動作確認〕更新 API の動作確認
+
+- `PUT /api/transactions/{id}` が成功し、`GET /api/transactions` の内容と `summary` に更新が反映されること
+- 存在しない明細 ID、存在しないカテゴリ ID で更新すると 400 とエラーメッセージが返ること
+
+#### CP7-7 〔動作確認〕画面での最終確認と完了報告
+
+Claude Code がバックエンドとフロントエンドを起動し、全テストの結果を報告して待機します。ブラウザで `http://localhost:3000/transactions` を開き、次の操作を確認してください。
+
+- 新規登録 → 「編集」で金額やカテゴリを変更して保存 → 一覧と「総収入・総支出・現在の残高」が更新後の内容に連動すること
+- 編集した明細を「削除」すると、一覧とサマリーから消えること
+- Claude Code の報告で、`./gradlew test` と `pnpm vitest run` の全テストがパスしていること
+
+確認が終わったら、Claude Code に「起動中のサーバーをすべて停止して」と指示します。
 
 ---
 
-## 7-4. フルスタック動作確認とハンズオンのまとめ
-
-### 1. ブラウザでの最終確認
-
-すべてのサーバーを起動し、`http://localhost:3000/transactions` にアクセスします。
-
-1. Docker で PostgreSQL 18 が起動していること（`docker compose ps`）
-2. バックエンドが起動していること（`cd backend && ./gradlew bootRun`）
-3. フロントエンドが起動していること（`cd frontend && pnpm dev`）
-
-ブラウザ上で「新規登録 → 金額やカテゴリの編集（更新） → 削除」の一連の操作を行い、画面上の明細一覧と「総収入・総支出・現在の残高」サマリーが正しく連動することを確かめてください。
-
-### 2. 全テストスイートの実行確認
-
-最後に、バックエンドとフロントエンドのすべての自動テストがパスすることを確認します。
-
-```bash
-cd backend && ./gradlew test
-cd ../frontend && pnpm vitest run
-```
-
-### 3. ハンズオン全体のまとめ
+## 7-4. ハンズオンのまとめ
 
 本ハンズオンでは、シンプル家計簿アプリの構築を通じて以下の設計原則と開発ワークフローを実践しました。
 

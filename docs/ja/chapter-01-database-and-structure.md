@@ -209,7 +209,7 @@ frontend/
 
 ---
 
-## 4. Claude Code で進める際のチェックポイント
+## 4. Claude Code で進める際の確認事項
 
 この構成をベースに、次の Chapter 2 で Claude Code 用の設計ルールファイル（`CLAUDE.md` および `.claude/rules/`）を作成します。
 

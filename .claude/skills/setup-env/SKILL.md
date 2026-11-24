@@ -6,17 +6,19 @@ disable-model-invocation: true
 
 # Budget App 環境構築手順
 
-ユーザーから `/setup-env` で呼び出された場合、すべてのコマンドはプロジェクトルート（`budget-app-handson`）を基準に上から順に実行し、各ステップの完了を確認しながら開発環境を構築してください。
+ユーザーから `/setup-env` で呼び出された場合、すべてのコマンドはプロジェクトルート（`budget-app-handson`）を基準に実行し、以下のチェックポイント（CP）を順に進めて開発環境を構築してください。
 
-## 事前確認
+CLAUDE.md の「チェックポイント運用」に従い、1つの CP を終えるたびに結果を報告して停止し、ユーザーが「次のチェックポイントに進む」と入力するまで次の CP に着手しないこと。最初は CP2-1 だけを実施する。
+
+## CP2-1 〔設計〕事前確認
 1. 現在の作業ディレクトリがプロジェクトのルート（`budget-app-handson`）であることを確認する。
 2. `docker --version`（Rancher Desktop の dockerd）、`java -version`（Java 25 必須）、`node -v`（v26）、`pnpm -v`（v11）が利用可能か確認する。Java が 25 でない場合や前提ツールが未インストールの場合は中断し、ユーザーに「2-0 / 2-1 の前提ツール導入」を案内する。
 3. 使用するポート（PostgreSQL: 5432、Spring Boot: 8080、Next.js: 3000）が他のプロセスに使われていないか `lsof -nP -iTCP:<ポート> -sTCP:LISTEN` で確認する。
-   - 5432 を占有しているのが、このプロジェクト自身のコンテナ `budget-app-db`（`docker ps` で確認）である場合は、再実行とみなして中断せず Step 1 へ進む。
+   - 5432 を占有しているのが、このプロジェクト自身のコンテナ `budget-app-db`（`docker ps` で確認）である場合は、再実行とみなして中断せず、結果を報告して CP2-2 の指示を待つ。
    - それ以外でいずれかのポートがすでに使用されている場合は、既存のプロセスやコンテナを勝手に終了・削除せず、占有しているプロセス情報（PID・コマンド名・ポート番号）をユーザーに報告して処理を中断する。
    - ユーザー自身で該当プロセスを停止した後に、再度 `/setup-env` を実行するよう案内する。
 
-## Step 1: PostgreSQL 18 の構築と起動
+## CP2-2 〔実装・動作確認〕PostgreSQL 18 の構築と起動
 1. ルートディレクトリ直下に `compose.yaml` を以下の内容で作成する。
 
 ```yaml
@@ -45,7 +47,7 @@ volumes:
 2. `docker compose up -d` を実行する。
 3. `docker compose ps` を実行し、`budget-app-db` の状態が `healthy` になるまで待機・確認する。
 
-## Step 2: バックエンド（Spring Boot 4 / Kotlin）のセットアップ
+## CP2-3 〔実装・動作確認〕バックエンド（Spring Boot 4 / Kotlin）のセットアップ
 1. ルートディレクトリで以下のコマンドを実行し、`backend` ディレクトリを生成する（Spring Initializr から最新の Spring Boot 4.x を取得する）。
 
 ```bash
@@ -120,7 +122,7 @@ docker compose exec -T db psql -U budget_user -d budget_db -c "\dt"
 docker compose exec -T db psql -U budget_user -d budget_db -c "SELECT * FROM categories;"
 ```
 
-## Step 3: フロントエンド（Next.js 16 / pnpm 11）のセットアップ
+## CP2-4 〔実装・動作確認〕フロントエンド（Next.js 16 / pnpm 11）のセットアップ
 1. ルートディレクトリの `mise.toml` に `node = "26"` と `pnpm = "11"` が定義されていることを確認する。
 2. 非対話オプションを指定してルートディレクトリ直下に `frontend` プロジェクトを生成する。
 
@@ -157,8 +159,8 @@ mkdir -p frontend/src/components/ui \
 
 5. `pnpm --dir frontend build` を実行し、Next.js のビルドがエラーなく完了することを確認する。
 
-## Step 4: 完了報告
-すべてのステップが完了したら、以下の項目を確認結果とともにユーザーへ報告する。
+## CP2-5 〔動作確認〕完了報告
+すべての CP が完了したら、以下の項目を確認結果とともにユーザーへ報告する。
 - Docker コンテナ `budget-app-db` の稼働状況
 - Spring Boot プロジェクトの生成と `categories` / `transactions` テーブルおよび初期マスタデータの作成結果
 - Next.js プロジェクトの生成とディレクトリ構成・ビルド完了結果

@@ -1,42 +1,129 @@
-# Chapter 4: バックエンドのテスト実装（単体テスト・統合テスト・アーキテクチャテスト）
+# Chapter 4: Backend Testing (Unit Tests, Integration Tests, Architecture Tests)
 
-## このチャプターの目的
+## Purpose of This Chapter
 
-Chapter 3 で実装したバックエンドの各層に対して、性質の異なる4種類の自動テストを Claude Code（AI）に実装させます。
+For each layer of the backend implemented in Chapter 3, you have Claude Code (the AI) implement four kinds of automated tests, each with a different nature.
 
-クリーンアーキテクチャを採用する利点は、ビジネスロジックと外部技術を分離したことで、データベースや Web サーバーを起動せずに高速かつ網羅的なテストを書ける点にあります。また、アーキテクチャテストを導入することで、今後の機能追加や AI によるコード生成時にも依存性ルール違反を自動で検知できる状態を作ります。
+One benefit of Clean Architecture is that, because business logic is separated from external technology, you can write fast and thorough tests without starting a database or a web server. Introducing architecture tests also means that Dependency Rule violations are detected automatically when features are added later or when an AI generates code.
 
-1. 4-1. ドメイン層の単体テスト（JUnit 5）：値オブジェクト、エンティティの不変条件、集計ロジックの検証
-2. 4-2. ユースケース層の単体テスト（JUnit 5 + MockK）：Output Port をモック化した業務フロー検証
-3. 4-3. コントローラー層の統合テスト（MockMvc）：HTTP ステータス、リクエストバリデーション、例外ハンドリングの検証
-4. 4-4. アーキテクチャテスト（Konsist）：4層の依存方向（外側から内側への一方向）と層の飛び越え禁止の自動検証
-5. 4-5. 全テストの実行と AI によるテストレビュー
+The checkpoints are divided by test type, and the last ones confirm that the tests actually detect violations.
+
+| CP | Kind | Content |
+| :--- | :--- | :--- |
+| CP4-1 | Design | Have the test design (targets, types, test cases) presented, and approve it |
+| CP4-2 | Test | Unit tests for `domain` (JUnit 5): value objects, entities, aggregation |
+| CP4-3 | Test | Unit tests for `usecase` (JUnit 5 + MockK): mock the Output Ports |
+| CP4-4 | Test | Integration tests for `adapter.controller` (MockMvc): HTTP, validation, exception handling |
+| CP4-5 | Test | Architecture tests (Konsist): dependency direction and no layer skipping |
+| CP4-6 | Verification | Confirm that the architecture tests actually detect violations |
+| CP4-7 | Verification | Run all tests and review the tests |
+
+## How to Work Through This Chapter
+
+In this chapter you work through the checkpoints (CPs) in the table above **one at a time**. After finishing each CP, Claude Code reports the result, stops, and waits for the next instruction (this is defined in the "Checkpoint operation" section of `CLAUDE.md`).
+
+1. Start Claude Code and enter the "Start prompt" below. Claude Code performs only the first CP and stops.
+2. Compare the report with the "Points to check" of each CP to verify the result.
+3. If there are no problems, type "Proceed to the next checkpoint". Claude Code performs just the next CP.
+4. If there is a problem, do not move on. Instead, instruct it as in "Redo CPx-y. XX is wrong" and have it fixed within that CP.
+
+### Start Prompt
+
+Enter the following in the Claude Code chat box and run it. Claude Code performs only CP4-1 and stops.
+
+```text
+We will now work through Chapter 4 (backend testing) in the following 7 checkpoints (CPs).
+Following the "Checkpoint operation" section of CLAUDE.md, perform only CP4-1 first, report, and stop.
+After that, perform only one CP at a time, each time I type "Proceed to the next checkpoint".
+Follow .claude/rules/backend.md when implementing the tests.
+
+[CP4-1 Design] Do not create any test code or files. Present the backend test design as a table.
+1. The test targets (layers and classes), the test types and tools (JUnit 5 / MockK / MockMvc / Konsist), and the list of cases to verify
+2. Which tests can run without starting a database or a web server
+3. What is verified as error cases and boundary values
+
+[CP4-2 Test] Implement unit tests for layer 1 (domain) in 3 files using JUnit 5.
+1. backend/src/test/kotlin/com/example/budgetapp/domain/model/AmountTest.kt
+   - It can be created with a positive integer of 1 yen or more
+   - DomainException is thrown when 0 yen or a negative integer is given
+2. backend/src/test/kotlin/com/example/budgetapp/domain/model/TransactionTest.kt
+   - It can be created with valid input, and isIncome() and isExpense() return the correct result according to the category type
+   - DomainException is thrown when the title is an empty string, whitespace only, or 101 characters or more
+3. backend/src/test/kotlin/com/example/budgetapp/domain/model/BalanceSummaryTest.kt
+   - Total income, total expense, and balance are calculated correctly from a list of transactions mixing income and expense
+   - All values are 0 when the list of transactions is empty
+Completion condition: cd backend && ./gradlew test --tests 'com.example.budgetapp.domain.*' succeeds, and the number of executed tests is reported.
+
+[CP4-3 Test] Using MockK, implement unit tests for the use case layer (Interactor). Do not start the Spring context; mock the Repository interfaces with mockk.
+1. backend/src/test/kotlin/com/example/budgetapp/usecase/interactor/CreateTransactionInteractorTest.kt
+   - When an existing category ID is given, the transaction is saved and returned
+   - When a non-existent category ID is given, DomainException is thrown and save is not called
+2. backend/src/test/kotlin/com/example/budgetapp/usecase/interactor/DeleteTransactionInteractorTest.kt
+   - When an existing transaction ID is given, deleteById is called once
+   - When a non-existent transaction ID is given, DomainException is thrown and deleteById is not called
+Completion condition: cd backend && ./gradlew test --tests 'com.example.budgetapp.usecase.*' succeeds, and the number of executed tests is reported.
+
+[CP4-4 Test] Using @WebMvcTest and MockMvc, implement integration tests for TransactionController.
+To support Spring Boot 4, use org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest for @WebMvcTest, and register the UseCase interfaces as beans with MockK's mockk() in a @TestConfiguration.
+File: backend/src/test/kotlin/com/example/budgetapp/adapter/controller/TransactionControllerTest.kt
+Test cases:
+1. GET /api/transactions returns 200 OK with the transaction list and summary JSON
+2. POST /api/transactions with valid JSON returns 201 Created and the JSON of the registered transaction
+3. POST /api/transactions with amount=0 or an empty title causes a validation error and returns 400 Bad Request with the unified error JSON (message, details)
+4. POST /api/transactions with malformed JSON (for example, a transactionDate that cannot be parsed as a date) returns 400 Bad Request with the unified error JSON (message) through GlobalExceptionHandler
+5. When the UseCase throws DomainException for DELETE /api/transactions/999, GlobalExceptionHandler returns 400 Bad Request with the error message
+Completion condition: cd backend && ./gradlew test --tests 'com.example.budgetapp.adapter.*' succeeds, and the number of executed tests is reported.
+
+[CP4-5 Test] Using Konsist, implement architecture tests that verify the Clean Architecture dependency rules.
+File: backend/src/test/kotlin/com/example/budgetapp/architecture/ArchitectureTest.kt
+Rules to verify:
+1. Using assertArchitecture, the dependencies among the 4 layers (Domain, UseCase, Adapter, Framework) point only from the outside to the inside (domain.dependsOnNothing(), usecase.dependsOn(domain), usecase.doesNotDependOn(adapter, framework), adapter.dependsOn(domain, usecase), adapter.doesNotDependOn(framework), framework.dependsOn(domain, usecase, adapter))
+2. Files in the domain package do not import org.springframework.* or jakarta.persistence.*
+3. Files in the usecase package do not import jakarta.persistence.*
+4. Files in the adapter.controller package do not directly import usecase.output.* or adapter.repository.* (no layer skipping)
+Completion condition: cd backend && ./gradlew cleanTest test --tests '*ArchitectureTest' succeeds.
+
+[CP4-6 Verification] Confirm that the architecture tests actually detect violations.
+1. Temporarily add import com.example.budgetapp.usecase.output.CategoryRepository right after the package declaration in domain/model/Category.kt, and confirm that cd backend && ./gradlew cleanTest test --tests '*ArchitectureTest' fails.
+2. After reverting step 1, temporarily add import com.example.budgetapp.adapter.repository.CategoryRepositoryImpl to usecase/output/CategoryRepository.kt, and confirm that the same command fails.
+3. Revert all the added imports, and confirm that the same command succeeds.
+Also report, from the test output at the time of failure, which rule detected the violation.
+
+[CP4-7 Verification] Run cd backend && ./gradlew cleanTest test, and confirm that all unit tests, integration tests, and Konsist architecture tests pass.
+Also review the currently implemented test code for missing verification of boundary values and error cases.
+```
 
 ---
 
-## 4-1. ドメイン層の単体テスト（JUnit 5）の実装
+## CP4-1 [Design] Presenting and Approving the Test Design
 
-第1層（`domain`）は外部ライブラリを一切使っていない純粋な Kotlin クラスで構成されているため、モックすら不要でそのままインスタンス化してテストできます。
+Before any test code is written, have Claude Code lay out what is verified in which layer and with which tool. The purpose is to check that an appropriate testing approach has been chosen for each layer.
 
-### Claude Code への指示プロンプト
+Claude Code creates no files in this CP.
 
-Claude Code のチャット欄に以下を入力して実行します。
+### Reference Design
 
-```text
-.claude/rules/backend.md に従い、第1層（domain）の単体テストを JUnit 5 で3ファイル実装してください。
+| Layer | Type / Tool | Main things verified | DB / Web server |
+| :--- | :--- | :--- | :--- |
+| `domain` | Unit test (JUnit 5) | Invariants of amount and title, aggregation logic | Not needed |
+| `usecase` | Unit test (JUnit 5 + MockK) | Business flow with the Repository mocked | Not needed |
+| `adapter.controller` | Integration test (MockMvc) | HTTP status, validation, exception handling | Not needed (`@WebMvcTest`) |
+| All layers | Architecture test (Konsist) | Dependency direction, no layer skipping | Not needed |
 
-1. backend/src/test/kotlin/com/example/budgetapp/domain/model/AmountTest.kt
-   - 1円以上の正の整数で正常に生成できること
-   - 0円または負の整数を指定した場合に DomainException がスローされること
-2. backend/src/test/kotlin/com/example/budgetapp/domain/model/TransactionTest.kt
-   - 有効な入力で生成でき、カテゴリの種別に応じて isIncome() と isExpense() が正しく判定されること
-   - タイトルが空文字、空白のみ、または101文字以上の場合に DomainException がスローされること
-3. backend/src/test/kotlin/com/example/budgetapp/domain/model/BalanceSummaryTest.kt
-   - 収入と支出が混在する明細リストから、総収入・総支出・残高が正しく計算されること
-   - 明細が空リストの場合にすべて 0 になること
-```
+### Points to check
 
-### 実装コードと設計のポイント
+- The targets and tools of the four kinds of tests do not differ significantly from the reference above
+- Error cases and boundary values (0 yen, a 101-character title, a non-existent ID, malformed JSON, and so on) are listed
+
+When the checks pass, type "Proceed to the next checkpoint" in Claude Code. (Next: CP4-2)
+
+---
+
+## CP4-2 [Test] Unit Tests for the Domain Layer (JUnit 5)
+
+Layer 1 (`domain`) consists of pure Kotlin classes that use no external libraries, so they can be instantiated and tested as they are, without even a mock.
+
+### Implementation Code and Design Points
 
 #### `AmountTest.kt`
 `backend/src/test/kotlin/com/example/budgetapp/domain/model/AmountTest.kt`
@@ -172,26 +259,21 @@ class BalanceSummaryTest {
 }
 ```
 
+### Points to check
+
+- `AmountTest.kt`, `TransactionTest.kt`, and `BalanceSummaryTest.kt` are created under `domain/model/`
+- Claude Code's report states that the `domain` tests passed and how many tests were run
+- The tests instantiate the classes directly, without using mocks
+
+When the checks pass, type "Proceed to the next checkpoint" in Claude Code. (Next: CP4-3)
+
 ---
 
-## 4-2. ユースケース層の単体テスト（JUnit 5 + MockK）の実装
+## CP4-3 [Test] Unit Tests for the Use Case Layer (JUnit 5 + MockK)
 
-第2層（`usecase`）は Output Port（`TransactionRepository` / `CategoryRepository`）インターフェースのみに依存しています。そのため、PostgreSQL を起動せずに MockK でリポジトリをモック化するだけで、ユースケースの業務フローをミリ秒単位で検証できます。
+Layer 2 (`usecase`) depends only on the Output Port interfaces (`TransactionRepository` / `CategoryRepository`). Because of this, simply mocking the repositories with MockK, without starting PostgreSQL, is enough to verify the business flow of the use cases in milliseconds.
 
-### Claude Code への指示プロンプト
-
-```text
-MockK を使用して、ユースケース層（Interactor）の単体テストを実装してください。Spring コンテキストは起動せず、Repository インターフェースを mockk でモック化してください。
-
-1. backend/src/test/kotlin/com/example/budgetapp/usecase/interactor/CreateTransactionInteractorTest.kt
-   - 存在するカテゴリIDを指定した場合、明細が保存されて返却されること
-   - 存在しないカテゴリIDを指定した場合、DomainException がスローされ save が呼ばれないこと
-2. backend/src/test/kotlin/com/example/budgetapp/usecase/interactor/DeleteTransactionInteractorTest.kt
-   - 存在する明細IDを指定した場合、deleteById が1回呼ばれること
-   - 存在しない明細IDを指定した場合、DomainException がスローされ deleteById が呼ばれないこと
-```
-
-### 実装コードと設計のポイント
+### Implementation Code and Design Points
 
 #### `CreateTransactionInteractorTest.kt`
 `backend/src/test/kotlin/com/example/budgetapp/usecase/interactor/CreateTransactionInteractorTest.kt`
@@ -316,30 +398,23 @@ class DeleteTransactionInteractorTest {
 }
 ```
 
+### Points to check
+
+- `CreateTransactionInteractorTest.kt` and `DeleteTransactionInteractorTest.kt` are created under `usecase/interactor/`
+- The tests verify that `save` / `deleteById` are not called for a non-existent ID (`verify(exactly = 0)`)
+- Claude Code's report states that the `usecase` tests passed and how many tests were run
+
+When the checks pass, type "Proceed to the next checkpoint" in Claude Code. (Next: CP4-4)
+
 ---
 
-## 4-3. コントローラー層の統合テスト（MockMvc）の実装
+## CP4-4 [Test] Integration Tests for the Controller Layer (MockMvc)
 
-第3層（`adapter.controller`）では、HTTP リクエストのデシリアライズ、Bean Validation（`@Valid`）、DTO への変換、および `GlobalExceptionHandler` によるエラーレスポンス整形を MockMvc で検証します。
+In layer 3 (`adapter.controller`), MockMvc verifies HTTP request deserialization, Bean Validation (`@Valid`), conversion to DTOs, and the error response formatting done by `GlobalExceptionHandler`.
 
-Controller は Input Port（`*UseCase`）のみに依存しているため、テスト用の `@TestConfiguration` でユースケースのモックを Bean 登録するだけで Web 層のテストが完結します。
+The Controller depends only on the Input Ports (`*UseCase`), so registering mocks of the use cases as beans in a test `@TestConfiguration` is all that is needed to complete the web layer tests.
 
-### Claude Code への指示プロンプト
-
-```text
-@WebMvcTest と MockMvc を使用して、TransactionController の統合テストを実装してください。
-Spring Boot 4 に対応するため、@WebMvcTest は org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest を使用し、UseCase インターフェースは @TestConfiguration で MockK の mockk() を Bean 登録してください。
-
-ファイル: backend/src/test/kotlin/com/example/budgetapp/adapter/controller/TransactionControllerTest.kt
-検証ケース:
-1. GET /api/transactions で 200 OK と明細一覧・サマリーJSONが返ること
-2. POST /api/transactions に正常なJSONを送ると 201 Created と登録された明細JSONが返ること
-3. POST /api/transactions に amount=0 や空の title を送ると、バリデーションエラーとなり 400 Bad Request と統一エラーJSON（message, details）が返ること
-4. POST /api/transactions に形式不正な JSON（transactionDate が日付として解釈できない等）を送ると、GlobalExceptionHandler により 400 Bad Request と統一エラーJSON（message）が返ること
-5. DELETE /api/transactions/999 で UseCase が DomainException をスローした場合、GlobalExceptionHandler により 400 Bad Request とエラーメッセージが返ること
-```
-
-### 実装コードと設計のポイント
+### Implementation Code and Design Points
 
 `backend/src/test/kotlin/com/example/budgetapp/adapter/controller/TransactionControllerTest.kt`
 
@@ -493,37 +568,32 @@ class TransactionControllerTest {
 }
 ```
 
+### Points to check
+
+- `adapter/controller/TransactionControllerTest.kt` is created and contains the 5 kinds of test cases (list, registration, validation error, malformed JSON, and `DomainException` on delete)
+- `@WebMvcTest` is imported from `org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest` (the location in Spring Boot 4)
+- Claude Code's report states that the `adapter` tests passed and how many tests were run
+
+When the checks pass, type "Proceed to the next checkpoint" in Claude Code. (Next: CP4-5)
+
 ---
 
-## 4-4. アーキテクチャテスト（Konsist）の実装
+## CP4-5 [Test] Architecture Tests (Konsist)
 
-人がレビューで気をつけるだけでなく、Kotlin のアーキテクチャ検証ライブラリである Konsist を使い、クリーンアーキテクチャの依存方向ルールを JUnit のテストとして自動化します。
+Rather than relying only on people being careful during review, you use Konsist, an architecture verification library for Kotlin, to automate the Clean Architecture dependency direction rules as JUnit tests.
 
-JPA Entity と Spring Data JPA Repository を第3層（`adapter.repository`）に配置したことで、自作パッケージ間の依存方向が一方向（外側から内側へのみ依存）になります（外部ライブラリの import は検証対象外です）。
+By placing the JPA Entities and Spring Data JPA Repositories in layer 3 (`adapter.repository`), the dependencies between the project's own packages run in one direction only (from the outside to the inside). Imports of external libraries are not covered by this verification.
 
-1. `domain`（第1層）：どの層にも依存しない（`dependsOnNothing()`）
-2. `usecase`（第2層）：`domain` のみに依存する（`dependsOn(domain)`）
-3. `adapter`（第3層）：`domain` と `usecase` のみに依存し、外側の `framework` には依存しない（`dependsOn(domain, usecase)`）
-4. `framework`（第4層）：内側の層にのみ依存する（`dependsOn(domain, usecase, adapter)`）
+1. `domain` (layer 1): depends on no layer (`dependsOnNothing()`)
+2. `usecase` (layer 2): depends only on `domain` (`dependsOn(domain)`)
+3. `adapter` (layer 3): depends only on `domain` and `usecase`, and not on the outer `framework` (`dependsOn(domain, usecase)`)
+4. `framework` (layer 4): depends only on the inner layers (`dependsOn(domain, usecase, adapter)`)
 
-Konsist の `dependsOn(...)` は「その層が依存してよい（依存している）層」の宣言であり、宣言していない外側の層への依存を禁止するものではありません（`dependsOnNothing()` だけが厳密な禁止になります）。そのため、外側への逆向き依存（`usecase` → `adapter` / `framework`、`adapter` → `framework`）は `doesNotDependOn(...)` で明示的に禁止します。
+Konsist's `dependsOn(...)` declares the layers that a layer may depend on (or does depend on). It does not forbid dependencies on outer layers that are not declared (only `dependsOnNothing()` is a strict prohibition). For this reason, reverse dependencies toward the outside (`usecase` -> `adapter` / `framework`, `adapter` -> `framework`) are explicitly forbidden with `doesNotDependOn(...)`.
 
-さらに個別ルールとして、第1層・第2層のフレームワーク非依存性と、`adapter.controller`（Web 側）から `usecase.output` や `adapter.repository`（DB 側）への層の飛び越え禁止を検証します。
+As individual rules, the tests also verify that layers 1 and 2 are independent of frameworks, and that `adapter.controller` (the web side) does not skip layers to reach `usecase.output` or `adapter.repository` (the DB side).
 
-### Claude Code への指示プロンプト
-
-```text
-Konsist を使用して、クリーンアーキテクチャの依存ルールを検証するアーキテクチャテストを実装してください。
-
-ファイル: backend/src/test/kotlin/com/example/budgetapp/architecture/ArchitectureTest.kt
-検証ルール:
-1. assertArchitecture を使用し、4層（Domain, UseCase, Adapter, Framework）の依存方向が外側から内側へのみ向かっていること（domain.dependsOnNothing(), usecase.dependsOn(domain), usecase.doesNotDependOn(adapter, framework), adapter.dependsOn(domain, usecase), adapter.doesNotDependOn(framework), framework.dependsOn(domain, usecase, adapter)）
-2. domain パッケージのファイルが org.springframework.* および jakarta.persistence.* を import していないこと
-3. usecase パッケージのファイルが jakarta.persistence.* を import していないこと
-4. adapter.controller パッケージのファイルが usecase.output.* および adapter.repository.* を直接 import していないこと（層の飛び越え禁止）
-```
-
-### 実装コードと設計のポイント
+### Implementation Code and Design Points
 
 `backend/src/test/kotlin/com/example/budgetapp/architecture/ArchitectureTest.kt`
 
@@ -597,19 +667,40 @@ class ArchitectureTest {
 }
 ```
 
+### Points to check
+
+- `architecture/ArchitectureTest.kt` is created and includes the prohibition of reverse dependencies with `doesNotDependOn`
+- `./gradlew cleanTest test --tests '*ArchitectureTest'` succeeds
+
+When the checks pass, type "Proceed to the next checkpoint" in Claude Code. (Next: CP4-6)
+
 ---
 
-## 4-5. 全テストの実行と AI によるテストレビュー
+## CP4-6 [Verification] Confirming That the Architecture Tests Actually Detect Violations
 
-すべてのテストコードが揃ったら、Claude Code にテスト実行と不足ケースのレビューを依頼します。
+A test can be trusted only after you confirm not just that it passes but also that it does not miss violations. Here you deliberately add an `import` that violates the dependency direction, confirm that the test fails, and then revert it.
 
-### Claude Code への指示プロンプト
+`./gradlew test` is not re-run and is reported as `UP-TO-DATE` when its inputs have not changed, so it is run with `cleanTest` every time (the hook in Chapter 7 uses `cleanTest` for the same reason).
 
-```text
-cd backend && ./gradlew test を実行し、すべての単体テスト・統合テスト・Konsist アーキテクチャテストがパスすることを確認してください。
-あわせて、現在実装されているテストコードに境界値や異常系の検証漏れがないかレビューしてください。
-```
+### Points to check
 
-`BUILD SUCCESSFUL` と表示され、全テストがパスすればバックエンドの実装とテストは完了です。
+- The test fails when a `domain` -> `usecase` dependency (from the inside to the outside) is added
+- The test fails when a `usecase` -> `adapter` dependency (forbidden with `doesNotDependOn`) is added
+- All the added `import` lines are reverted and the test passes again (no diff remains in the source, as checked with `git diff` or similar)
 
-次の Chapter 5 では、フロントエンド（Next.js 16 / TypeScript）において、同じくクリーンアーキテクチャの4層構造と依存性逆転の原則を取り入れた実装を進めます。
+When the checks pass, type "Proceed to the next checkpoint" in Claude Code. (Next: CP4-7)
+
+---
+
+## CP4-7 [Verification] Running All Tests and Reviewing the Tests
+
+Once all the test code is in place, ask Claude Code to run all the tests and to review them for missing cases.
+
+### Points to check
+
+- `./gradlew cleanTest test` ends with `BUILD SUCCESSFUL` and all tests pass
+- Read the proposals for additional cases raised in the review and choose the ones you need (they are not implemented automatically)
+
+When all tests pass, the backend implementation and tests are complete.
+
+In the next chapter, Chapter 5, you implement the frontend (Next.js 16 / TypeScript) in the same way, adopting the four-layer structure of Clean Architecture and the Dependency Inversion Principle.

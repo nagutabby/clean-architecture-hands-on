@@ -141,6 +141,10 @@ AI コーディングエージェント（Claude Code）を使って開発を進
 3. Agent Skills と Hooks による機能追加の演習（Chapter 7）
    ユースケース追加の手順を `.claude/skills/add-usecase/SKILL.md` に定義し、ファイル編集時に自動検証を実行する `PostToolUse` フック（`.claude/settings.json`）の設定例を組み合わせて機能追加を試します。
 
+### チェックポイント方式での進行
+
+Chapter 2 以降の Claude Code への指示は、作業を「チェックポイント（CP）」に分けて進めます。CP は「設計 → 実装 → テスト → 動作確認」の種別を持ち、Claude Code は CP を1つ終えるたびに結果を報告して停止します。人は結果を確認し、「次のチェックポイントに進む」と入力して次の CP へ進めます。この運用ルールは `CLAUDE.md` の「チェックポイント運用」に記載します（Chapter 2）。
+
 ---
 
 ## 6. チャプター構成一覧
