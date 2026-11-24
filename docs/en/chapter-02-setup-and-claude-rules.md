@@ -266,7 +266,7 @@ pnpm create next-app@latest frontend \
 
    `create-next-app` generates `frontend/.git`, so, only when you generated it, delete it with `rm -rf frontend/.git` to allow the monorepo to be managed as a whole from the root.
 
-3. Check `devDependencies` in `frontend/package.json` and add only the packages that are not installed yet (do not run `add` again for installed packages, which could change their versions). Keep the current directory at the root and run the following.
+3. If `frontend/node_modules` does not exist, first install the dependencies with `pnpm --dir frontend install` (this covers the state right after switching branches, where only `package.json` exists). Then check `devDependencies` in `frontend/package.json` and add only the packages that are not installed yet (do not run `add` again for installed packages, which could change their versions). Keep the current directory at the root and run the following.
 
 ```bash
 pnpm --dir frontend add -D vitest @vitejs/plugin-react jsdom @testing-library/react @testing-library/dom @testing-library/jest-dom msw

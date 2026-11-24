@@ -266,7 +266,7 @@ pnpm create next-app@latest frontend \
 
    `create-next-app` は `frontend/.git` を生成するため、モノレポのルートで一括管理できるよう、生成した場合に限り `rm -rf frontend/.git` で削除する。
 
-3. `frontend/package.json` の `devDependencies` を確認し、未導入のパッケージだけを追加する（導入済みのパッケージを再度 `add` して、バージョンを更新しない）。カレントディレクトリはルートに保ったまま、以下を実行する。
+3. `frontend/node_modules` が存在しない場合は、先に `pnpm --dir frontend install` で依存パッケージをインストールする（ブランチ切り替え直後など、`package.json` だけがある状態に対応する）。続いて、`frontend/package.json` の `devDependencies` を確認し、未導入のパッケージだけを追加する（導入済みのパッケージを再度 `add` して、バージョンを更新しない）。カレントディレクトリはルートに保ったまま、以下を実行する。
 
 ```bash
 pnpm --dir frontend add -D vitest @vitejs/plugin-react jsdom @testing-library/react @testing-library/dom @testing-library/jest-dom msw
