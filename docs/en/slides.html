@@ -167,7 +167,7 @@
     <line x1="1094" y1="260" x2="1176" y2="260" stroke="#000" stroke-width="4" marker-end="url(#a1)"/>
   </svg>
   <div class="note" style="margin-top:12px"><ul class="pts" style="font-size:26px"><li>Each chapter has a start prompt, sample code and check points</li></ul></div>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- 4. What we build -->
@@ -199,7 +199,7 @@
     <div class="card"><h3>API</h3><code class="i">GET /api/categories</code><br><code class="i">GET / POST /api/transactions</code><br><code class="i">PUT / DELETE /api/transactions/{id}</code></div>
     <div class="card"><h3>Business rules</h3>Amount is an integer of 1 or more<br>Title is required, 100 characters max<br>Balance = total income − total expenses</div>
   </div>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <section class="slide" data-title="Spring Boot philosophy">
@@ -212,7 +212,7 @@
     <div class="card " style="font-size:26px"><h3>Externalized config</h3>Connection settings live in <code class="i">application.yml</code> instead of the code</div>
   </div>
   <div class="note " style="margin-top:24px;font-size:28px">Spring's DI container "passes implementations in from outside", which fits the Dependency Inversion Principle of Clean Architecture</div>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <section class="slide" data-title="Spring Boot annotations">
@@ -228,8 +228,7 @@
     <tr><td><code class="i">@Component</code> <code class="i">@Repository</code></td><td>Register a bean with @Component, and mark a Spring Data JPA repository with @Repository</td><td class="n"><span class="pill l3">adapter</span><br>RepositoryImpl と JpaRepository</td></tr>
     <tr><td><code class="i">@Entity</code> <code class="i">@Table</code> <code class="i">@Id</code> and more</td><td>Map a class to a table and fields to columns</td><td class="n"><span class="pill l3">adapter</span><br>JPA Entity</td></tr>
   </table>
-  <div class="note" style="margin-top:16px;font-size:26px"><ul class="pts"><li>No Spring annotation goes on domain classes</li><li>Annotations are dependencies on the framework, so they stay in usecase, adapter and framework</li></ul></div>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <section class="slide" data-title="Next.js philosophy">
@@ -241,7 +240,7 @@
     <div class="card " style="font-size:26px"><h3><code class="i">'use client'</code> is the boundary</h3><ul class="pts"><li>Adding <code class="i">'use client'</code> at the top makes that file and its imports run in the browser</li><li>Hooks and onClick work only there</li></ul></div>
   </div>
   <div class="note " style="margin-top:24px;font-size:28px"><ul class="pts"><li>Next.js decides how screens are delivered</li><li>It is not the place for business rules</li></ul></div>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <section class="slide" data-title="React Hooks">
@@ -257,7 +256,7 @@
     <tr><td class="n">Custom hook</td><td>A function that combines hooks and is given a name</td><td>useTransactions bundles the screen state and operations</td></tr>
   </table>
   <div class="note" style="margin-top:16px;font-size:26px"><ul class="pts"><li>Hooks work only in Client Components</li><li>useTransactions sits in the usecase layer and knows only the TransactionRepository interface, not fetch</li></ul></div>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- 6. Why CA -->
@@ -284,7 +283,7 @@
     <text x="1310" y="344" text-anchor="middle" font-size="30" font-weight="800">Things that change often</text>
     <text x="1310" y="394" text-anchor="middle" font-size="27">DB, UI, frameworks</text>
   </svg>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- 7. Concentric circles -->
@@ -315,7 +314,7 @@
       <div class="note" style="margin-top:22px">The frontend <code class="i">adapter</code> for API calls and <code class="i">presentation</code> for UI both connect the inside to the outside, so both are Layer 3</div>
     </div>
   </div>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <section class="slide" data-title="Layer 1 Entities">
@@ -329,7 +328,7 @@
     <tr><td class="n">In this app</td><td>Amount at least 1 yen, title required and up to 100 characters, balance = income − expense</td><td>Validates form input with the same business rules</td></tr>
   </table>
   <div class="note " style="margin-top:16px;font-size:26px">Tests are plain unit tests with no mocks, using JUnit 5 / Vitest, and finish in milliseconds</div>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <section class="slide" data-title="Layer 2 Use Cases">
@@ -343,7 +342,7 @@
     <tr><td class="n">In this app</td><td><code class="i">CreateTransactionInteractor</code>: load category → create <code class="i">Transaction</code> → <code class="i">save</code></td><td>State handling and refetch for load, create and delete</td></tr>
   </table>
   <div class="note " style="margin-top:16px;font-size:26px"><ul class="pts"><li>Practical exceptions: Interactors use Spring's @Service / @Transactional and hooks use React state APIs</li><li>External I/O stays out of this layer</li></ul></div>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <section class="slide" data-title="Layer 3 Adapters">
@@ -357,7 +356,7 @@
     <tr><td class="n">In this app</td><td><code class="i">TransactionRepositoryImpl</code> converts between JPA Entity and <code class="i">Transaction</code> and implements the usecase interface</td><td><code class="i">transactionApi</code> implements <code class="i">TransactionRepository</code> with fetch</td></tr>
   </table>
   <div class="note " style="margin-top:16px;font-size:26px">In the frontend, API communication in adapter and UI in presentation both belong to layer 3</div>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <section class="slide" data-title="Layer 4 Frameworks">
@@ -371,7 +370,7 @@
     <tr><td class="n">In this app</td><td><code class="i">CorsConfig</code> allows calls from <code class="i">localhost:3000</code></td><td><code class="i">page.tsx</code> just places <code class="i"><TransactionSection/></code></td></tr>
   </table>
   <div class="note " style="margin-top:16px;font-size:26px"><ul class="pts"><li>Treat frameworks as replaceable tools</li><li>Neither Spring Boot nor Next.js goes inside this layer</li></ul></div>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- 8. Dependency Rule -->
@@ -394,7 +393,7 @@
     <div class="card l2"><h3>usecase depends only on domain</h3>Does not reference adapter or framework, except <code class="i">@Service</code> / <code class="i">@Transactional</code> as practical exceptions</div>
     <div class="card l3"><h3>adapter depends only inward</h3>References only domain and usecase, and holds the JPA Entity and Repository implementation</div>
   </div>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- Dependency rule violations -->
@@ -426,7 +425,7 @@
       <ul class="pts" style="font-size:27px"><li>The JPA Entity is a separate class in adapter</li><li>The Controller calls only the usecase entry point, that is, the Input Port</li></ul>
     </div>
   </div>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- 9. DIP -->
@@ -471,7 +470,7 @@
     <div class="note ok" style="font-size:27px">Benefit 1&emsp;Interactor tests only swap the Repository for MockK, no DB needed</div>
     <div class="note ok" style="font-size:27px">Benefit 2&emsp;Changing the storage only means swapping <code class="i">RepositoryImpl</code></div>
   </div>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- Data crossing boundaries -->
@@ -487,7 +486,7 @@
     <tr><td>Controller → HTTP</td><td><code class="i">TransactionItemResponse</code> converted by <code class="i">fromDomain()</code></td><td><span class="pill l3">adapter</span></td></tr>
   </table>
   <div class="note" style="margin-top:22px">DTOs and JPA Entities never enter the inside, so API or table changes do not reach domain</div>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- 10. Backend structure + DB -->
@@ -512,7 +511,7 @@
 └ <span class="l4">framework/</span>
    └ config/ CorsConfig</pre>
   </div>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- Request flow and error handling -->
@@ -532,7 +531,7 @@
       <div class="card l3"><h3>Conversion to HTTP</h3>adapter's <code class="i">GlobalExceptionHandler</code> turns validation errors and <code class="i">DomainException</code> into 400 with a message</div>
     </div>
   </div>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <section class="slide" data-title="Spring layers vs Clean Architecture">
@@ -546,7 +545,7 @@
     <tr><td class="n">Testing</td><td>Tends to need a DB or slice tests</td><td>Interactor is verified with MockK only</td></tr>
   </table>
   <div class="note " style="margin-top:18px;font-size:26px"><ul class="pts"><li>Spring Boot features such as DI, JPA and MVC are used in adapter and framework</li><li>domain and usecase stay free of Spring concerns</li></ul></div>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- 11. Frontend structure -->
@@ -576,7 +575,7 @@
       <div class="card l2"><h3>The usecase hook</h3><code class="i">useTransactions</code> does not import <code class="i">adapter</code> and goes through the <code class="i">TransactionRepository</code> interface</div>
     </div>
   </div>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <section class="slide" data-title="Next.js app is layer 4">
@@ -590,7 +589,7 @@
     <tr><td class="n">State hooks</td><td><span class="pill l2">usecase</span></td><td><code class="i">useTransactions</code> communicates through an interface</td></tr>
   </table>
   <div class="note " style="margin-top:18px;font-size:26px">A Server Component cannot pass objects containing functions to a Client Component, so injection happens in the client-side TransactionSection</div>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <section class="slide" data-title="Frontend layers and dependencies">
@@ -605,7 +604,7 @@
     <tr><td class="n"><span class="pill l1">L1</span></td><td>domain/</td><td>nothing</td><td>Types and input validation</td></tr>
   </table>
   <div class="note ng" style="margin-top:18px;font-size:26px">Unlike the backend, frontend dependency rules are not checked by an architecture test, so we rely on reviews and tsc</div>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <section class="slide" data-title="Data flow in React">
@@ -620,7 +619,7 @@
     <tr><td class="n">5</td><td><span class="pill l3">presentation</span></td><td><code class="i">TransactionList</code> and <code class="i">BalanceSummaryCard</code> re-render</td></tr>
   </table>
   <div class="note " style="margin-top:18px;font-size:26px">UI parts only receive state and callbacks and know nothing about how communication works</div>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- 12. Guardrails -->
@@ -651,7 +650,7 @@
     <text x="1067" y="270" text-anchor="middle" font-size="22" fill="#7048e8" font-weight="700">Shows steps</text>
     <text x="1504" y="270" text-anchor="middle" font-size="22" fill="#7048e8" font-weight="700">Verifies and enforces</text>
   </svg>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <section class="slide" data-title="Problems without layers">
@@ -672,7 +671,7 @@
 }</pre></div>
 <div><div class="note ng" style="font-size:27px"><ul class="pts" style="font-size:27px"><li>The amount rule lives in the Controller and is rewritten for the update API</li><li>Changing a DB column forces a Controller change</li><li>Tests need Spring and a DB, so they run slowly</li><li>The class grows with each feature and its impact is unreadable</li></ul></div></div>
   </div>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <section class="slide" data-title="Case 1 Changing storage">
@@ -697,7 +696,7 @@
     <tr><td class="n"><span class="pill l4">framework</span></td><td>Connection settings only</td></tr>
   </table></div>
   </div>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
   <div class="note " style="margin-top:18px;font-size:27px">The Interactor only knows TransactionRepository, so the same code runs on PostgreSQL or memory</div>
 </section>
 
@@ -717,7 +716,7 @@
 }</pre></div>
 <div><div class="note ok" style="font-size:27px"><ul class="pts" style="font-size:27px"><li>Interactor, Controller and JPA Entity stay unchanged</li><li>The new rule applies on every path that creates <code class="i">Transaction</code> or <code class="i">Amount</code></li><li>Only domain tests such as <code class="i">AmountTest</code> need updating</li></ul></div></div>
   </div>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
   <div class="note ng" style="margin-top:18px;font-size:26px">Note: adapter input validation with <code class="i">@Positive</code> checks format; domain is the last line of defense for business rules</div>
 </section>
 
@@ -747,7 +746,7 @@ verify(exactly = 0) { transactionRepository.save(any()) }</pre></div>
 
 <span class="c">// In tests MSW answers fetch</span></pre></div>
   </div>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
   <div class="note ok" style="margin-top:18px;font-size:27px">We can check that an unknown category throws and save is never called, without starting Spring or a DB</div>
 </section>
 
@@ -763,7 +762,7 @@ verify(exactly = 0) { transactionRepository.save(any()) }</pre></div>
     <tr><td class="n">Catch AI violations</td><td>Konsist architecture tests</td><td>4 ArchitectureTests and the hook</td></tr>
   </table>
   <div class="note " style="margin-top:18px;font-size:27px"><ul class="pts"><li>The cost is more layers and files</li><li>The payoff grows with change frequency, lifespan and team size</li></ul></div>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <section class="slide" data-title="Implementation overview">
@@ -777,7 +776,7 @@ verify(exactly = 0) { transactionRepository.save(any()) }</pre></div>
     <tr><td class="n"><span class="pill l4">framework</span></td><td>Spring DI wires it in BudgetappApplication</td><td>app/transactions/page.tsx</td></tr>
   </table>
   <div class="note " style="margin-top:18px;font-size:27px"><ul class="pts"><li>Order: domain → usecase → adapter → framework</li><li>Inner files are complete without knowing outer files</li></ul></div>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <section class="slide" data-title="Example domain and usecase">
@@ -806,7 +805,7 @@ verify(exactly = 0) { transactionRepository.save(any()) }</pre></div>
   }
 }</pre></div>
   </div>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
   <div class="note " style="margin-top:18px;font-size:26px">The Interactor imports only interfaces and domain; Spring annotations such as @Service are excluded</div>
 </section>
 
@@ -832,7 +831,7 @@ verify(exactly = 0) { transactionRepository.save(any()) }</pre></div>
   }
 }</pre></div>
   </div>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
   <div class="note " style="margin-top:18px;font-size:26px">The Controller holds only the UseCase interface, and RepositoryImpl converts types with toEntity / toDomain</div>
 </section>
 
@@ -863,7 +862,7 @@ verify(exactly = 0) { transactionRepository.save(any()) }</pre></div>
 <span class="c">// presentation/TransactionSection.tsx: wiring</span>
 repository = transactionApi</pre></div>
   </div>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
   <div class="note " style="margin-top:18px;font-size:26px"><ul class="pts"><li>useTransactions knows nothing about fetch and transactionApi knows nothing about React</li><li>Only the default argument in TransactionSection joins them</li></ul></div>
 </section>
 
@@ -879,7 +878,7 @@ repository = transactionApi</pre></div>
     <tr><td class="n">Formatting "¥1,000"</td><td><span class="pill l3">presentation</span></td><td>Concern of the screen</td></tr>
     <tr><td class="n">CORS and startup settings</td><td><span class="pill l4">framework</span></td><td>Framework configuration</td></tr>
   </table>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- 14. Ch3 points -->
@@ -917,7 +916,7 @@ repository = transactionApi</pre></div>
       <div class="note ng" style="margin-top:18px;font-size:26px">Bad example&emsp;Putting <code class="i">@Entity</code> or <code class="i">@Component</code> on domain makes Layer 1 depend on external technology</div>
     </div>
   </div>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- 16. Ch4 four test kinds -->
@@ -946,7 +945,7 @@ repository = transactionApi</pre></div>
       <tr><td class="n"><span class="pill l4">arch</span></td><td>Scans source <code class="i">import</code>s and detects Dependency Rule violations</td></tr>
     </table>
   </div>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- 17. Konsist -->
@@ -964,7 +963,7 @@ framework.dependsOn(domain, usecase, adapter)</pre>
       <div class="note ng" style="font-size:32px;margin-top:20px"><ul class="pts" style="font-size:32px"><li><code class="i">dependsOn</code> declares allowed layers and does not forbid other layers</li><li>Only <code class="i">dependsOnNothing</code> and <code class="i">doesNotDependOn</code> can forbid</li></ul></div>
     </div>
   </div>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- 19. Frontend DIP -->
@@ -993,7 +992,7 @@ framework.dependsOn(domain, usecase, adapter)</pre>
     <rect x="0" y="450" width="1700" height="80" rx="14" fill="#fff" stroke="#e67700" stroke-width="3"/>
     <text x="30" y="500" font-size="26">Server Components cannot pass functions to Client Components, so <tspan font-family="monospace">TransactionSection</tspan> injects by default argument</text>
   </svg>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- 21. Ch6 -->
@@ -1013,7 +1012,7 @@ framework.dependsOn(domain, usecase, adapter)</pre>
     <text x="850" y="230" text-anchor="middle" font-size="27" fill="#000" font-weight="700">Verifies close to real user actions without starting Spring Boot</text>
   </svg>
   <div class="note" style="margin-top:20px;font-size:28px">Verified operations are initial display, create, validation, delete and API error display</div>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- 22. Skills x Hooks -->
@@ -1047,7 +1046,7 @@ framework.dependsOn(domain, usecase, adapter)</pre>
     <line x1="741" y1="318" x2="646" y2="284" stroke="#2f9e44" stroke-width="4" marker-end="url(#a11)"/>
     <line x1="741" y1="362" x2="646" y2="408" stroke="#e67700" stroke-width="4" marker-end="url(#a11r)"/>
   </svg>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- 23. Update feature exercise -->
@@ -1061,7 +1060,7 @@ framework.dependsOn(domain, usecase, adapter)</pre>
     <tr><td class="n"><span class="pill n">frontend</span></td><td><code class="i">updateTransaction</code> in <code class="i">TransactionRepository</code>, <code class="i">useTransactions</code>, an "Edit" button and an edit form</td></tr>
     <tr><td class="n"><span class="pill n">Tests</span></td><td>Interactor with MockK, Controller with MockMvc, MSW PUT handler and integration test</td></tr>
   </table>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- Free exercise -->
@@ -1088,7 +1087,7 @@ framework.dependsOn(domain, usecase, adapter)</pre>
       </table>
     </div>
   </div>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- Presentation -->
@@ -1103,7 +1102,7 @@ framework.dependsOn(domain, usecase, adapter)</pre>
     <tr><td class="n">How you kept the Dependency Rule</td><td>Where the AI nearly broke it and how you fixed it</td></tr>
   </table>
   <div class="note" style="margin-top:22px"><ul class="pts"><li>About 3 to 5 minutes per person</li><li>1 minute to introduce the feature, 2 to 3 minutes for layer placement and the Dependency Rule, 1 minute for questions</li></ul></div>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- Impact of change -->
@@ -1118,7 +1117,7 @@ framework.dependsOn(domain, usecase, adapter)</pre>
     <tr><td>New feature, for example update</td><td>Add usecase → adapter → UI in order</td><td>Existing Interactors</td></tr>
   </table>
   <div class="note" style="margin-top:22px">Because dependencies point inward, inner layers can be tested without knowing outer changes</div>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- Trade-offs -->
@@ -1132,7 +1131,7 @@ framework.dependsOn(domain, usecase, adapter)</pre>
       <ul class="pts" style="font-size:27px"><li>Interactors carry <code class="i">@Service</code> and <code class="i">@Transactional</code>, so usecase depends on Spring</li><li>UseCases return domain models directly</li></ul></div>
   </div>
   <div class="note" style="margin-top:26px"><ul class="pts"><li>Decide by business-rule complexity, lifespan, and team size</li><li>The team decides how much simplification to allow</li></ul></div>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- 26. Summary -->
@@ -1146,7 +1145,7 @@ framework.dependsOn(domain, usecase, adapter)</pre>
     <div class="card l4" style="min-height:340px"><h3>④ Making the AI follow rules</h3>CLAUDE.md, rules, Skills and Hooks drive implementation and verification within the rules</div>
   </div>
   <div class="note" style="margin-top:34px"><ul class="pts"><li>Rules are not only written, tests also detect violations</li><li>Dependency direction violations are detected automatically by Konsist architecture tests</li></ul></div>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- 27. Q&A -->
@@ -1156,7 +1155,7 @@ framework.dependsOn(domain, usecase, adapter)</pre>
     <div class="sub">Share what worked and where you got stuck</div>
     <div class="meta">As a next step, try adding another use case, such as category management or monthly totals, with <code style="font-family:var(--mono)">/add-feature</code></div>
   </div>
-  <div class="foot" style="left:130px;right:130px"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot" style="left:130px;right:130px"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- Appendix -->
@@ -1166,7 +1165,7 @@ framework.dependsOn(domain, usecase, adapter)</pre>
     <div class="sub">Checkpoint workflow</div>
     <div class="meta">Workflow, app state per checkpoint, and the Chapter 3 and 5 checkpoint tables</div>
   </div>
-  <div class="foot" style="left:130px;right:130px"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot" style="left:130px;right:130px"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- Checkpoint workflow -->
@@ -1195,7 +1194,7 @@ framework.dependsOn(domain, usecase, adapter)</pre>
     <tr><td class="n">Test</td><td>Adds and runs tests, checks for rule violations</td><td>Number of tests run and passed</td></tr>
     <tr><td class="n">Verification</td><td>Starts the server and checks APIs and screens per feature</td><td>Expected values and display</td></tr>
   </table>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- State per checkpoint, backend -->
@@ -1212,7 +1211,7 @@ framework.dependsOn(domain, usecase, adapter)</pre>
     <tr><td class="n"><span class="tag t-test" style="margin:0;font-size:24px;padding:0 14px">CP4-2~4</span></td><td>16 tests for domain, usecase, Controller</td><td>Business rules checked in milliseconds, no DB</td></tr>
     <tr><td class="n"><span class="tag t-test" style="margin:0;font-size:24px;padding:0 14px">CP4-5~7</span></td><td>4 Konsist architecture tests</td><td>20 tests pass, dependency violations caught automatically</td></tr>
   </table>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- State per checkpoint, frontend -->
@@ -1228,7 +1227,7 @@ framework.dependsOn(domain, usecase, adapter)</pre>
     <tr><td class="n"><span class="tag t-ai" style="margin:0;font-size:24px;padding:0 14px">CP7-2~3</span></td><td>Update API using PUT and its tests</td><td>Hook catches dependency violations, all backend tests pass</td></tr>
     <tr><td class="n"><span class="tag t-ai" style="margin:0;font-size:24px;padding:0 14px">CP7-4~7</span></td><td>Edit UI and its tests</td><td>Create, edit, delete work on screen, all tests pass</td></tr>
   </table>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- 13. Ch3 flow -->
@@ -1244,7 +1243,7 @@ framework.dependsOn(domain, usecase, adapter)</pre>
     <tr><td class="n">CP3-7〜10</td><td>Self-review, compileKotlin, curl checks</td><td>Each API works</td></tr>
   </table>
   <div class="note " style="margin-top:20px;font-size:28px">The AI runs one CP and stops → you check → "next checkpoint"</div>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- 18. Ch5 flow -->
@@ -1261,7 +1260,7 @@ framework.dependsOn(domain, usecase, adapter)</pre>
     <tr><td class="n">CP5-8 <span class="pill l4">app</span></td><td>page.tsx</td><td>Build succeeds</td></tr>
   </table>
 
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 </div>

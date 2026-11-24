@@ -167,7 +167,7 @@
     <line x1="1094" y1="260" x2="1176" y2="260" stroke="#000" stroke-width="4" marker-end="url(#a1)"/>
   </svg>
   <div class="note" style="margin-top:12px"><ul class="pts" style="font-size:26px"><li>各章に開始プロンプト、実装コード例、確認ポイントがある</li></ul></div>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- 4. 作るもの -->
@@ -199,7 +199,7 @@
     <div class="card"><h3>API</h3><code class="i">GET /api/categories</code><br><code class="i">GET・POST /api/transactions</code><br><code class="i">PUT・DELETE /api/transactions/{id}</code></div>
     <div class="card"><h3>業務ルール</h3>金額は 1 円以上の整数<br>タイトルは必須・100 文字以内<br>残高 ＝ 総収入 − 総支出</div>
   </div>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <section class="slide" data-title="Spring Boot の思想">
@@ -212,7 +212,7 @@
     <div class="card " style="font-size:26px"><h3>外部化設定</h3>接続先などは <code class="i">application.yml</code> に出し、コードに埋め込まない</div>
   </div>
   <div class="note " style="margin-top:24px;font-size:28px">Spring の DI コンテナは「実装を外から渡す」仕組みなので、クリーンアーキテクチャの依存性逆転 DIP と相性が良い</div>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <section class="slide" data-title="Spring Boot のアノテーション">
@@ -228,8 +228,7 @@
     <tr><td><code class="i">@Component</code> <code class="i">@Repository</code></td><td>Bean として登録する @Component と、Spring Data JPA のリポジトリを示す @Repository</td><td class="n"><span class="pill l3">adapter</span><br>RepositoryImpl と JpaRepository</td></tr>
     <tr><td><code class="i">@Entity</code> <code class="i">@Table</code> <code class="i">@Id</code> ほか</td><td>クラスとテーブル、フィールドと列を対応づける</td><td class="n"><span class="pill l3">adapter</span><br>JPA Entity</td></tr>
   </table>
-  <div class="note" style="margin-top:16px;font-size:26px"><ul class="pts"><li>domain には Spring のアノテーションを付けない</li><li>アノテーションは内側から外側への依存なので、付ける層を adapter・framework・usecase に絞る</li></ul></div>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <section class="slide" data-title="Next.js の思想">
@@ -241,7 +240,7 @@
     <div class="card " style="font-size:26px"><h3><code class="i">'use client'</code> が境界</h3><ul class="pts"><li>ファイル先頭に <code class="i">'use client'</code> を書くと、そのファイルから先がブラウザで動く</li><li>フックや onClick はここでのみ使える</li></ul></div>
   </div>
   <div class="note " style="margin-top:24px;font-size:28px">Next.js は「画面をどう配信するか」を決めるフレームワークで、業務ルールを置く場所ではない</div>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <section class="slide" data-title="React Hooks">
@@ -257,7 +256,7 @@
     <tr><td class="n">カスタムフック</td><td>フックを組み合わせて、名前を付けて切り出した関数</td><td>useTransactions が画面の状態と操作をまとめる</td></tr>
   </table>
   <div class="note" style="margin-top:16px;font-size:26px"><ul class="pts"><li>フックは Client Component でのみ使える</li><li>useTransactions は usecase 層に置き、fetch を知らず TransactionRepository の interface だけを使う</li></ul></div>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- 6. なぜCA -->
@@ -284,7 +283,7 @@
     <text x="1310" y="344" text-anchor="middle" font-size="30" font-weight="800">変わりやすいもの</text>
     <text x="1310" y="394" text-anchor="middle" font-size="27">DB・画面・フレームワーク</text>
   </svg>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- 7. 同心円 -->
@@ -315,7 +314,7 @@
       <div class="note" style="margin-top:22px">フロントエンドの <code class="i">adapter</code> の API 通信と <code class="i">presentation</code> の UI は、どちらも内側と外部をつなぐため、同じ第 3 層になる</div>
     </div>
   </div>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <section class="slide" data-title="第1層 Entities">
@@ -329,7 +328,7 @@
     <tr><td class="n">このアプリの例</td><td>金額は 1 円以上、タイトルは必須で 100 文字以内、残高 ＝ 総収入 − 総支出</td><td>登録フォームの入力を同じ業務ルールで検証</td></tr>
   </table>
   <div class="note " style="margin-top:16px;font-size:26px">テストは JUnit 5 / Vitest によるモック不要の単体テストで、ミリ秒単位で終わる</div>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <section class="slide" data-title="第2層 Use Cases">
@@ -343,7 +342,7 @@
     <tr><td class="n">このアプリの例</td><td><code class="i">CreateTransactionInteractor</code>：カテゴリ取得 → <code class="i">Transaction</code> 生成 → <code class="i">save</code></td><td>取得・登録・削除の状態管理と再取得</td></tr>
   </table>
   <div class="note " style="margin-top:16px;font-size:26px"><ul class="pts"><li>実用上の例外：Interactor は Spring の @Service / @Transactional、フックは React の状態 API を使う</li><li>外部の入出力はこの層に入れない</li></ul></div>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <section class="slide" data-title="第3層 Adapters">
@@ -357,7 +356,7 @@
     <tr><td class="n">このアプリの例</td><td><code class="i">TransactionRepositoryImpl</code> が JPA Entity と <code class="i">Transaction</code> を変換し、usecase の interface を実装</td><td><code class="i">transactionApi</code> が fetch で <code class="i">TransactionRepository</code> を実装</td></tr>
   </table>
   <div class="note " style="margin-top:16px;font-size:26px">フロントエンドでは、API 通信の adapter と UI の presentation の 2 つが、どちらも第 3 層に入る</div>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <section class="slide" data-title="第4層 Frameworks">
@@ -371,7 +370,7 @@
     <tr><td class="n">このアプリの例</td><td><code class="i">CorsConfig</code> が <code class="i">localhost:3000</code> からの呼び出しを許可</td><td><code class="i">page.tsx</code> は <code class="i"><TransactionSection/></code> を置くだけ</td></tr>
   </table>
   <div class="note " style="margin-top:16px;font-size:26px"><ul class="pts"><li>フレームワークは交換可能な道具として扱う</li><li>Spring Boot も Next.js も、この層より内側には入れない</li></ul></div>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- 8. 依存性ルール -->
@@ -394,7 +393,7 @@
     <div class="card l2"><h3>usecase は domain のみ</h3>adapter・framework を参照しない、ただし <code class="i">@Service</code> / <code class="i">@Transactional</code> は実用上の例外</div>
     <div class="card l3"><h3>adapter は内側のみ</h3>domain と usecase だけを参照し、JPA Entity と Repository 実装もここに置く</div>
   </div>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- 依存性ルール違反の例 -->
@@ -426,7 +425,7 @@
       <ul class="pts" style="font-size:27px"><li>JPA Entity は adapter に別クラスで置く</li><li>Controller は usecase の入口、つまり Input Port だけを呼ぶ</li></ul>
     </div>
   </div>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- 9. DIP -->
@@ -471,7 +470,7 @@
     <div class="note ok" style="font-size:27px">利点 1　Interactor のテストは Repository を MockK に差し替えるだけで済み、DB が不要</div>
     <div class="note ok" style="font-size:27px">利点 2　保存先を変えても <code class="i">RepositoryImpl</code> の差し替えだけで済む</div>
   </div>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- 境界を越えるデータ -->
@@ -487,7 +486,7 @@
     <tr><td>Controller → HTTP</td><td><code class="i">TransactionItemResponse</code>、<code class="i">fromDomain()</code> で変換</td><td><span class="pill l3">adapter</span></td></tr>
   </table>
   <div class="note" style="margin-top:22px">DTO や JPA Entity を内側へ持ち込まないので、API 形式やテーブル構造の変更が domain に及ばない</div>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- 10. バックエンド構成 + DB -->
@@ -512,7 +511,7 @@
 └ <span class="l4">framework/</span>
    └ config/ CorsConfig</pre>
   </div>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- リクエストの流れとエラー処理 -->
@@ -532,7 +531,7 @@
       <div class="card l3"><h3>HTTP への変換</h3>adapter の <code class="i">GlobalExceptionHandler</code> が、検証エラーと <code class="i">DomainException</code> を 400 とエラーメッセージに変換する</div>
     </div>
   </div>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <section class="slide" data-title="Spring の標準 3 層との違い">
@@ -546,7 +545,7 @@
     <tr><td class="n">テスト</td><td>DB かスライステストが必要になりやすい</td><td>Interactor は MockK だけで検証</td></tr>
   </table>
   <div class="note " style="margin-top:18px;font-size:26px">Spring Boot の DI・JPA・MVC の機能は adapter と framework で使い、domain と usecase は Spring の都合を持ち込まない</div>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- 11. フロント構成 -->
@@ -576,7 +575,7 @@
       <div class="card l2"><h3>usecase のフック</h3><code class="i">useTransactions</code> は <code class="i">adapter</code> を import せず、<code class="i">TransactionRepository</code> interface 経由で通信する</div>
     </div>
   </div>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <section class="slide" data-title="Next.js の app は第4層">
@@ -590,7 +589,7 @@
     <tr><td class="n">状態管理のフック</td><td><span class="pill l2">usecase</span></td><td><code class="i">useTransactions</code> が interface 経由で通信する</td></tr>
   </table>
   <div class="note " style="margin-top:18px;font-size:26px"><ul class="pts"><li>Server Component は関数を含むオブジェクトを Client Component に渡せない</li><li>そのため、依存は Client 側の TransactionSection で注入する</li></ul></div>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <section class="slide" data-title="フロントエンドの層と依存">
@@ -605,7 +604,7 @@
     <tr><td class="n"><span class="pill l1">第1層</span></td><td>domain/</td><td>なし</td><td>型と入力検証</td></tr>
   </table>
   <div class="note ng" style="margin-top:18px;font-size:26px">Backend と違い、フロントエンドの依存ルールはアーキテクチャテストで自動検査していない、CP ごとの目視確認と tsc に頼る</div>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <section class="slide" data-title="React のデータの流れ">
@@ -620,7 +619,7 @@
     <tr><td class="n">5</td><td><span class="pill l3">presentation</span></td><td><code class="i">TransactionList</code> と <code class="i">BalanceSummaryCard</code> が再描画される</td></tr>
   </table>
   <div class="note " style="margin-top:18px;font-size:26px">画面部品は state とコールバックを受け取るだけで、通信の方法を知らない</div>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- 12. ガードレール -->
@@ -651,7 +650,7 @@
     <text x="1067" y="270" text-anchor="middle" font-size="22" fill="#7048e8" font-weight="700">手順を示す</text>
     <text x="1504" y="270" text-anchor="middle" font-size="22" fill="#7048e8" font-weight="700">検証して遵守させる</text>
   </svg>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <section class="slide" data-title="層がない場合の問題">
@@ -672,7 +671,7 @@
 }</pre></div>
 <div><div class="note ng" style="font-size:27px"><ul class="pts" style="font-size:27px"><li>金額のルールが Controller にあり、更新 API でも同じ判定を書き直す</li><li>DB の列を変えると、Controller まで直す必要がある</li><li>テストに Spring と DB が必要で、実行が遅い</li><li>機能が増えるほどクラスが肥大化し、影響範囲が読めなくなる</li></ul></div></div>
   </div>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <section class="slide" data-title="場面1 保存先の変更">
@@ -697,7 +696,7 @@
     <tr><td class="n"><span class="pill l4">framework</span></td><td>接続設定のみ</td></tr>
   </table></div>
   </div>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
   <div class="note " style="margin-top:18px;font-size:27px">Interactor は TransactionRepository しか知らないため、保存先が PostgreSQL でもメモリでも同じコードで動く</div>
 </section>
 
@@ -717,7 +716,7 @@
 }</pre></div>
 <div><div class="note ok" style="font-size:27px"><ul class="pts" style="font-size:27px"><li>Interactor・Controller・JPA Entity は変更しない</li><li><code class="i">Transaction</code> 生成と <code class="i">Amount</code> 生成のどの経路でも新ルールが効く</li><li>修正するテストは <code class="i">AmountTest</code> などの domain テストだけ</li></ul></div></div>
   </div>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
   <div class="note ng" style="margin-top:18px;font-size:26px">注意：adapter の入力検証 <code class="i">@Positive</code> は形式のチェックで、業務ルールを最後に守るのは domain</div>
 </section>
 
@@ -747,7 +746,7 @@ verify(exactly = 0) { transactionRepository.save(any()) }</pre></div>
 
 <span class="c">// テストでは MSW が fetch を受ける</span></pre></div>
   </div>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
   <div class="note ok" style="margin-top:18px;font-size:27px">存在しないカテゴリでは例外になり、save が呼ばれないことを、Spring・DB を起動せずに確認できる</div>
 </section>
 
@@ -763,7 +762,7 @@ verify(exactly = 0) { transactionRepository.save(any()) }</pre></div>
     <tr><td class="n">AI の規約違反を検出できる</td><td>Konsist アーキテクチャテスト</td><td>ArchitectureTest 4 件・フック</td></tr>
   </table>
   <div class="note " style="margin-top:18px;font-size:27px"><ul class="pts"><li>コストは、層とファイルが増えること</li><li>変更が多い・長く使う・チームで開発するアプリほど、見返りが大きい</li></ul></div>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <section class="slide" data-title="実装の全体像">
@@ -777,7 +776,7 @@ verify(exactly = 0) { transactionRepository.save(any()) }</pre></div>
     <tr><td class="n"><span class="pill l4">framework</span></td><td>BudgetappApplication で Spring の DI が配線</td><td>app/transactions/page.tsx</td></tr>
   </table>
   <div class="note " style="margin-top:18px;font-size:27px"><ul class="pts"><li>実装は domain → usecase → adapter → framework の順に進める</li><li>内側のファイルは外側のファイルを知らないまま完成する</li></ul></div>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <section class="slide" data-title="実装例 domain と usecase">
@@ -806,7 +805,7 @@ verify(exactly = 0) { transactionRepository.save(any()) }</pre></div>
   }
 }</pre></div>
   </div>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
   <div class="note " style="margin-top:18px;font-size:26px">Interactor は interface と domain だけを import する、ただし @Service などの Spring 注釈は除く</div>
 </section>
 
@@ -832,7 +831,7 @@ verify(exactly = 0) { transactionRepository.save(any()) }</pre></div>
   }
 }</pre></div>
   </div>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
   <div class="note " style="margin-top:18px;font-size:26px">Controller は UseCase の interface だけを持ち、RepositoryImpl は toEntity / toDomain で型を変換する</div>
 </section>
 
@@ -863,7 +862,7 @@ verify(exactly = 0) { transactionRepository.save(any()) }</pre></div>
 <span class="c">// presentation/TransactionSection.tsx: 組み立て</span>
 repository = transactionApi</pre></div>
   </div>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
   <div class="note " style="margin-top:18px;font-size:26px"><ul class="pts"><li>useTransactions は fetch を知らず、transactionApi は React を知らない</li><li>両者をつなぐのは TransactionSection の既定引数だけ</li></ul></div>
 </section>
 
@@ -879,7 +878,7 @@ repository = transactionApi</pre></div>
     <tr><td class="n">「¥1,000」の表示整形</td><td><span class="pill l3">presentation</span></td><td>画面表示の都合</td></tr>
     <tr><td class="n">CORS・起動設定</td><td><span class="pill l4">framework</span></td><td>フレームワークの設定</td></tr>
   </table>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- 14. Ch3 ポイント -->
@@ -917,7 +916,7 @@ repository = transactionApi</pre></div>
       <div class="note ng" style="margin-top:18px;font-size:26px">NG 例　domain に <code class="i">@Entity</code> や <code class="i">@Component</code> を付けると、第 1 層が外部技術に依存してしまう</div>
     </div>
   </div>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- 16. Ch4 テスト4種 -->
@@ -946,7 +945,7 @@ repository = transactionApi</pre></div>
       <tr><td class="n"><span class="pill l4">arch</span></td><td>ソースの <code class="i">import</code> を調べ、依存ルール違反を検出</td></tr>
     </table>
   </div>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- 17. Konsist -->
@@ -964,7 +963,7 @@ framework.dependsOn(domain, usecase, adapter)</pre>
       <div class="note ng" style="font-size:32px;margin-top:20px"><ul class="pts" style="font-size:32px"><li><code class="i">dependsOn</code> は依存してよい層の宣言で、宣言外の層への依存は禁止しない</li><li>禁止できるのは <code class="i">dependsOnNothing</code> と <code class="i">doesNotDependOn</code> だけ</li></ul></div>
     </div>
   </div>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- 19. フロントDIP -->
@@ -993,7 +992,7 @@ framework.dependsOn(domain, usecase, adapter)</pre>
     <rect x="0" y="450" width="1700" height="80" rx="14" fill="#fff" stroke="#e67700" stroke-width="3"/>
     <text x="30" y="500" font-size="26">Server Component は関数を含むオブジェクトを Client Component に渡せないため、注入は <tspan font-family="monospace">TransactionSection</tspan> の既定引数で行う</text>
   </svg>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- 21. Ch6 -->
@@ -1013,7 +1012,7 @@ framework.dependsOn(domain, usecase, adapter)</pre>
     <text x="850" y="230" text-anchor="middle" font-size="27" fill="#000" font-weight="700">Spring Boot を起動せずに、実際のユーザー操作に近い形で検証</text>
   </svg>
   <div class="note" style="margin-top:20px;font-size:28px">検証する操作は、初期表示・登録・バリデーション・削除・API エラー表示</div>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- 22. Skills x Hooks -->
@@ -1047,7 +1046,7 @@ framework.dependsOn(domain, usecase, adapter)</pre>
     <line x1="741" y1="318" x2="646" y2="284" stroke="#2f9e44" stroke-width="4" marker-end="url(#a11)"/>
     <line x1="741" y1="362" x2="646" y2="408" stroke="#e67700" stroke-width="4" marker-end="url(#a11r)"/>
   </svg>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- 23. 更新機能演習 -->
@@ -1061,7 +1060,7 @@ framework.dependsOn(domain, usecase, adapter)</pre>
     <tr><td class="n"><span class="pill n">frontend</span></td><td><code class="i">TransactionRepository</code> に <code class="i">updateTransaction</code>、<code class="i">useTransactions</code>、「編集」ボタンと編集フォーム</td></tr>
     <tr><td class="n"><span class="pill n">テスト</span></td><td>Interactor は MockK、Controller は MockMvc、MSW の PUT ハンドラーと結合テスト</td></tr>
   </table>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- 自由演習 -->
@@ -1088,7 +1087,7 @@ framework.dependsOn(domain, usecase, adapter)</pre>
       </table>
     </div>
   </div>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- 発表 -->
@@ -1103,7 +1102,7 @@ framework.dependsOn(domain, usecase, adapter)</pre>
     <tr><td class="n">依存ルールをどう守ったか</td><td>AI が違反しかけた点と、その直し方</td></tr>
   </table>
   <div class="note" style="margin-top:22px">時間の目安は 1 人あたり 3〜5 分で、作ったものの紹介に 1 分、層の置き方と依存ルールの説明に 2〜3 分、質問に 1 分を使う</div>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- 変更の影響範囲 -->
@@ -1118,7 +1117,7 @@ framework.dependsOn(domain, usecase, adapter)</pre>
     <tr><td>機能追加、例えば明細の更新</td><td>usecase → adapter → UI の順に追加</td><td>既存の Interactor</td></tr>
   </table>
   <div class="note" style="margin-top:22px">依存の向きを守っているので、内側の層は外側の変更を知らずにテストできる</div>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- トレードオフ -->
@@ -1132,7 +1131,7 @@ framework.dependsOn(domain, usecase, adapter)</pre>
       <ul class="pts" style="font-size:27px"><li>Interactor に <code class="i">@Service</code> と <code class="i">@Transactional</code> を付け、usecase が Spring に依存する</li><li>UseCase の戻り値に domain モデルをそのまま使う</li></ul></div>
   </div>
   <div class="note" style="margin-top:26px"><ul class="pts"><li>採用するかは、業務ルールの複雑さ・寿命・チーム規模で判断する</li><li>簡略化をどこまで許すかはチームで決める</li></ul></div>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- 26. まとめ -->
@@ -1146,7 +1145,7 @@ framework.dependsOn(domain, usecase, adapter)</pre>
     <div class="card l4" style="min-height:340px"><h3>④ AI に規約を守らせる仕組み</h3>CLAUDE.md・rules・Skills・Hooks で、AI に規約を守らせながら実装と検証を進める</div>
   </div>
   <div class="note" style="margin-top:34px"><ul class="pts"><li>ルールは書くだけでなく、テストで検出させる</li><li>依存方向の違反は、Konsist のアーキテクチャテストで自動的に検出する</li></ul></div>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- 27. Q&A -->
@@ -1156,7 +1155,7 @@ framework.dependsOn(domain, usecase, adapter)</pre>
     <div class="sub">うまくいった点と詰まった点の共有</div>
     <div class="meta">次のステップとして、カテゴリ管理・月別集計など別のユースケースの追加を <code style="font-family:var(--mono)">/add-feature</code> で試す</div>
   </div>
-  <div class="foot" style="left:130px;right:130px"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot" style="left:130px;right:130px"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- Appendix -->
@@ -1166,7 +1165,7 @@ framework.dependsOn(domain, usecase, adapter)</pre>
     <div class="sub">チェックポイント運用</div>
     <div class="meta">進め方・各 CP の状態・Chapter 3 と 5 の進行表</div>
   </div>
-  <div class="foot" style="left:130px;right:130px"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot" style="left:130px;right:130px"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- チェックポイント運用 -->
@@ -1195,7 +1194,7 @@ framework.dependsOn(domain, usecase, adapter)</pre>
     <tr><td class="n">テスト</td><td>テストを追加して実行し、ルール違反を検査する</td><td>実行件数と、すべて成功したか</td></tr>
     <tr><td class="n">動作確認</td><td>サーバーを起動し、機能ごとに API・画面を確認</td><td>期待する値・表示になること</td></tr>
   </table>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- チェックポイントごとの状態、バックエンド -->
@@ -1212,7 +1211,7 @@ framework.dependsOn(domain, usecase, adapter)</pre>
     <tr><td class="n"><span class="tag t-test" style="margin:0;font-size:24px;padding:0 14px">CP4-2〜4</span></td><td>domain・usecase・Controller のテスト 16 件</td><td>DB を使わず、ミリ秒単位で業務ルールを検証できる</td></tr>
     <tr><td class="n"><span class="tag t-test" style="margin:0;font-size:24px;padding:0 14px">CP4-5〜7</span></td><td>Konsist のアーキテクチャテスト 4 件</td><td>計 20 件が通過し、依存方向の違反を自動で検出できる</td></tr>
   </table>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- チェックポイントごとの状態、フロントエンド・拡張 -->
@@ -1228,7 +1227,7 @@ framework.dependsOn(domain, usecase, adapter)</pre>
     <tr><td class="n"><span class="tag t-ai" style="margin:0;font-size:24px;padding:0 14px">CP7-2〜3</span></td><td>PUT の更新 API とそのテスト</td><td>フックが依存違反を自動検出し、バックエンドの全テストが通る</td></tr>
     <tr><td class="n"><span class="tag t-ai" style="margin:0;font-size:24px;padding:0 14px">CP7-4〜7</span></td><td>編集 UI とそのテスト</td><td>画面で登録 → 編集 → 削除ができ、全テストが通る</td></tr>
   </table>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- 13. Ch3 進行 -->
@@ -1244,7 +1243,7 @@ framework.dependsOn(domain, usecase, adapter)</pre>
     <tr><td class="n">CP3-7〜10</td><td>自己レビュー・compileKotlin・curl 疎通</td><td>機能ごとに API が動く</td></tr>
   </table>
   <div class="note " style="margin-top:20px;font-size:28px">AI が CP を 1 つ実施して停止 → 確認 →「次のチェックポイントに進む」</div>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 <!-- 18. Ch5 進行 -->
@@ -1261,7 +1260,7 @@ framework.dependsOn(domain, usecase, adapter)</pre>
     <tr><td class="n">CP5-8 <span class="pill l4">app</span></td><td>page.tsx</td><td>ビルドが成功する</td></tr>
   </table>
 
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+  <div class="foot"><span></span><span class="pn"></span></div>
 </section>
 
 </div>
