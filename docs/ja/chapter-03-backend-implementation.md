@@ -1,29 +1,29 @@
-# Chapter 3: バックエンド実装（Spring Boot / Kotlin）
+# Chapter 3: Spring Boot / Kotlin によるバックエンド実装
 
 ## このチャプターの目的
 
-Chapter 2 で作成した `CLAUDE.md` と `.claude/rules/backend.md` を前提として、Claude Code（AI）にバックエンドの4層を実装させます。
+Chapter 2 で作成した `CLAUDE.md` と `.claude/rules/backend.md` を前提として、AI の Claude Code にバックエンドの4層を実装させます。
 
-クリーンアーキテクチャの依存性ルールを体感するため、最も中心にある第1層（Entities）から最外層の第4層（Frameworks & Drivers）まで、内側から外側へ向かって順番に段階実装を進めます。各チェックポイントでは、Claude Code への指示と、AI が生成すべき実装コードおよび設計上のポイントを記載しています。
+クリーンアーキテクチャの依存性ルールを体感するため、最も内側の第1層の Entities から最も外側の第4層の Frameworks & Drivers まで、内側から順に実装します。各チェックポイントには、Claude Code への指示、AI が生成するはずの実装コード、設計上のポイントを載せています。
 
-内側の層から外側の層へ向かって順番に実装し、その後に機能ごとの動作確認を行います。
+内側の層から順に実装し、そのあとで機能ごとに動作確認します。
 
 | CP | 種別 | 内容 |
 | :--- | :--- | :--- |
-| CP3-1 | 設計 | バックエンドの設計案（クラス一覧・依存方向・API 仕様）を提示させ、承認する |
+| CP3-1 | 設計 | クラス一覧・依存方向・API 仕様を含むバックエンドの設計案を提示させ、承認する |
 | CP3-2 | 実装 | 第1層 `domain`：値オブジェクト・エンティティ・集計ロジック |
 | CP3-3 | 実装 | 第2層 `usecase`：Output Port・Input Port・Interactor |
-| CP3-4 | 実装 | 第3層 `adapter`（DB 側）：JPA Entity・JPA Repository・Repository 実装 |
-| CP3-5 | 実装 | 第3層 `adapter`（Web 側）：DTO・Controller・例外ハンドラー |
+| CP3-4 | 実装 | 第3層 `adapter` の DB 側：JPA Entity・JPA Repository・Repository 実装 |
+| CP3-5 | 実装 | 第3層 `adapter` の Web 側：DTO・Controller・例外ハンドラー |
 | CP3-6 | 実装 | 第4層 `framework`：CORS 設定 |
 | CP3-7 | テスト | 依存方向ルールの検査とコンパイル確認 |
-| CP3-8 | 動作確認 | サーバー起動、カテゴリ一覧・明細一覧（空の状態） |
-| CP3-9 | 動作確認 | 明細の登録、一覧・集計への反映、入力エラー（400） |
+| CP3-8 | 動作確認 | サーバー起動、カテゴリ一覧、空の状態の明細一覧 |
+| CP3-9 | 動作確認 | 明細の登録、一覧・集計への反映、入力エラー時の 400 |
 | CP3-10 | 動作確認 | 明細の削除、存在しない ID の削除、サーバー停止 |
 
 ## このチャプターの進め方
 
-このチャプターは、上の表のチェックポイント（CP）を **1つずつ** 進めます。Claude Code は CP を1つ終えるたびに結果を報告して停止し、次の指示を待ちます（`CLAUDE.md` の「チェックポイント運用」で定義済みです）。
+このチャプターは、上の表のチェックポイントである CP を **1つずつ** 進めます。Claude Code は CP を1つ終えるたびに結果を報告して停止し、次の指示を待ちます。この動きは `CLAUDE.md` の「チェックポイント運用」で定められています。
 
 1. Claude Code を起動し、下の「開始プロンプト」を入力します。Claude Code は最初の CP だけを実施して停止します。
 2. 報告内容と、各 CP の「確認ポイント」を照らし合わせて結果を確認します。
@@ -122,9 +122,9 @@ DB のテーブルは backend/src/main/resources/db/migration/V1__create_tables.
 
 ## CP3-1 〔設計〕バックエンドの設計案の提示と承認
 
-コードを書く前に、Claude Code に設計案だけを出させます。クリーンアーキテクチャでは、どの層にどのクラスを置き、誰が誰に依存するかを先に決めておくことで、後続の実装で層の飛び越えが起きにくくなります。
+コードを書く前に、Claude Code に設計案だけを出させます。クリーンアーキテクチャでは、どの層にどのクラスを置き、誰が誰に依存するかを先に決めておくと、後続の実装で層の飛び越えが起きにくくなります。
 
-Claude Code が作成するファイルはありません。提示された設計案を `.claude/rules/backend.md` と Chapter 1 のディレクトリ構成に照らして確認します。
+Claude Code が作成するファイルはありません。提示された設計案が `.claude/rules/backend.md` と Chapter 1 のディレクトリ構成に合っているか確認します。
 
 ### 設計案の目安
 
@@ -133,25 +133,25 @@ Claude Code が作成するファイルはありません。提示された設�
 | 層 | クラス数 | 内容 |
 | :--- | :--- | :--- |
 | `domain` | 6 | `DomainException`、`TransactionType`、`Amount`、`Category`、`Transaction`、`BalanceSummary` |
-| `usecase` | 10 | Output Port 2、Input Port 4（Categories 取得・Transactions 取得・Create・Delete）、Interactor 4 |
+| `usecase` | 10 | Output Port 2、Input Port 4 で、内訳は Categories 取得、Transactions 取得、Create、Delete、Interactor 4 |
 | `adapter` | 12 | JPA Entity 2、Spring Data Repository 2、Repository 実装 2、DTO 3、Controller 2、`GlobalExceptionHandler` 1 |
 | `framework` | 1 | `CorsConfig` |
 
-REST API は `GET /api/categories`、`GET /api/transactions`、`POST /api/transactions`（201）、`DELETE /api/transactions/{id}`（204）の4つです。
+REST API は `GET /api/categories`、`GET /api/transactions`、`POST /api/transactions`、`DELETE /api/transactions/{id}` の4つです。POST の成功時は 201、DELETE の成功時は 204 を返します。
 
 ### 確認ポイント
 
-- 依存方向がすべて「外側 → 内側」になっていること（`domain` は何にも依存しない）
-- `TransactionRepository`（Output Port）は `usecase` に置かれ、実装クラスは `adapter` に置かれていること
-- Controller が依存するのは `*UseCase`（Input Port）だけであること
+- 依存方向がすべて「外側 → 内側」になっていること。`domain` は何にも依存しません
+- Output Port である `TransactionRepository` は `usecase` に置かれ、実装クラスは `adapter` に置かれていること
+- Controller が依存するのは Input Port である `*UseCase` だけであること
 
-確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。（次は CP3-2）
+確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。次は CP3-2 です。
 
 ---
 
-## CP3-2 〔実装〕第1層：Entities（`domain` パッケージ）
+## CP3-2 〔実装〕第1層 Entities：`domain` パッケージ
 
-最初に、システムの中核となるドメイン層を実装させます。この層には Spring Framework や JPA の `import` 文を一切含めないことがルールです。
+最初に、システムの中核となるドメイン層を実装させます。この層には Spring Framework や JPA の `import` 文を一切書かないのがルールです。
 
 ### 実装コードと設計のポイント
 
@@ -178,8 +178,8 @@ enum class TransactionType {
 }
 ```
 
-#### `Amount.kt`（値オブジェクト）
-「金額は1円以上の正の整数でなければならない」という業務ルールをプリミティブ型（`Int`）のまま放置せず、値オブジェクトに閉じ込めます。`value class` を使うことで実行時のメモリ負荷なく型安全性を確保できます。
+#### `Amount.kt`：値オブジェクト
+「金額は1円以上の正の整数でなければならない」という業務ルールをプリミティブ型の `Int` のまま放置せず、値オブジェクトに閉じ込めます。`value class` を使うと、実行時のメモリ負荷をかけずに型安全にできます。
 
 `backend/src/main/kotlin/com/example/budgetapp/domain/model/Amount.kt`
 
@@ -211,10 +211,10 @@ data class Category(
 )
 ```
 
-#### `Transaction.kt`（エンティティ）
-データベースのテーブル定義ではなく、アプリケーションの業務概念を表現するモデルです。`categoryId: Long` ではなく `Category` オブジェクトそのものを保持することで、自身が収入か支出かを判定する振る舞い（`isIncome()` / `isExpense()`）を持てます。
+#### `Transaction.kt`：エンティティ
+データベースのテーブル定義ではなく、アプリケーションの業務概念を表現するモデルです。`categoryId: Long` ではなく `Category` オブジェクトそのものを保持することで、自身が収入か支出かを判定する振る舞いとして `isIncome()` / `isExpense()` を持てます。
 
-また、`init` ブロックでタイトルの必須チェックおよび100文字以内の上限チェックを検証することで、どの経路からインスタンスが生成されても不正な状態が存在しない（モデルの不変条件）ことを保証します。
+また、`init` ブロックでタイトルの必須チェックと100文字以内のチェックを行います。これにより、どの経路でインスタンスを生成しても不正な状態にならないこと、つまりモデルの不変条件を保証できます。
 
 `backend/src/main/kotlin/com/example/budgetapp/domain/model/Transaction.kt`
 
@@ -246,7 +246,7 @@ data class Transaction(
 }
 ```
 
-#### `BalanceSummary.kt`（収支集計のドメインモデル）
+#### `BalanceSummary.kt`：収支集計のドメインモデル
 `backend/src/main/kotlin/com/example/budgetapp/domain/model/BalanceSummary.kt`
 
 ```kotlin
@@ -283,19 +283,19 @@ data class BalanceSummary(
 - Claude Code の報告に、`org.springframework` / `jakarta` の import が 0 件だったことと、`compileKotlin` の成功が含まれていること
 - `Amount` が 1 円未満、`Transaction` がタイトルの空文字・101文字以上を `DomainException` で拒否する実装になっていること
 
-確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。（次は CP3-3）
+確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。次は CP3-3 です。
 
 ---
 
-## CP3-3 〔実装〕第2層：Use Cases（`usecase` パッケージ）
+## CP3-3 〔実装〕第2層 Use Cases：`usecase` パッケージ
 
-次に、アプリケーションがユーザーに提供する操作手順（ユースケース）を実装させます。この層は第1層（`domain`）のみを参照し、外側の第3層（`adapter` / JPA）や第4層（`framework`）には一切依存しません。なお、Chapter 0 で説明した通り、本ハンズオンでは実用上のトレードオフとして Spring の `@Service` と `@Transactional` のみをアノテーションとして利用しています。
+次に、アプリケーションがユーザーに提供する操作手順であるユースケースを実装させます。この層は第1層の `domain` のみを参照し、外側の第3層の `adapter` や JPA、第4層の `framework` には一切依存しません。なお、Chapter 0 で説明したとおり、このハンズオンでは実用上のトレードオフとして、アノテーションは Spring の `@Service` と `@Transactional` だけを使います。
 
 ### 実装コードと設計のポイント
 
-#### Output Port（出口の契約インターフェース）
+#### Output Port：出口の契約インターフェース
 
-ユースケースが外部（データベース等）にデータ永続化を依頼するためのインターフェースです。実装クラスは第3層（`adapter.repository`）に配置するため、依存性逆転の原則が成立します。
+ユースケースがデータの保存を外部に依頼するためのインターフェースです。実装クラスは第3層の `adapter.repository` に置くので、依存性逆転の原則が成り立ちます。
 
 `backend/src/main/kotlin/com/example/budgetapp/usecase/output/CategoryRepository.kt`
 
@@ -325,9 +325,9 @@ interface TransactionRepository {
 }
 ```
 
-#### Input Port（入り口の契約インターフェース）
+#### Input Port：入り口の契約インターフェース
 
-外側の Controller がユースケースを呼び出すための契約です。1つの操作につき1つのインターフェースを定義することで、責務の肥大化を防ぎます。
+外側の Controller がユースケースを呼び出すための契約です。1つの操作につき1つのインターフェースを定義すると、責務が肥大化しません。
 
 `backend/src/main/kotlin/com/example/budgetapp/usecase/input/GetCategoriesUseCase.kt`
 
@@ -390,7 +390,7 @@ interface DeleteTransactionUseCase {
 }
 ```
 
-#### Interactor（ユースケースの実装）
+#### Interactor：ユースケースの実装
 
 `backend/src/main/kotlin/com/example/budgetapp/usecase/interactor/GetCategoriesInteractor.kt`
 
@@ -516,21 +516,21 @@ class DeleteTransactionInteractor(
 - `Interactor` が `adapter` のクラスを import しておらず、`*Repository` インターフェースだけに依存していること
 - Claude Code の報告に、`adapter` / `framework` / `jakarta.persistence` の import が 0 件だったことと、`compileKotlin` の成功が含まれていること
 
-確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。（次は CP3-4）
+確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。次は CP3-4 です。
 
 ---
 
-## CP3-4 〔実装〕第3層：Interface Adapters（DB 側 `adapter.repository`）
+## CP3-4 〔実装〕第3層 Interface Adapters：DB 側の `adapter.repository`
 
-続いて、第2層（Use Cases）と外部（DB・HTTP）の間でデータ形式を変換するアダプター層を実装させます。この層は2つのサブパッケージに分かれ、CP3-4 で DB 側、CP3-5 で Web 側を実装します。
+続いて、第2層の Use Cases と、DB・HTTP などの外部との間でデータ形式を変換するアダプター層を実装させます。この層は2つのサブパッケージに分かれ、CP3-4 で DB 側、CP3-5 で Web 側を実装します。
 
-- `adapter.repository`（DB アダプター）：JPA Entity、Spring Data JPA インターフェース、および Output Port を実装する `*RepositoryImpl`
-- `adapter.controller`（Web アダプター）：REST Controller、DTO、および共通例外ハンドラー
+- `adapter.repository`、DB アダプター：JPA Entity、Spring Data JPA インターフェース、および Output Port を実装する `*RepositoryImpl`
+- `adapter.controller`、Web アダプター：REST Controller、DTO、および共通例外ハンドラー
 
 ### 実装コードと設計のポイント
 
-#### JPA Entity（DB テーブルとのマッピング）
-JPA 用のエンティティをドメインモデルと分離することで、RDB のテーブル構造（外部キーの `categoryId: Long` やデフォルト引数コンストラクタの制約）がドメイン層の設計に影響を与えるのを防ぎます。
+#### JPA Entity：DB テーブルとのマッピング
+JPA 用のエンティティをドメインモデルと分離すると、RDB のテーブル構造、例えば外部キーの `categoryId: Long` やデフォルト引数コンストラクタの制約がドメイン層の設計に影響しません。
 
 `backend/src/main/kotlin/com/example/budgetapp/adapter/repository/entity/CategoryJpaEntity.kt`
 
@@ -616,7 +616,7 @@ interface JpaTransactionRepository : JpaRepository<TransactionJpaEntity, Long> {
 }
 ```
 
-#### Repository 実装（DB とドメインモデルの変換）
+#### Repository 実装：DB とドメインモデルの変換
 
 `backend/src/main/kotlin/com/example/budgetapp/adapter/repository/CategoryRepositoryImpl.kt`
 
@@ -728,25 +728,25 @@ class TransactionRepositoryImpl(
 ### 確認ポイント
 
 - `adapter/repository/` 配下に `entity` 2ファイル、`jpa` 2ファイル、`*RepositoryImpl` 2ファイルが作成されていること
-- JPA のアノテーション（`@Entity` など）が `adapter/repository/entity` にだけあり、`domain` のクラスには付いていないこと
+- `@Entity` などの JPA のアノテーションが `adapter/repository/entity` にだけあり、`domain` のクラスには付いていないこと
 - `*RepositoryImpl` が `usecase.output` のインターフェースを実装し、JPA Entity とドメインモデルを相互変換していること
 - Claude Code の報告に `compileKotlin` の成功が含まれていること
 
-確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。（次は CP3-5）
+確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。次は CP3-5 です。
 
 ---
 
-## CP3-5 〔実装〕第3層：Interface Adapters（Web 側 `adapter.controller`）
+## CP3-5 〔実装〕第3層 Interface Adapters：Web 側の `adapter.controller`
 
 DB 側に続いて、HTTP の入出力を担う Web 側を実装させます。Controller は `usecase.input` のインターフェースだけに依存させ、Repository を直接呼び出さないことが重要です。
 
 ### 実装コードと設計のポイント
 
-#### DTO（HTTP リクエスト・レスポンスの型定義）
+#### DTO：HTTP リクエスト・レスポンスの型定義
 
-ドメインモデルを直接 JSON として返却せず、API 専用の DTO に変換することで、API のレスポンス形式変更とドメインロジックの変更を分離します。
+ドメインモデルをそのまま JSON で返さず、API 専用の DTO に変換します。これにより、レスポンス形式の変更とドメインロジックの変更が互いに影響しません。
 
-なお、`TransactionRequest` の `@NotBlank` / `@Size(max = 100)` / `@Positive` は「HTTP リクエスト境界での入力検証」を担い、`Transaction` / `Amount` の検証は「ドメインモデル自身の不変条件の保証」を担うため、両方に検証を記述して責務を分担しています。
+なお、`TransactionRequest` の `@NotBlank` / `@Size(max = 100)` / `@Positive` は「HTTP リクエスト境界での入力検証」、`Transaction` / `Amount` の検証は「ドメインモデル自身の不変条件の保証」と、役割が異なります。そのため両方に検証を書いて、責務を分担しています。
 
 `backend/src/main/kotlin/com/example/budgetapp/adapter/controller/dto/CategoryResponse.kt`
 
@@ -862,7 +862,7 @@ data class TransactionListResponse(
 )
 ```
 
-#### Controller（REST API エンドポイント）
+#### Controller：REST API エンドポイント
 
 `backend/src/main/kotlin/com/example/budgetapp/adapter/controller/CategoryController.kt`
 
@@ -931,7 +931,7 @@ class TransactionController(
 }
 ```
 
-#### GlobalExceptionHandler（例外ハンドリングの共通化）
+#### GlobalExceptionHandler：例外ハンドリングの共通化
 
 `backend/src/main/kotlin/com/example/budgetapp/adapter/controller/advice/GlobalExceptionHandler.kt`
 
@@ -985,13 +985,13 @@ class GlobalExceptionHandler {
 - `GlobalExceptionHandler` が `MethodArgumentNotValidException`、`HttpMessageNotReadableException`、`DomainException` の3種類を処理していること
 - Claude Code の報告に `compileKotlin` の成功が含まれていること
 
-確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。（次は CP3-6）
+確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。次は CP3-6 です。
 
 ---
 
-## CP3-6 〔実装〕第4層：Frameworks & Drivers（`framework` パッケージ）
+## CP3-6 〔実装〕第4層 Frameworks & Drivers：`framework` パッケージ
 
-最外層である第4層（`framework`）には、フロントエンド（`http://localhost:3000`）からの通信を許可するための CORS 設定など、フレームワーク全体の横断設定を配置します。
+最も外側の第4層の `framework` には、`http://localhost:3000` で動くフロントエンドからの通信を許可する CORS 設定など、フレームワーク全体にかかわる設定を置きます。
 
 ### 実装コードと設計のポイント
 
@@ -1022,47 +1022,47 @@ class CorsConfig : WebMvcConfigurer {
 - `framework/config/CorsConfig.kt` のみが作成されていること
 - 許可するオリジンが `http://localhost:3000` で、`/api/**` に限定されていること
 
-確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。（次は CP3-7）
+確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。次は CP3-7 です。
 
 ---
 
 ## CP3-7 〔テスト〕アーキテクチャ規約の検査とコンパイル確認
 
-実装が完了したら、Claude Code にアーキテクチャ規約のセルフレビューとコンパイル確認を実行させます。自動テスト（Konsist）は Chapter 4 で導入するため、ここでは AI による目視レビューに相当する検査です。
+実装が完了したら、Claude Code にアーキテクチャ規約のセルフレビューとコンパイル確認を実行させます。Konsist による自動テストは Chapter 4 で導入します。ここで行うのは、人が目で確認するレビューに相当する検査を AI にさせることです。
 
 ### 確認ポイント
 
 - Claude Code の報告で、4層の依存方向ルールと層の飛び越え禁止ルールの違反が 0 件であること
 - `./gradlew compileKotlin` が成功していること
 
-確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。（次は CP3-8）
+確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。次は CP3-8 です。
 
 ---
 
-## CP3-8 〔動作確認〕サーバー起動、カテゴリ一覧・明細一覧（空の状態）
+## CP3-8 〔動作確認〕サーバー起動、カテゴリ一覧、空の状態の明細一覧
 
-ここからは機能ごとに API の動作を確認します。サーバーは CP3-10 まで起動したままにします。起動前に、Docker の PostgreSQL（`budget-app-db`）が稼働していることを確認してください。
+ここからは機能ごとに API の動作を確認します。サーバーは CP3-10 まで起動したままにします。起動前に、Docker の PostgreSQL である `budget-app-db` が稼働していることを確認してください。
 
 ### 確認ポイント
 
 - `GET /api/categories` が 200 で、初期マスタデータ5件を返すこと
 - `GET /api/transactions` が 200 で、`transactions` が空配列、`summary` の3項目がすべて 0 であること
-- Flyway のマイグレーションが起動時に適用されていること（起動ログ）
+- Flyway のマイグレーションが起動時に適用されていること。起動ログで確認します
 
-確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。（次は CP3-9）
+確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。次は CP3-9 です。
 
 ---
 
-## CP3-9 〔動作確認〕明細の登録、一覧・集計への反映、入力エラー（400）
+## CP3-9 〔動作確認〕明細の登録、一覧・集計への反映、入力エラー時の 400
 
 ### 確認ポイント
 
 - 給与 300000 円と食費 1500 円の登録がどちらも 201 Created になること
 - `GET /api/transactions` の `summary` が、`totalIncome` 300000、`totalExpense` 1500、`balance` 298500 になること
 - `amount` が 0 の場合に 400 と `{"message": ..., "details": [...]}` 形式のエラー JSON が返ること
-- `transactionDate` が不正な場合に 400 と `{"message": "リクエストの形式が不正です。"}` が返ること（Spring 標準のエラー形式になっていないこと）
+- `transactionDate` が不正な場合に 400 と `{"message": "リクエストの形式が不正です。"}` が返ること。Spring 標準のエラー形式になっていないことを確認します
 
-確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。（次は CP3-10）
+確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。次は CP3-10 です。
 
 ---
 
@@ -1074,4 +1074,4 @@ class CorsConfig : WebMvcConfigurer {
 - 存在しない ID の削除が 400 とエラーメッセージになること
 - サーバーが停止し、8080 番ポートが解放されていること
 
-4つの機能（カテゴリ一覧・明細一覧・登録・削除）の API 動作が確認できれば、バックエンドの実装は完了です。次の Chapter 4 では、今回実装したコードに対して自動テスト（ドメイン単体テスト、MockK によるユースケーステスト、MockMvc 統合テスト、Konsist アーキテクチャテスト）を構築します。
+カテゴリ一覧、明細一覧、登録、削除の4つの機能の API 動作が確認できれば、バックエンドの実装は完了です。次の Chapter 4 では、今回実装したコードに対して自動テストを構築します。具体的には、ドメイン単体テスト、MockK によるユースケーステスト、MockMvc 統合テスト、Konsist アーキテクチャテストです。

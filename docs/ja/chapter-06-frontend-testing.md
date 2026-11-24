@@ -1,31 +1,31 @@
-# Chapter 6: フロントエンドのテスト実装（単体テスト・結合テスト）
+# Chapter 6: フロントエンドのテスト実装：単体テスト・結合テスト
 
 ## このチャプターの目的
 
-Chapter 5 で実装したフロントエンドの各層に対して、Vitest、React Testing Library、MSW（Mock Service Worker）を用いた自動テストを Claude Code（AI）に実装させます。
+Chapter 5 で実装したフロントエンドの各層に対して、Vitest、React Testing Library、Mock Service Worker を使った自動テストを、AI である Claude Code に実装させます。Mock Service Worker は以降 MSW と呼びます。
 
-クリーンアーキテクチャの層分離により、ビジネスルール（`domain`）は React やブラウザ環境なしで高速に単体テストでき、画面全体（`presentation`）は MSW で HTTP 通信をモック化することで、実際のユーザー操作に近い形で結合テストを実行できます。
+クリーンアーキテクチャで層を分けているため、`domain` のビジネスルールは React やブラウザ環境なしで高速に単体テストできます。`presentation` の画面全体は、MSW で HTTP 通信をモック化すれば、実際のユーザー操作に近い形で結合テストできます。
 
-テスト基盤（モックサーバーと設定）を先に整えてから、対象ごとにテストを追加します。
+先にテスト基盤、つまりモックサーバーと設定を整え、そのあと対象ごとにテストを追加します。
 
 | CP | 種別 | 内容 |
 | :--- | :--- | :--- |
-| CP6-1 | 設計 | フロントエンドのテスト戦略（対象・手段・検証ケース）を提示させ、承認する |
-| CP6-2 | 実装 | MSW によるモックサーバー（`handlers.ts`・`server.ts`）の構築 |
-| CP6-3 | 実装 | Vitest の設定ファイル（`vitest.config.ts`・`vitest.setup.ts`） |
+| CP6-1 | 設計 | フロントエンドのテスト戦略として、対象・手段・検証ケースを提示させ、承認する |
+| CP6-2 | 実装 | MSW によるモックサーバー `handlers.ts`・`server.ts` の構築 |
+| CP6-3 | 実装 | Vitest の設定ファイル `vitest.config.ts`・`vitest.setup.ts` |
 | CP6-4 | テスト | `domain` の単体テスト：入力バリデーション |
 | CP6-5 | テスト | `presentation/utils` の単体テスト：金額整形 |
-| CP6-6 | テスト | 画面全体の結合テスト（Testing Library + MSW）：一覧・登録・入力エラー・削除・通信エラー |
+| CP6-6 | テスト | Testing Library と MSW による画面全体の結合テスト：一覧・登録・入力エラー・削除・通信エラー |
 | CP6-7 | 動作確認 | 全テストの実行・ビルド確認とテストレビュー |
 
 ## このチャプターの進め方
 
-このチャプターは、上の表のチェックポイント（CP）を **1つずつ** 進めます。Claude Code は CP を1つ終えるたびに結果を報告して停止し、次の指示を待ちます（`CLAUDE.md` の「チェックポイント運用」で定義済みです）。
+このチャプターでは、上の表のチェックポイント、つまり CP を **1つずつ** 進めます。Claude Code は CP を1つ終えるたびに結果を報告して停止し、次の指示を待ちます。これは `CLAUDE.md` の「チェックポイント運用」で定めています。
 
 1. Claude Code を起動し、下の「開始プロンプト」を入力します。Claude Code は最初の CP だけを実施して停止します。
-2. 報告内容と、各 CP の「確認ポイント」を照らし合わせて結果を確認します。
+2. 報告内容を、各 CP の「確認ポイント」と照らし合わせて確認します。
 3. 問題がなければ「次のチェックポイントに進む」と入力します。Claude Code が次の CP を1つだけ実施します。
-4. 問題があれば、次へ進まずに「CPx-y をやり直して。〇〇が違う」のように指示して、その CP の中で直させます。
+4. 問題があれば、次へ進まずに「CPx-y をやり直して。〇〇が違う」のように指示し、その CP の中で直させます。
 
 ### 開始プロンプト
 
@@ -93,7 +93,7 @@ CLAUDE.md の「チェックポイント運用」に従い、まず CP6-1 だけ
 
 ## CP6-1 〔設計〕テスト戦略の提示と承認
 
-テストを書く前に、どの層をどの手段で検証するかを Claude Code に整理させます。フロントエンドでは、ビジネスルールは React なしの単体テスト、画面全体は MSW で HTTP をモック化した結合テスト、という使い分けが要点です。
+テストを書く前に、どの層をどの手段で検証するかを Claude Code に整理させます。フロントエンドでは、ビジネスルールは React なしの単体テスト、画面全体は MSW で HTTP をモック化した結合テストと使い分けるのがポイントです。
 
 Claude Code が作成するファイルはありません。
 
@@ -101,24 +101,24 @@ Claude Code が作成するファイルはありません。
 
 | 対象 | 種類・ツール | 主な検証内容 |
 | :--- | :--- | :--- |
-| `domain/validateTransaction.ts` | 単体テスト（Vitest） | カテゴリ・タイトル・金額・決済日の検証ルール |
-| `presentation/utils/formatCurrency.ts` | 単体テスト（Vitest） | 日本円表記、3桁区切り |
-| `presentation/TransactionSection` | 結合テスト（Testing Library + MSW） | 初期表示、登録、入力エラー、削除、通信エラー |
+| `domain/validateTransaction.ts` | Vitest による単体テスト | カテゴリ・タイトル・金額・決済日の検証ルール |
+| `presentation/utils/formatCurrency.ts` | Vitest による単体テスト | 日本円表記、3桁区切り |
+| `presentation/TransactionSection` | Testing Library と MSW による結合テスト | 初期表示、登録、入力エラー、削除、通信エラー |
 
 ### 確認ポイント
 
 - 画面全体のテストで、バックエンドを起動せず MSW で HTTP をモック化する方針になっていること
-- 異常系（入力エラー、API の 500 エラー）が検証ケースに含まれていること
+- 異常系として、入力エラーと API の 500 エラーが検証ケースに含まれていること
 
-確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。（次は CP6-2）
+確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。次は CP6-2 です。
 
 ---
 
 ## CP6-2 〔実装〕MSW によるモックサーバーの構築
 
-画面結合テストでは、バックエンドサーバー（Spring Boot）を起動する代わりに、MSW を使用してネットワークレベルで HTTP リクエストをインターセプトします。
+画面結合テストでは、バックエンドサーバーである Spring Boot を起動する代わりに、MSW を使って、ネットワークレベルで HTTP リクエストを横取りします。
 
-登録（POST）や削除（DELETE）のあとに一覧取得（GET）が再実行された際にも最新状態が返るように、テストごとにリセット可能なインメモリ状態を持つハンドラーを定義します。
+登録の POST や削除の DELETE のあとに、一覧取得の GET が再実行されても最新の状態を返せるように、テストごとにリセットできるインメモリの状態を持つハンドラーを定義します。
 
 ### 実装コード
 
@@ -226,18 +226,18 @@ export const server = setupServer(...handlers);
 ### 確認ポイント
 
 - `src/mocks/handlers.ts` と `src/mocks/server.ts` が作成されていること
-- 4つのエンドポイント（カテゴリ取得・明細取得・登録・削除）がハンドラーとして定義され、`resetMockTransactions` が公開されていること
+- カテゴリ取得・明細取得・登録・削除の4つのエンドポイントがハンドラーとして定義され、`resetMockTransactions` が公開されていること
 - Claude Code の報告に `tsc --noEmit` の成功が含まれていること
 
-確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。（次は CP6-3）
+確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。次は CP6-3 です。
 
 ---
 
 ## CP6-3 〔実装〕Vitest の設定ファイルの作成
 
-最初に、Vitest が jsdom 環境で React コンポーネントと `@/` パスエイリアスを扱えるように設定ファイルを作成します。ESM 環境でも安全にパスを解決できるよう、`__dirname` ではなく `fileURLToPath` を使用します。
+最初に、Vitest が jsdom 環境で React コンポーネントと `@/` パスエイリアスを扱えるように、設定ファイルを作成します。ESM 環境でも安全にパスを解決できるよう、`__dirname` ではなく `fileURLToPath` を使います。
 
-`vitest.setup.ts` は CP6-2 で作成した `server` を読み込むため、先にモックサーバーを用意しています。
+`vitest.setup.ts` は CP6-2 で作成した `server` を読み込むため、モックサーバーを先に用意しています。
 
 ### 実装コードと設計のポイント
 
@@ -277,21 +277,21 @@ afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
 ```
 
-`onUnhandledFrame: 'error'` を指定しておくことで（MSW v3 では旧 `onUnhandledRequest` から名称が変更されています）、テスト中に MSW で定義していない予期しない URL へリクエストが飛んだ場合に即座に検知できます。
+`onUnhandledFrame: 'error'` を指定しておくと、MSW で定義していない URL へテスト中にリクエストが飛んだ場合に、すぐ検知できます。なお、MSW v3 では旧 `onUnhandledRequest` から名称が変更されています。
 
 ### 確認ポイント
 
 - `vitest.config.ts` と `vitest.setup.ts` が作成されていること
-- `vitest.setup.ts` が `server.listen({ onUnhandledFrame: 'error' })` を呼んでいること（旧 `onUnhandledRequest` ではない）
+- `vitest.setup.ts` が `server.listen({ onUnhandledFrame: 'error' })` を呼んでいること。旧 `onUnhandledRequest` ではないこと
 - Claude Code の報告に、`tsc --noEmit` と `pnpm vitest run --passWithNoTests` の成功が含まれていること
 
-確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。（次は CP6-4）
+確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。次は CP6-4 です。
 
 ---
 
-## CP6-4 〔テスト〕第1層（domain）の単体テスト
+## CP6-4 〔テスト〕第1層 `domain` の単体テスト
 
-`domain/validateTransaction.ts` は React に一切依存しない純粋な TypeScript 関数であるため、コンポーネントを描画せずにそのまま呼び出して入力ルールを検証します。
+`domain/validateTransaction.ts` は React に一切依存しない純粋な TypeScript 関数なので、コンポーネントを描画せず、そのまま呼び出して入力ルールを検証します。
 
 ### 実装コード
 
@@ -359,15 +359,15 @@ describe('validateTransactionInput', () => {
 ### 確認ポイント
 
 - `domain/validateTransaction.test.ts` が作成され、5種類の検証ケースが含まれていること
-- Claude Code の報告に、`pnpm vitest run` の成功とテスト件数が含まれていること（ここで初めて `vitest.setup.ts` が実際に読み込まれます）
+- Claude Code の報告に、`pnpm vitest run` の成功とテスト件数が含まれていること。ここで初めて `vitest.setup.ts` が実際に読み込まれます
 
-確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。（次は CP6-5）
+確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。次は CP6-5 です。
 
 ---
 
-## CP6-5 〔テスト〕第3層（presentation/utils）の単体テスト
+## CP6-5 〔テスト〕第3層 `presentation/utils` の単体テスト
 
-表示整形ユーティリティである `formatCurrency` のテストもあわせて作成します。`Intl.NumberFormat` の円記号は実行環境の ICU データによって半角（`¥`）または全角（`￥`）になる場合があるため、正規表現でどちらの表記でも検証できるようにします。
+表示を整形するユーティリティ `formatCurrency` のテストもあわせて作成します。`Intl.NumberFormat` の円記号は実行環境の ICU データによって、半角の `¥` または全角の `￥` になる場合があります。そのため、正規表現でどちらの表記でも検証できるようにします。
 
 ### 実装コード
 
@@ -396,13 +396,13 @@ describe('formatCurrency', () => {
 - 円記号の半角・全角どちらでも通るように、正規表現で検証していること
 - Claude Code の報告に、`pnpm vitest run` の成功とテスト件数が含まれていること
 
-確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。（次は CP6-6）
+確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。次は CP6-6 です。
 
 ---
 
 ## CP6-6 〔テスト〕画面全体の結合テスト
 
-`TransactionSection` をレンダリングし、ユーザーの実際の操作（初期表示、フォーム入力と登録、バリデーションエラー表示、明細の削除、API エラー発生時の表示）を一通り検証します。金額の検証は円記号の環境差を吸収する正規表現と `getAllByText` に統一します。
+`TransactionSection` をレンダリングし、実際のユーザー操作として、初期表示、フォーム入力と登録、バリデーションエラーの表示、明細の削除、API エラー発生時の表示を一通り検証します。金額の検証には、円記号の環境差を吸収する正規表現と `getAllByText` を共通で使います。
 
 ### 実装コード
 
@@ -498,24 +498,24 @@ describe('TransactionSection', () => {
 
 ### 確認ポイント
 
-- `presentation/TransactionSection.test.tsx` が作成され、5種類の検証ケース（初期表示・登録・入力エラー・削除・API エラー）が含まれていること
+- `presentation/TransactionSection.test.tsx` が作成され、初期表示・登録・入力エラー・削除・API エラーの5種類の検証ケースが含まれていること
 - 金額の検証が、円記号の環境差を吸収する正規表現と `getAllByText` になっていること
 - Claude Code の報告に、`pnpm vitest run` の成功とテスト件数が含まれていること
 
-確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。（次は CP6-7）
+確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。次は CP6-7 です。
 
 ---
 
 ## CP6-7 〔動作確認〕全テストの実行・ビルド確認とテストレビュー
 
-すべてのテストファイルを配置したら、Claude Code にテストの全件実行と、不足ケースのレビューを依頼します。
+すべてのテストファイルを配置したら、Claude Code に全テストの実行と、不足ケースのレビューを依頼します。
 
 ### 確認ポイント
 
 - `pnpm vitest run` がすべてパスしていること
-- `pnpm exec tsc --noEmit` と `pnpm build` が成功していること（テストコードを追加しても型エラーやビルドエラーが出ないこと）
-- レビューで挙がった追加ケースの提案を読み、必要なものを選ぶこと（自動では実装されません）
+- `pnpm exec tsc --noEmit` と `pnpm build` が成功していること。つまり、テストコードを追加しても型エラーやビルドエラーが出ないこと
+- レビューで挙がった追加ケースの提案を読み、必要なものを選ぶこと。自動では実装されません
 
 すべてのテストがパスすれば、フロントエンドの実装とテストは完了です。
 
-次の最終章 Chapter 7 では、Claude Code の Agent Skills（`.claude/skills/`）と Hooks（`.claude/settings.json`）を活用し、新しいユースケースをクリーンアーキテクチャの4層すべてに漏れなく実装・検証する発展演習を行います。
+次の最終章 Chapter 7 では、Claude Code の Agent Skills である `.claude/skills/` と Hooks である `.claude/settings.json` を活用し、新しいユースケースをクリーンアーキテクチャの4層すべてに漏れなく実装・検証する発展演習を行います。

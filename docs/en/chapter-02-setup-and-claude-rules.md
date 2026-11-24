@@ -2,17 +2,17 @@
 
 ## Purpose of This Chapter
 
-In this chapter, you build the development environment with a clear division of roles between the person and the AI (Claude Code).
+In this chapter, you build the development environment with a clear division of roles between the person and the AI, Claude Code.
 
-- 2-0 (done by a person): Install Homebrew, Rancher Desktop (Docker-compatible), and mise on the system.
-- 2-1 (done by a person): Create the working directory, install languages and runtimes with mise, create the environment setup skill (`SKILL.md`), and place the Clean Architecture design rules (`CLAUDE.md` / `.claude/rules/`).
-- 2-2 (done by the AI): Have Claude Code load the skill and rules the person created, then have the AI set up PostgreSQL 18, Spring Boot 4, and Next.js 16, through the initial build and migration check, running all the way through without stopping (Chapter 2 has no checkpoints).
+- 2-0 is done by a person. Install Homebrew, Rancher Desktop, which is Docker-compatible, and mise on the system.
+- 2-1 is done by a person. Create the working directory, install languages and runtimes with mise, create `SKILL.md` for the environment setup skill, and place `CLAUDE.md` and `.claude/rules/`, which hold the Clean Architecture design rules.
+- 2-2 is done by the AI. Have Claude Code load the skill and rules the person created, then have the AI set up PostgreSQL 18, Spring Boot 4, and Next.js 16, through the initial build and the migration check, running all the way through without stopping. Note that Chapter 2 has no checkpoints.
 
 ---
 
-## 2-0. Install Prerequisite Tools (done by a person)
+## 2-0. Install Prerequisite Tools: Done by a Person
 
-This hands-on uses Rancher Desktop (Docker-compatible) as the container runtime and mise to manage the versions of Java, Node.js, and pnpm.
+This hands-on uses Docker-compatible Rancher Desktop as the container runtime and mise to manage the versions of Java, Node.js, and pnpm.
 
 ### 1. Check the Homebrew Installation
 
@@ -22,17 +22,17 @@ The following installations use Homebrew. Check whether it is already installed 
 brew --version
 ```
 
-If `command not found` is displayed, install it by following the instructions on the official Homebrew site (https://brew.sh/).
+If `command not found` is displayed, install it by following the instructions on the official Homebrew site, https://brew.sh/.
 
 ```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
-Run the "Next steps" commands shown when the installation finishes (such as `eval "$(/opt/homebrew/bin/brew shellenv)"`, which adds `brew` to your PATH), then run `brew --version` again and confirm that the version is displayed.
+Run the "Next steps" commands shown when the installation finishes, for example `eval "$(/opt/homebrew/bin/brew shellenv)"`, which adds `brew` to your PATH. Then run `brew --version` again and confirm that the version is displayed.
 
 ### 2. Install Rancher Desktop
 
-Rancher Desktop bundles the Docker CLI (`docker` / `docker compose`). If you select `dockerd (moby)` as the container engine, you can operate it with the same commands as Docker Desktop.
+Rancher Desktop bundles the Docker CLI as `docker` and `docker compose`. If you select `dockerd (moby)` as the container engine, you can operate it with the same commands as Docker Desktop.
 
 ```bash
 brew install --cask rancher
@@ -60,7 +60,7 @@ exec $SHELL -l
 
 ---
 
-## 2-1. Project Initialization and Claude Code Configuration (done by a person)
+## 2-1. Project Initialization and Claude Code Configuration: Done by a Person
 
 The steps from here are carried out by the learner in a terminal and editor, from top to bottom.
 
@@ -74,7 +74,7 @@ mkdir -p budget-app-handson/.claude/rules
 cd budget-app-handson
 ```
 
-Place the `.env.example` distributed at the workshop directly under this root directory (`budget-app-handson`). It holds the DB connection settings (user name, password and DB name), and in Step 2 you copy (or rename) it to `.env`.
+Place the `.env.example` distributed at the workshop directly under this root directory, `budget-app-handson`. It holds the DB connection settings, namely the user name, password, and DB name, and in Step 2 you copy or rename it to `.env`.
 
 ```text
 DB_NAME=budget_db
@@ -84,9 +84,9 @@ DB_PASSWORD=budget_password
 
 The values in `.env.example` are for the workshop only. In your own projects, use a hard-to-guess password and never commit `.env` to Git.
 
-### 2. Install Java 25 / Node.js 26 / pnpm 11 (`mise.toml`)
+### 2. Install Java 25 / Node.js 26 / pnpm 11 with `mise.toml`
 
-Create `mise.toml` directly under the root directory (`budget-app-handson`), then pin and install the tool versions used by the project.
+Create `mise.toml` directly under the root directory `budget-app-handson`, then pin and install the tool versions used by the project.
 
 ```bash
 cat > mise.toml <<'EOF'
@@ -107,7 +107,7 @@ node -v         # v26.x
 pnpm -v         # 11.x
 ```
 
-### 3. Create the Environment Setup Skill (`.claude/skills/setup-env/SKILL.md`)
+### 3. Create the Environment Setup Skill `.claude/skills/setup-env/SKILL.md`
 
 Create the skill file that lets Claude Code perform the environment setup in "2-2" below.
 
@@ -293,7 +293,7 @@ When all Steps are complete, report the following items to the user together wit
 - A list of the steps that were run and the steps that were skipped (on a re-run, include the reason for each skip)
 ````
 
-### 4. Create the Project-Wide Guidelines (`CLAUDE.md`)
+### 4. Create the Project-Wide Guidelines `CLAUDE.md`
 
 Create the common rules file that Claude Code loads automatically at the start of a session.
 Create `CLAUDE.md` directly under the root directory and write the following content.
@@ -330,7 +330,7 @@ Work proceeds in units of checkpoints (CP). The exception is `/setup-env` in Cha
 5. Do not create files that are not listed in the CP.
 ```
 
-### 5. Create the Area-Specific Architecture Rules (`.claude/rules/`)
+### 5. Create the Area-Specific Architecture Rules `.claude/rules/`
 
 Create detailed rules that are applied automatically only when editing files in the target directories.
 
@@ -402,9 +402,9 @@ That completes the preparation by the person.
 
 ---
 
-## 2-2. Build and Verify the Development Environment (done by the AI)
+## 2-2. Build and Verify the Development Environment: Done by the AI
 
-From here, start Claude Code in the root directory (`budget-app-handson`) and have the AI perform the environment setup.
+From here, start Claude Code in the root directory `budget-app-handson` and have the AI perform the environment setup.
 
 ### 1. Start Claude Code and Confirm the Rules Are Loaded
 
@@ -434,21 +434,21 @@ Claude Code follows the procedure in `.claude/skills/setup-env/SKILL.md`, runs t
 
 | Step | Content |
 | :--- | :--- |
-| Step 1 | Check the prerequisite tool versions and the availability of ports (5432, 8080, 3000) |
+| Step 1 | Check the prerequisite tool versions and the availability of ports 5432, 8080, and 3000 |
 | Step 2 | Create `.env`, generate `compose.yaml`, start PostgreSQL 18 with Docker, and run the health check |
-| Step 3 | Generate `backend` from Spring Initializr, add dependency libraries, place `application.yml` (which reads `.env`) and the Flyway SQL, and verify the tables and initial master data with `psql` |
+| Step 3 | Generate `backend` from Spring Initializr, add dependency libraries, place `application.yml`, which reads `.env`, and the Flyway SQL, and verify the tables and initial master data with `psql` |
 | Step 4 | Check `mise.toml`, generate `frontend`, install the test libraries, create the four-layer directories, and verify the build |
-| Step 5 | Completion report (a list of the steps that were run and skipped) |
+| Step 5 | Completion report with a list of the steps that were run and skipped |
 
-Claude Code stops midway only when a prerequisite tool is missing, a port conflicts, or a difference from an existing file needs confirmation. If it stops, review the reported reason, deal with it, and run `/setup-env` again (re-running is safe).
+Claude Code stops midway only when a prerequisite tool is missing, a port conflicts, or a difference from an existing file needs confirmation. If it stops, review the reported reason, deal with it, and run `/setup-env` again. Re-running is safe.
 
 ### 3. Checkpoints After the AI Completes the Setup
 
 When the completion report is output, confirm that the following state is in place.
 
 - `.env`, `compose.yaml`, `backend/`, and `frontend/` have been created directly under the root directory.
-- `.env` is not tracked by Git (it does not appear in `git status`).
-- The PostgreSQL 18 container (`budget-app-db`) is running, and the `categories` table (5 initial rows) and the `transactions` table have been created.
+- `.env` is not tracked by Git. If it does not appear in `git status`, it is not tracked.
+- The PostgreSQL 18 container `budget-app-db` is running, and the `categories` table with its 5 initial rows and the `transactions` table have been created.
 - The backend's `./gradlew test` and the frontend's `pnpm --dir frontend build` have completed without errors.
 
 This completes the setup of the development environment and the AI development foundation. From Chapter 3 onward, you continue with implementation and testing while having Claude Code follow the architecture rules.

@@ -1,29 +1,29 @@
-# Chapter 6: Frontend Test Implementation (Unit Tests and Integration Tests)
+# Chapter 6: Frontend Test Implementation: Unit Tests and Integration Tests
 
 ## Purpose of this chapter
 
-You have Claude Code (the AI) implement automated tests for each layer of the frontend built in Chapter 5, using Vitest, React Testing Library, and MSW (Mock Service Worker).
+You have Claude Code, the AI, implement automated tests for each layer of the frontend built in Chapter 5, using Vitest, React Testing Library, and Mock Service Worker. Mock Service Worker is called MSW from here on.
 
-Because of the layer separation in Clean Architecture, business rules (`domain`) can be unit-tested quickly without React or a browser environment. The whole screen (`presentation`) can be integration-tested in a way that is close to real user operations by mocking HTTP communication with MSW.
+Clean Architecture separates the layers. As a result, the business rules in `domain` can be unit-tested quickly without React or a browser environment. The whole screen in `presentation` can be integration-tested in a way that is close to real user operations, by mocking HTTP communication with MSW.
 
-The test foundation (mock server and configuration) is set up first, and then tests are added target by target.
+First set up the test foundation, that is, the mock server and the configuration. Then add tests target by target.
 
 | CP | Type | Content |
 | :--- | :--- | :--- |
-| CP6-1 | Design | Have the AI present the frontend test strategy (targets, means, cases to verify) and approve it |
-| CP6-2 | Implementation | Build the mock server with MSW (`handlers.ts` and `server.ts`) |
-| CP6-3 | Implementation | Vitest configuration files (`vitest.config.ts` and `vitest.setup.ts`) |
+| CP6-1 | Design | Have the AI present the frontend test strategy, covering targets, means, and cases to verify, and approve it |
+| CP6-2 | Implementation | Build the mock server with MSW: `handlers.ts` and `server.ts` |
+| CP6-3 | Implementation | Vitest configuration files: `vitest.config.ts` and `vitest.setup.ts` |
 | CP6-4 | Test | Unit tests for `domain`: input validation |
 | CP6-5 | Test | Unit tests for `presentation/utils`: currency formatting |
-| CP6-6 | Test | Integration tests for the whole screen (Testing Library + MSW): list, registration, input errors, deletion, communication errors |
+| CP6-6 | Test | Integration tests for the whole screen with Testing Library and MSW: list, registration, input errors, deletion, communication errors |
 | CP6-7 | Verification | Run all tests, confirm the build, and review the tests |
 
 ## How to proceed in this chapter
 
-In this chapter you work through the checkpoints (CP) in the table above **one at a time**. After finishing each CP, Claude Code reports the result, stops, and waits for the next instruction (this is defined in "Checkpoint operation" in `CLAUDE.md`).
+In this chapter you work through the checkpoints, or CPs, in the table above **one at a time**. After finishing each CP, Claude Code reports the result, stops, and waits for the next instruction. This is defined in "Checkpoint operation" in `CLAUDE.md`.
 
 1. Start Claude Code and enter the "Start prompt" below. Claude Code performs only the first CP and stops.
-2. Check the result by comparing the report with the "Points to check" of each CP.
+2. Compare the report with the "Points to check" of each CP.
 3. If there are no problems, type "Proceed to the next checkpoint". Claude Code performs exactly one next CP.
 4. If there are problems, do not move on. Instead, give an instruction such as "Redo CPx-y. The XX is wrong" so that it is fixed within that CP.
 
@@ -93,7 +93,7 @@ Then propose any test cases that should be added, such as the form display when 
 
 ## CP6-1 [Design] Present and approve the test strategy
 
-Before writing tests, have Claude Code organize which layer is verified by which means. On the frontend, the key point is the split: business rules get unit tests without React, and the whole screen gets integration tests with HTTP mocked by MSW.
+Before writing tests, have Claude Code organize which layer is verified by which means. On the frontend, the key point is to use each approach where it fits: business rules get unit tests without React, and the whole screen gets integration tests with HTTP mocked by MSW.
 
 Claude Code creates no files in this CP.
 
@@ -101,24 +101,24 @@ Claude Code creates no files in this CP.
 
 | Target | Type / tool | Main things to verify |
 | :--- | :--- | :--- |
-| `domain/validateTransaction.ts` | Unit test (Vitest) | Validation rules for category, title, amount, and transaction date |
-| `presentation/utils/formatCurrency.ts` | Unit test (Vitest) | Japanese yen notation, thousands separators |
-| `presentation/TransactionSection` | Integration test (Testing Library + MSW) | Initial display, registration, input errors, deletion, communication errors |
+| `domain/validateTransaction.ts` | Unit test with Vitest | Validation rules for category, title, amount, and transaction date |
+| `presentation/utils/formatCurrency.ts` | Unit test with Vitest | Japanese yen notation, thousands separators |
+| `presentation/TransactionSection` | Integration test with Testing Library and MSW | Initial display, registration, input errors, deletion, communication errors |
 
 ### Points to check
 
 - The whole-screen tests mock HTTP with MSW without starting the backend
-- Error cases (input errors, API 500 errors) are included in the cases to verify
+- Error cases are included in the cases to verify: input errors and API 500 errors
 
-When the checks pass, type "Proceed to the next checkpoint" in Claude Code. (Next: CP6-2)
+When the checks pass, type "Proceed to the next checkpoint" in Claude Code. Next is CP6-2.
 
 ---
 
 ## CP6-2 [Implementation] Build the mock server with MSW
 
-In the screen integration tests, MSW intercepts HTTP requests at the network level instead of starting the backend server (Spring Boot).
+In the screen integration tests, you do not start the backend server, Spring Boot. Instead, MSW intercepts HTTP requests at the network level.
 
-The handlers hold in-memory state that can be reset for each test, so that the latest state is returned even when the list fetch (GET) runs again after a registration (POST) or deletion (DELETE).
+The handlers hold in-memory state that can be reset for each test. This way, the latest state is returned even when the list fetch, a GET, runs again after a registration, a POST, or a deletion, a DELETE.
 
 ### Implementation code
 
@@ -226,18 +226,18 @@ export const server = setupServer(...handlers);
 ### Points to check
 
 - `src/mocks/handlers.ts` and `src/mocks/server.ts` have been created
-- The four endpoints (get categories, get transactions, register, delete) are defined as handlers, and `resetMockTransactions` is exported
+- The four endpoints, which are get categories, get transactions, register, and delete, are defined as handlers, and `resetMockTransactions` is exported
 - Claude Code's report states that `tsc --noEmit` succeeded
 
-When the checks pass, type "Proceed to the next checkpoint" in Claude Code. (Next: CP6-3)
+When the checks pass, type "Proceed to the next checkpoint" in Claude Code. Next is CP6-3.
 
 ---
 
 ## CP6-3 [Implementation] Create the Vitest configuration files
 
-First, create the configuration files so that Vitest can handle React components and the `@/` path alias in a jsdom environment. To resolve paths safely in an ESM environment, `fileURLToPath` is used instead of `__dirname`.
+First, create the configuration files so that Vitest can handle React components and the `@/` path alias in a jsdom environment. To resolve paths safely in an ESM environment, use `fileURLToPath` instead of `__dirname`.
 
-`vitest.setup.ts` imports the `server` created in CP6-2, which is why the mock server was prepared first.
+`vitest.setup.ts` imports the `server` created in CP6-2, so the mock server is prepared first.
 
 ### Implementation code and design points
 
@@ -277,21 +277,21 @@ afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
 ```
 
-By specifying `onUnhandledFrame: 'error'` (renamed from the former `onUnhandledRequest` in MSW v3), you can detect immediately when a request goes to an unexpected URL that is not defined in MSW during a test.
+If you specify `onUnhandledFrame: 'error'`, you can detect immediately when a test sends a request to a URL that is not defined in MSW. Note that MSW v3 renamed this option from the former `onUnhandledRequest`.
 
 ### Points to check
 
 - `vitest.config.ts` and `vitest.setup.ts` have been created
-- `vitest.setup.ts` calls `server.listen({ onUnhandledFrame: 'error' })` (not the former `onUnhandledRequest`)
+- `vitest.setup.ts` calls `server.listen({ onUnhandledFrame: 'error' })`, not the former `onUnhandledRequest`
 - Claude Code's report states that `tsc --noEmit` and `pnpm vitest run --passWithNoTests` succeeded
 
-When the checks pass, type "Proceed to the next checkpoint" in Claude Code. (Next: CP6-4)
+When the checks pass, type "Proceed to the next checkpoint" in Claude Code. Next is CP6-4.
 
 ---
 
-## CP6-4 [Test] Unit tests for layer 1 (domain)
+## CP6-4 [Test] Unit tests for layer 1, `domain`
 
-`domain/validateTransaction.ts` is a pure TypeScript function with no dependency on React, so the input rules are verified by calling it directly without rendering any component.
+`domain/validateTransaction.ts` is a pure TypeScript function with no dependency on React. Call it directly to verify the input rules, without rendering any component.
 
 ### Implementation code
 
@@ -359,15 +359,15 @@ describe('validateTransactionInput', () => {
 ### Points to check
 
 - `domain/validateTransaction.test.ts` has been created and contains five kinds of verification cases
-- Claude Code's report states that `pnpm vitest run` succeeded and gives the number of tests (this is the first time `vitest.setup.ts` is actually loaded)
+- Claude Code's report states that `pnpm vitest run` succeeded and gives the number of tests. This is the first time `vitest.setup.ts` is actually loaded
 
-When the checks pass, type "Proceed to the next checkpoint" in Claude Code. (Next: CP6-5)
+When the checks pass, type "Proceed to the next checkpoint" in Claude Code. Next is CP6-5.
 
 ---
 
-## CP6-5 [Test] Unit tests for layer 3 (presentation/utils)
+## CP6-5 [Test] Unit tests for layer 3, `presentation/utils`
 
-A test for `formatCurrency`, the display formatting utility, is created as well. The yen sign produced by `Intl.NumberFormat` can be either half-width (`¥`) or full-width (`￥`) depending on the ICU data of the runtime environment, so a regular expression is used to accept either form.
+Also create a test for `formatCurrency`, the display formatting utility. The yen sign produced by `Intl.NumberFormat` can be either half-width, `¥`, or full-width, `￥`, depending on the ICU data of the runtime environment. So use a regular expression to accept either form.
 
 ### Implementation code
 
@@ -396,13 +396,13 @@ describe('formatCurrency', () => {
 - It verifies with a regular expression so that it passes with either the half-width or full-width yen sign
 - Claude Code's report states that `pnpm vitest run` succeeded and gives the number of tests
 
-When the checks pass, type "Proceed to the next checkpoint" in Claude Code. (Next: CP6-6)
+When the checks pass, type "Proceed to the next checkpoint" in Claude Code. Next is CP6-6.
 
 ---
 
 ## CP6-6 [Test] Integration tests for the whole screen
 
-Render `TransactionSection` and verify the actual user operations end to end: initial display, form input and registration, display of validation errors, deletion of a transaction, and display when an API error occurs. Amount assertions are standardized on a regular expression that absorbs the yen-sign differences between environments, together with `getAllByText`.
+Render `TransactionSection` and verify the actual user operations end to end. These are initial display, form input and registration, display of validation errors, deletion of a transaction, and display when an API error occurs. For amount assertions, use a regular expression that absorbs the yen-sign differences between environments, together with `getAllByText`, throughout.
 
 ### Implementation code
 
@@ -498,24 +498,24 @@ describe('TransactionSection', () => {
 
 ### Points to check
 
-- `presentation/TransactionSection.test.tsx` has been created and contains five kinds of verification cases (initial display, registration, input errors, deletion, API error)
+- `presentation/TransactionSection.test.tsx` has been created and contains five kinds of verification cases: initial display, registration, input errors, deletion, and API error
 - Amount assertions use a regular expression that absorbs the yen-sign differences between environments, together with `getAllByText`
 - Claude Code's report states that `pnpm vitest run` succeeded and gives the number of tests
 
-When the checks pass, type "Proceed to the next checkpoint" in Claude Code. (Next: CP6-7)
+When the checks pass, type "Proceed to the next checkpoint" in Claude Code. Next is CP6-7.
 
 ---
 
 ## CP6-7 [Verification] Run all tests, confirm the build, and review the tests
 
-Once all test files are in place, ask Claude Code to run all the tests and to review which cases are missing.
+Once all test files are in place, ask Claude Code to run all the tests and review which cases are missing.
 
 ### Points to check
 
 - All tests pass with `pnpm vitest run`
-- `pnpm exec tsc --noEmit` and `pnpm build` succeed (adding test code causes no type errors or build errors)
-- Read the proposals for additional cases raised in the review and choose the ones you need (they are not implemented automatically)
+- `pnpm exec tsc --noEmit` and `pnpm build` succeed. That is, adding test code causes no type errors or build errors
+- Read the proposals for additional cases raised in the review and choose the ones you need. They are not implemented automatically
 
 When all tests pass, the frontend implementation and tests are complete.
 
-In the next and final chapter, Chapter 7, you will do an advanced exercise that uses Claude Code's Agent Skills (`.claude/skills/`) and Hooks (`.claude/settings.json`) to implement and verify a new use case across all four layers of Clean Architecture without omissions.
+In the next and final chapter, Chapter 7, you will do an advanced exercise that uses Claude Code's Agent Skills, which are in `.claude/skills/`, and Hooks, which are in `.claude/settings.json`, to implement and verify a new use case across all four layers of Clean Architecture without omissions.

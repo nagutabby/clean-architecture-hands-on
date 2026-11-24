@@ -1,31 +1,31 @@
-# Chapter 4: Backend Testing (Unit Tests, Integration Tests, Architecture Tests)
+# Chapter 4: Backend Testing: Unit Tests, Integration Tests, and Architecture Tests
 
 ## Purpose of This Chapter
 
-For each layer of the backend implemented in Chapter 3, you have Claude Code (the AI) implement four kinds of automated tests, each with a different nature.
+For each layer of the backend implemented in Chapter 3, you have Claude Code, the AI, implement four kinds of automated tests, each with a different nature.
 
-One benefit of Clean Architecture is that, because business logic is separated from external technology, you can write fast and thorough tests without starting a database or a web server. Introducing architecture tests also means that Dependency Rule violations are detected automatically when features are added later or when an AI generates code.
+Clean Architecture separates business logic from external technology. Because of this, you can write fast, thorough tests without starting a database or a web server. If you also add architecture tests, Dependency Rule violations are detected automatically when you add features later or when an AI generates code.
 
 The checkpoints are divided by test type, and the last ones confirm that the tests actually detect violations.
 
 | CP | Kind | Content |
 | :--- | :--- | :--- |
-| CP4-1 | Design | Have the test design (targets, types, test cases) presented, and approve it |
-| CP4-2 | Test | Unit tests for `domain` (JUnit 5): value objects, entities, aggregation |
-| CP4-3 | Test | Unit tests for `usecase` (JUnit 5 + MockK): mock the Output Ports |
-| CP4-4 | Test | Integration tests for `adapter.controller` (MockMvc): HTTP, validation, exception handling |
-| CP4-5 | Test | Architecture tests (Konsist): dependency direction and no layer skipping |
+| CP4-1 | Design | Have the test design presented, covering targets, types, and test cases, and approve it |
+| CP4-2 | Test | Unit tests for `domain` with JUnit 5: value objects, entities, aggregation |
+| CP4-3 | Test | Unit tests for `usecase` with JUnit 5 and MockK: mock the Output Ports |
+| CP4-4 | Test | Integration tests for `adapter.controller` with MockMvc: HTTP, validation, exception handling |
+| CP4-5 | Test | Architecture tests with Konsist: dependency direction and no layer skipping |
 | CP4-6 | Verification | Confirm that the architecture tests actually detect violations |
 | CP4-7 | Verification | Run all tests and review the tests |
 
 ## How to Work Through This Chapter
 
-In this chapter you work through the checkpoints (CPs) in the table above **one at a time**. After finishing each CP, Claude Code reports the result, stops, and waits for the next instruction (this is defined in the "Checkpoint operation" section of `CLAUDE.md`).
+In this chapter you work through the checkpoints, or CPs, in the table above **one at a time**. After finishing each CP, Claude Code reports the result, stops, and waits for the next instruction. This is defined in the "Checkpoint operation" section of `CLAUDE.md`.
 
 1. Start Claude Code and enter the "Start prompt" below. Claude Code performs only the first CP and stops.
-2. Compare the report with the "Points to check" of each CP to verify the result.
+2. Compare the report with the "Points to check" of each CP.
 3. If there are no problems, type "Proceed to the next checkpoint". Claude Code performs just the next CP.
-4. If there is a problem, do not move on. Instead, instruct it as in "Redo CPx-y. XX is wrong" and have it fixed within that CP.
+4. If there is a problem, do not move on. Instead, give an instruction such as "Redo CPx-y. XX is wrong" and have it fixed within that CP.
 
 ### Start Prompt
 
@@ -97,7 +97,7 @@ Also review the currently implemented test code for missing verification of boun
 
 ## CP4-1 [Design] Presenting and Approving the Test Design
 
-Before any test code is written, have Claude Code lay out what is verified in which layer and with which tool. The purpose is to check that an appropriate testing approach has been chosen for each layer.
+Before any test code is written, have Claude Code lay out which layer is verified with which tool. Check that an appropriate testing approach has been chosen for each layer.
 
 Claude Code creates no files in this CP.
 
@@ -105,23 +105,23 @@ Claude Code creates no files in this CP.
 
 | Layer | Type / Tool | Main things verified | DB / Web server |
 | :--- | :--- | :--- | :--- |
-| `domain` | Unit test (JUnit 5) | Invariants of amount and title, aggregation logic | Not needed |
-| `usecase` | Unit test (JUnit 5 + MockK) | Business flow with the Repository mocked | Not needed |
-| `adapter.controller` | Integration test (MockMvc) | HTTP status, validation, exception handling | Not needed (`@WebMvcTest`) |
-| All layers | Architecture test (Konsist) | Dependency direction, no layer skipping | Not needed |
+| `domain` | Unit test with JUnit 5 | Invariants of amount and title, aggregation logic | Not needed |
+| `usecase` | Unit test with JUnit 5 and MockK | Business flow with the Repository mocked | Not needed |
+| `adapter.controller` | Integration test with MockMvc | HTTP status, validation, exception handling | Not needed. `@WebMvcTest` is used |
+| All layers | Architecture test with Konsist | Dependency direction, no layer skipping | Not needed |
 
 ### Points to check
 
 - The targets and tools of the four kinds of tests do not differ significantly from the reference above
-- Error cases and boundary values (0 yen, a 101-character title, a non-existent ID, malformed JSON, and so on) are listed
+- Error cases and boundary values are listed, such as 0 yen, a 101-character title, a non-existent ID, and malformed JSON
 
-When the checks pass, type "Proceed to the next checkpoint" in Claude Code. (Next: CP4-2)
+When the checks pass, type "Proceed to the next checkpoint" in Claude Code. Next is CP4-2.
 
 ---
 
-## CP4-2 [Test] Unit Tests for the Domain Layer (JUnit 5)
+## CP4-2 [Test] Unit Tests for the Domain Layer with JUnit 5
 
-Layer 1 (`domain`) consists of pure Kotlin classes that use no external libraries, so they can be instantiated and tested as they are, without even a mock.
+Layer 1, `domain`, consists of pure Kotlin classes that use no external libraries. They need no mocks and can be instantiated and tested directly.
 
 ### Implementation Code and Design Points
 
@@ -265,13 +265,13 @@ class BalanceSummaryTest {
 - Claude Code's report states that the `domain` tests passed and how many tests were run
 - The tests instantiate the classes directly, without using mocks
 
-When the checks pass, type "Proceed to the next checkpoint" in Claude Code. (Next: CP4-3)
+When the checks pass, type "Proceed to the next checkpoint" in Claude Code. Next is CP4-3.
 
 ---
 
-## CP4-3 [Test] Unit Tests for the Use Case Layer (JUnit 5 + MockK)
+## CP4-3 [Test] Unit Tests for the Use Case Layer with JUnit 5 and MockK
 
-Layer 2 (`usecase`) depends only on the Output Port interfaces (`TransactionRepository` / `CategoryRepository`). Because of this, simply mocking the repositories with MockK, without starting PostgreSQL, is enough to verify the business flow of the use cases in milliseconds.
+Layer 2, `usecase`, depends only on the Output Port interfaces, that is, `TransactionRepository` and `CategoryRepository`. Because of this, you do not need to start PostgreSQL. Mocking the repositories with MockK is enough to verify the business flow of the use cases in milliseconds.
 
 ### Implementation Code and Design Points
 
@@ -401,18 +401,18 @@ class DeleteTransactionInteractorTest {
 ### Points to check
 
 - `CreateTransactionInteractorTest.kt` and `DeleteTransactionInteractorTest.kt` are created under `usecase/interactor/`
-- The tests verify that `save` / `deleteById` are not called for a non-existent ID (`verify(exactly = 0)`)
+- The tests verify with `verify(exactly = 0)` that `save` / `deleteById` are not called for a non-existent ID
 - Claude Code's report states that the `usecase` tests passed and how many tests were run
 
-When the checks pass, type "Proceed to the next checkpoint" in Claude Code. (Next: CP4-4)
+When the checks pass, type "Proceed to the next checkpoint" in Claude Code. Next is CP4-4.
 
 ---
 
-## CP4-4 [Test] Integration Tests for the Controller Layer (MockMvc)
+## CP4-4 [Test] Integration Tests for the Controller Layer with MockMvc
 
-In layer 3 (`adapter.controller`), MockMvc verifies HTTP request deserialization, Bean Validation (`@Valid`), conversion to DTOs, and the error response formatting done by `GlobalExceptionHandler`.
+In layer 3, `adapter.controller`, MockMvc verifies HTTP request deserialization, Bean Validation with `@Valid`, conversion to DTOs, and the error response formatting done by `GlobalExceptionHandler`.
 
-The Controller depends only on the Input Ports (`*UseCase`), so registering mocks of the use cases as beans in a test `@TestConfiguration` is all that is needed to complete the web layer tests.
+The Controller depends only on the Input Ports, that is, `*UseCase`. So you can write the web layer tests by registering mocks of the use cases as beans in a test `@TestConfiguration`.
 
 ### Implementation Code and Design Points
 
@@ -570,28 +570,28 @@ class TransactionControllerTest {
 
 ### Points to check
 
-- `adapter/controller/TransactionControllerTest.kt` is created and contains the 5 kinds of test cases (list, registration, validation error, malformed JSON, and `DomainException` on delete)
-- `@WebMvcTest` is imported from `org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest` (the location in Spring Boot 4)
+- `adapter/controller/TransactionControllerTest.kt` is created and contains 5 kinds of test cases: list, registration, validation error, malformed JSON, and `DomainException` on delete
+- `@WebMvcTest` is imported from `org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest`. This is the location in Spring Boot 4
 - Claude Code's report states that the `adapter` tests passed and how many tests were run
 
-When the checks pass, type "Proceed to the next checkpoint" in Claude Code. (Next: CP4-5)
+When the checks pass, type "Proceed to the next checkpoint" in Claude Code. Next is CP4-5.
 
 ---
 
-## CP4-5 [Test] Architecture Tests (Konsist)
+## CP4-5 [Test] Architecture Tests with Konsist
 
-Rather than relying only on people being careful during review, you use Konsist, an architecture verification library for Kotlin, to automate the Clean Architecture dependency direction rules as JUnit tests.
+Do not rely only on people being careful during review. Use Konsist, an architecture verification library for Kotlin, to automate the Clean Architecture dependency direction rules as JUnit tests.
 
-By placing the JPA Entities and Spring Data JPA Repositories in layer 3 (`adapter.repository`), the dependencies between the project's own packages run in one direction only (from the outside to the inside). Imports of external libraries are not covered by this verification.
+The JPA Entities and Spring Data JPA Repositories are placed in layer 3, `adapter.repository`. As a result, the dependencies between the project's own packages run in one direction only, from the outside to the inside. Imports of external libraries are not covered by this verification.
 
-1. `domain` (layer 1): depends on no layer (`dependsOnNothing()`)
-2. `usecase` (layer 2): depends only on `domain` (`dependsOn(domain)`)
-3. `adapter` (layer 3): depends only on `domain` and `usecase`, and not on the outer `framework` (`dependsOn(domain, usecase)`)
-4. `framework` (layer 4): depends only on the inner layers (`dependsOn(domain, usecase, adapter)`)
+1. `domain`, layer 1: depends on no layer. Declared with `dependsOnNothing()`
+2. `usecase`, layer 2: depends only on `domain`. Declared with `dependsOn(domain)`
+3. `adapter`, layer 3: depends only on `domain` and `usecase`, and not on the outer `framework`. Declared with `dependsOn(domain, usecase)`
+4. `framework`, layer 4: depends only on the inner layers. Declared with `dependsOn(domain, usecase, adapter)`
 
-Konsist's `dependsOn(...)` declares the layers that a layer may depend on (or does depend on). It does not forbid dependencies on outer layers that are not declared (only `dependsOnNothing()` is a strict prohibition). For this reason, reverse dependencies toward the outside (`usecase` -> `adapter` / `framework`, `adapter` -> `framework`) are explicitly forbidden with `doesNotDependOn(...)`.
+Konsist's `dependsOn(...)` declares the layers that a layer may depend on, that is, the layers it does depend on. It does not forbid dependencies on outer layers that are not declared. Only `dependsOnNothing()` is a strict prohibition. For this reason, reverse dependencies toward the outside, that is, `usecase` -> `adapter` / `framework` and `adapter` -> `framework`, are explicitly forbidden with `doesNotDependOn(...)`.
 
-As individual rules, the tests also verify that layers 1 and 2 are independent of frameworks, and that `adapter.controller` (the web side) does not skip layers to reach `usecase.output` or `adapter.repository` (the DB side).
+As individual rules, the tests also verify that layers 1 and 2 do not depend on frameworks, and that `adapter.controller` on the web side does not skip layers to reach `usecase.output` or `adapter.repository` on the DB side.
 
 ### Implementation Code and Design Points
 
@@ -672,35 +672,35 @@ class ArchitectureTest {
 - `architecture/ArchitectureTest.kt` is created and includes the prohibition of reverse dependencies with `doesNotDependOn`
 - `./gradlew cleanTest test --tests '*ArchitectureTest'` succeeds
 
-When the checks pass, type "Proceed to the next checkpoint" in Claude Code. (Next: CP4-6)
+When the checks pass, type "Proceed to the next checkpoint" in Claude Code. Next is CP4-6.
 
 ---
 
 ## CP4-6 [Verification] Confirming That the Architecture Tests Actually Detect Violations
 
-A test can be trusted only after you confirm not just that it passes but also that it does not miss violations. Here you deliberately add an `import` that violates the dependency direction, confirm that the test fails, and then revert it.
+A test can be trusted only after you confirm that it passes and also that it does not miss violations. Here you deliberately add an `import` that violates the dependency direction, confirm that the test fails, and then revert it.
 
-`./gradlew test` is not re-run and is reported as `UP-TO-DATE` when its inputs have not changed, so it is run with `cleanTest` every time (the hook in Chapter 7 uses `cleanTest` for the same reason).
+`./gradlew test` is not re-run when its inputs have not changed, and Gradle reports it as `UP-TO-DATE`. So run it with `cleanTest` every time. The hook in Chapter 7 uses `cleanTest` for the same reason.
 
 ### Points to check
 
-- The test fails when a `domain` -> `usecase` dependency (from the inside to the outside) is added
-- The test fails when a `usecase` -> `adapter` dependency (forbidden with `doesNotDependOn`) is added
-- All the added `import` lines are reverted and the test passes again (no diff remains in the source, as checked with `git diff` or similar)
+- The test fails when a `domain` -> `usecase` dependency, from the inside to the outside, is added
+- The test fails when a `usecase` -> `adapter` dependency, which `doesNotDependOn` forbids, is added
+- All the added `import` lines are reverted and the test passes again. Check with `git diff` or similar that no diff remains in the source
 
-When the checks pass, type "Proceed to the next checkpoint" in Claude Code. (Next: CP4-7)
+When the checks pass, type "Proceed to the next checkpoint" in Claude Code. Next is CP4-7.
 
 ---
 
 ## CP4-7 [Verification] Running All Tests and Reviewing the Tests
 
-Once all the test code is in place, ask Claude Code to run all the tests and to review them for missing cases.
+Once all the test code is in place, ask Claude Code to run all the tests and review them for missing cases.
 
 ### Points to check
 
 - `./gradlew cleanTest test` ends with `BUILD SUCCESSFUL` and all tests pass
-- Read the proposals for additional cases raised in the review and choose the ones you need (they are not implemented automatically)
+- Read the proposals for additional cases raised in the review and choose the ones you need. They are not implemented automatically
 
 When all tests pass, the backend implementation and tests are complete.
 
-In the next chapter, Chapter 5, you implement the frontend (Next.js 16 / TypeScript) in the same way, adopting the four-layer structure of Clean Architecture and the Dependency Inversion Principle.
+In the next chapter, Chapter 5, you implement the frontend with Next.js 16 and TypeScript in the same way, adopting the four-layer structure of Clean Architecture and the Dependency Inversion Principle.

@@ -50,7 +50,6 @@
   .tag.t-lec { background: #000; } .tag.t-be { background: #1c7ed6; } .tag.t-test { background: #2f9e44; }
   .tag.t-fe { background: #e67700; } .tag.t-ai { background: #7048e8; } .tag.t-ops { background: #000; }
   h1.title { font-size: 60px; line-height: 1.25; font-weight: 800; margin-bottom: 8px; }
-  .lead { font-size: 32px; color: var(--muted); margin-bottom: 26px; }
   .foot {
     position: absolute; left: 110px; right: 110px; bottom: 26px; display: flex;
     justify-content: space-between; font-size: 20px; color: #000;
@@ -141,7 +140,6 @@
 <section class="slide" data-title="Workflow">
   <span class="tag">Opening</span>
   <h1 class="title">Humans set the rules, AI implements</h1>
-  <p class="lead">Humans define the design rules, Claude Code implements layer by layer, and humans verify the result</p>
   <svg viewBox="0 0 1700 520" width="1700" height="520" role="img" aria-label="Roles of human and AI">
     <defs><marker id="a1" markerUnits="userSpaceOnUse" markerWidth="20" markerHeight="20" refX="18" refY="10" orient="auto"><path d="M0,0 L20,10 L0,20 z" fill="#000"/></marker></defs>
     <rect x="0" y="20" width="520" height="470" rx="22" fill="#fff" stroke="#1c7ed6" stroke-width="4"/>
@@ -153,12 +151,12 @@
       <text x="44" y="388">• Verify output, flag gaps</text><text x="62" y="428" fill="#000" font-size="24">Dependency direction, tests, behavior</text>
     </g>
     <rect x="1180" y="20" width="520" height="470" rx="22" fill="#fff" stroke="#7048e8" stroke-width="4"/>
-    <text x="1440" y="76" text-anchor="middle" font-size="36" font-weight="800" fill="#7048e8">Claude Code (AI)</text>
+    <text x="1440" y="76" text-anchor="middle" font-size="36" font-weight="800" fill="#7048e8">AI Claude Code</text>
     <g font-size="29" fill="#000">
-      <text x="1204" y="140">• Set up (/setup-env)</text>
+      <text x="1204" y="140">• Set up with /setup-env</text>
       <text x="1204" y="196">• Implement layer by layer</text><text x="1222" y="228" fill="#000" font-size="23">domain → usecase →</text><text x="1222" y="258" fill="#000" font-size="23">adapter → framework</text>
       <text x="1204" y="292">• Write tests at every level</text>
-      <text x="1204" y="348">• Add features (/add-usecase)</text>
+      <text x="1204" y="348">• Add features with /add-usecase</text>
       <text x="1204" y="404">• Self-fix from hook results</text>
     </g>
     <rect x="590" y="150" width="500" height="220" rx="22" fill="#fff" stroke="#000" stroke-width="3"/>
@@ -168,77 +166,14 @@
     <line x1="520" y1="260" x2="586" y2="260" stroke="#000" stroke-width="4" marker-end="url(#a1)"/>
     <line x1="1094" y1="260" x2="1176" y2="260" stroke="#000" stroke-width="4" marker-end="url(#a1)"/>
   </svg>
-  <div class="note" style="margin-top:12px"><ul class="pts" style="font-size:26px"><li>Each chapter has a start prompt, sample code and check points, and the AI stops at every checkpoint</li></ul></div>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
-</section>
-
-<!-- Checkpoint workflow -->
-<section class="slide" data-title="Checkpoint workflow">
-  <span class="tag">Opening</span>
-  <h1 class="title">Work proceeds one checkpoint at a time</h1>
-  <p class="lead">Work is split into Design, Implementation, Test and Verification checkpoints (CP)</p>
-  <svg viewBox="0 0 1700 300" width="1700" height="300" role="img" aria-label="How checkpoints proceed">
-    <defs><marker id="acp" markerUnits="userSpaceOnUse" markerWidth="20" markerHeight="20" refX="18" refY="10" orient="auto"><path d="M0,0 L20,10 L0,20 z" fill="#000"/></marker></defs>
-    <g text-anchor="middle" font-weight="800">
-      <rect x="0" y="20" width="380" height="150" rx="18" fill="#fff" stroke="#1c7ed6" stroke-width="4"/>
-      <text x="190" y="82" font-size="30" fill="#1c7ed6">Human</text><text x="190" y="126" font-size="26" font-weight="700" fill="#000">Enter the start prompt</text>
-      <rect x="440" y="20" width="380" height="150" rx="18" fill="#fff" stroke="#7048e8" stroke-width="4"/>
-      <text x="630" y="82" font-size="30" fill="#7048e8">AI</text><text x="630" y="126" font-size="26" font-weight="700" fill="#000">Run one CP only</text>
-      <rect x="880" y="20" width="380" height="150" rx="18" fill="#fff" stroke="#7048e8" stroke-width="4"/>
-      <text x="1070" y="82" font-size="30" fill="#7048e8">AI</text><text x="1070" y="126" font-size="26" font-weight="700" fill="#000">Report and stop</text>
-      <rect x="1320" y="20" width="380" height="150" rx="18" fill="#fff" stroke="#1c7ed6" stroke-width="4"/>
-      <text x="1510" y="82" font-size="30" fill="#1c7ed6">Human</text><text x="1510" y="126" font-size="26" font-weight="700" fill="#000">Review, then proceed</text>
-    </g>
-    <g stroke="#000" stroke-width="4" fill="none" marker-end="url(#acp)"><line x1="384" y1="95" x2="436" y2="95"/><line x1="824" y1="95" x2="876" y2="95"/><line x1="1264" y1="95" x2="1316" y2="95"/><path d="M1510,176 V250 H630 V176"/></g>
-    <text x="1070" y="284" text-anchor="middle" font-size="26" font-weight="700" fill="#1c7ed6">Type "Proceed to the next checkpoint"</text>
-  </svg>
-  <table class="t" style="margin-top:20px">
-    <tr><th style="width:230px">Kind</th><th>What the AI does</th><th style="width:560px">What the human checks</th></tr>
-    <tr><td class="n">Design</td><td>Presents classes, dependency direction and APIs, no code</td><td>Fit with rules, dependency direction</td></tr>
-    <tr><td class="n">Implementation</td><td>Implements one layer or part, then compiles and type-checks</td><td>No Dependency Rule violations</td></tr>
-    <tr><td class="n">Test</td><td>Adds and runs tests, checks for rule violations</td><td>Number of tests run and passed</td></tr>
-    <tr><td class="n">Verification</td><td>Starts the server and checks APIs and screens per feature</td><td>Expected values and display</td></tr>
-  </table>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
-</section>
-
-<!-- State per checkpoint (backend) -->
-<section class="slide" data-title="App state per checkpoint (setup and backend)">
-  <span class="tag">Overview</span>
-  <h1 class="title">App state per checkpoint (setup and backend)</h1>
-  <table class="t" style="font-size:28px">
-    <tr><th style="width:250px">Completed CP</th><th style="width:680px">Added at this point</th><th>State at this point</th></tr>
-    <tr><td class="n"><span class="tag t-ops" style="margin:0;font-size:24px;padding:0 14px">Ch2</span></td><td>Scaffold, DB, CLAUDE.md, rules, skills</td><td>5 seed rows in DB, build passes, no app features yet</td></tr>
-    <tr><td class="n"><span class="tag t-be" style="margin:0;font-size:24px;padding:0 14px">CP3-2</span></td><td>6 domain files</td><td>Compiles with no external libraries</td></tr>
-    <tr><td class="n"><span class="tag t-be" style="margin:0;font-size:24px;padding:0 14px">CP3-3</span></td><td>10 usecase files (Ports, Interactors)</td><td>Compile only, not yet connected to DB or HTTP</td></tr>
-    <tr><td class="n"><span class="tag t-be" style="margin:0;font-size:24px;padding:0 14px">CP3-4~5</span></td><td>12 adapter files (JPA, DTO, Controller)</td><td>Connected to HTTP and DB, ready to start</td></tr>
-    <tr><td class="n"><span class="tag t-be" style="margin:0;font-size:24px;padding:0 14px">CP3-6~10</span></td><td>1 framework file (29 in total)</td><td>4 APIs work (list, create, delete, 400 on bad input)</td></tr>
-    <tr><td class="n"><span class="tag t-test" style="margin:0;font-size:24px;padding:0 14px">CP4-2~4</span></td><td>16 tests for domain, usecase, Controller</td><td>Business rules checked in milliseconds, no DB</td></tr>
-    <tr><td class="n"><span class="tag t-test" style="margin:0;font-size:24px;padding:0 14px">CP4-5~7</span></td><td>4 architecture tests (Konsist)</td><td>20 tests pass, dependency violations caught automatically</td></tr>
-  </table>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
-</section>
-
-<!-- State per checkpoint (frontend) -->
-<section class="slide" data-title="App state per checkpoint (frontend and new feature)">
-  <span class="tag">Overview</span>
-  <h1 class="title">App state per checkpoint (frontend and new feature)</h1>
-  <table class="t" style="font-size:28px">
-    <tr><th style="width:250px">Completed CP</th><th style="width:680px">Added at this point</th><th>State at this point</th></tr>
-    <tr><td class="n"><span class="tag t-fe" style="margin:0;font-size:24px;padding:0 14px">CP5-2~5</span></td><td>Shared UI, domain, usecase, adapter</td><td>Type check only, no screen yet</td></tr>
-    <tr><td class="n"><span class="tag t-fe" style="margin:0;font-size:24px;padding:0 14px">CP5-6~9</span></td><td>presentation, app pages</td><td>Build passes, screens render</td></tr>
-    <tr><td class="n"><span class="tag t-fe" style="margin:0;font-size:24px;padding:0 14px">CP5-10~12</span></td><td>(No code added)</td><td>List, create, delete, errors verified on screen</td></tr>
-    <tr><td class="n"><span class="tag t-test" style="margin:0;font-size:24px;padding:0 14px">CP6-2~7</span></td><td>MSW, Vitest, 13 unit and integration tests</td><td>Whole screen tested automatically, no backend</td></tr>
-    <tr><td class="n"><span class="tag t-ai" style="margin:0;font-size:24px;padding:0 14px">CP7-2~3</span></td><td>Update API (PUT) and its tests</td><td>Hook catches dependency violations, all backend tests pass</td></tr>
-    <tr><td class="n"><span class="tag t-ai" style="margin:0;font-size:24px;padding:0 14px">CP7-4~7</span></td><td>Edit UI and its tests</td><td>Create, edit, delete work on screen, all tests pass</td></tr>
-  </table>
+  <div class="note" style="margin-top:12px"><ul class="pts" style="font-size:26px"><li>Each chapter has a start prompt, sample code and check points</li></ul></div>
   <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
 </section>
 
 <!-- 4. What we build -->
 <section class="slide" data-title="App to build">
   <span class="tag">Opening</span>
-  <h1 class="title">The app is a simple budget tracker (Budget App)</h1>
+  <h1 class="title">The app is a simple budget tracker called Budget App</h1>
   <svg viewBox="0 0 1700 330" width="1700" height="330" role="img" aria-label="System architecture">
     <defs><marker id="a2" markerUnits="userSpaceOnUse" markerWidth="20" markerHeight="20" refX="18" refY="10" orient="auto"><path d="M0,0 L20,10 L0,20 z" fill="#000"/></marker></defs>
     <g font-weight="800" text-anchor="middle">
@@ -271,8 +206,8 @@
   <span class="tag t-be">Spring Boot</span>
   <h1 class="title">Spring Boot assembles a working server fast through convention over configuration</h1>
   <div class="cols" style="gap:24px">
-    <div class="card " style="font-size:26px"><h3>Auto-configuration</h3>It inspects the classpath and prepares beans and settings. The entry point is <code class="i">@SpringBootApplication</code></div>
-    <div class="card " style="font-size:26px"><h3>Dependency injection</h3>Spring creates objects and passes an implementation that matches the constructor type. Here it injects an Interactor into the Controller</div>
+    <div class="card " style="font-size:26px"><h3>Auto-configuration</h3><ul class="pts"><li>It inspects the classpath and prepares beans and settings</li><li>The entry point is <code class="i">@SpringBootApplication</code></li></ul></div>
+    <div class="card " style="font-size:26px"><h3>Dependency injection</h3><ul class="pts"><li>Spring creates objects and passes an implementation that matches the constructor type</li><li>Here it injects an Interactor into the Controller</li></ul></div>
     <div class="card " style="font-size:26px"><h3>Starters and embedded server</h3><code class="i">spring-boot-starter-*</code> adds related dependencies together, and the embedded web server starts with just <code class="i">./gradlew bootRun</code></div>
     <div class="card " style="font-size:26px"><h3>Externalized config</h3>Connection settings live in <code class="i">application.yml</code> instead of the code</div>
   </div>
@@ -285,18 +220,17 @@
   <h1 class="title">Next.js uses file placement as convention and makes the server/browser boundary explicit</h1>
   <div class="cols" style="gap:24px">
     <div class="card " style="font-size:26px"><h3>File-system routing</h3><code class="i">app/transactions/page.tsx</code> becomes <code class="i">/transactions</code>, and <code class="i">layout.tsx</code> is the shared frame</div>
-    <div class="card " style="font-size:26px"><h3>Server Components by default</h3>App Router components render on the server by default. Only parts that need state or events become Client Components</div>
-    <div class="card " style="font-size:26px"><h3><code class="i">'use client'</code> is the boundary</h3>Adding <code class="i">'use client'</code> at the top makes that file and its imports run in the browser. Hooks and onClick work only there</div>
+    <div class="card " style="font-size:26px"><h3>Server Components by default</h3><ul class="pts"><li>App Router components render on the server by default</li><li>Only parts that need state or events become Client Components</li></ul></div>
+    <div class="card " style="font-size:26px"><h3><code class="i">'use client'</code> is the boundary</h3><ul class="pts"><li>Adding <code class="i">'use client'</code> at the top makes that file and its imports run in the browser</li><li>Hooks and onClick work only there</li></ul></div>
   </div>
-  <div class="note " style="margin-top:24px;font-size:28px">Next.js decides how screens are delivered. It is not the place for business rules</div>
+  <div class="note " style="margin-top:24px;font-size:28px"><ul class="pts"><li>Next.js decides how screens are delivered</li><li>It is not the place for business rules</li></ul></div>
   <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
 </section>
 
 <!-- 6. Why CA -->
 <section class="slide" data-title="Why Clean Architecture">
-  <span class="tag t-lec">Lecture (Chapters 0-1)</span>
+  <span class="tag t-lec">Lecture, Chapters 0-1</span>
   <h1 class="title">Why adopt Clean Architecture</h1>
-  <p class="lead">Mixing business logic with framework and DB code causes these problems</p>
   <svg viewBox="0 0 1700 470" width="1700" height="470" role="img" aria-label="Problems and solution">
     <defs><marker id="a3" markerUnits="userSpaceOnUse" markerWidth="20" markerHeight="20" refX="18" refY="10" orient="auto"><path d="M0,0 L20,10 L0,20 z" fill="#000"/></marker></defs>
     <g font-size="27">
@@ -322,7 +256,7 @@
 
 <!-- 7. Concentric circles -->
 <section class="slide" data-title="Four concentric circles">
-  <span class="tag t-lec">Lecture (Chapters 0-1)</span>
+  <span class="tag t-lec">Lecture, Chapters 0-1</span>
   <h1 class="title">The center circle is closest to the business</h1>
   <div class="cols" style="align-items:center;gap:40px">
     <svg viewBox="0 0 760 760" width="740" height="740" style="flex:none" role="img" aria-label="Four concentric circles">
@@ -345,7 +279,7 @@
         <tr><td class="n"><span class="pill l3">3</span> Interface Adapters</td><td><code class="i">adapter</code></td><td><code class="i">adapter/</code><br><code class="i">presentation/</code></td></tr>
         <tr><td class="n"><span class="pill l4">4</span> Frameworks &amp; Drivers</td><td><code class="i">framework</code></td><td><code class="i">app/</code></td></tr>
       </table>
-      <div class="note" style="margin-top:22px">The frontend <code class="i">adapter</code> (API calls) and <code class="i">presentation</code> (UI) both connect the inside to the outside, so both are Layer 3</div>
+      <div class="note" style="margin-top:22px">The frontend <code class="i">adapter</code> for API calls and <code class="i">presentation</code> for UI both connect the inside to the outside, so both are Layer 3</div>
     </div>
   </div>
   <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
@@ -353,69 +287,64 @@
 
 <section class="slide" data-title="Layer 1 Entities">
   <span class="tag t-lec">Layer 1 of 4</span>
-  <h1 class="title"><span class="pill l1">Layer 1</span> Entities (domain) holds the essential business rules</h1>
-  <p class="lead">The most stable layer, independent of any technology. It holds knowledge that survives app changes</p>
+  <h1 class="title"><span class="pill l1">Layer 1</span> Entities in the domain layer hold the essential business rules</h1>
   <table class="t" style="font-size:25px">
-    <tr><th style="width:190px">Item</th><th>Backend (Kotlin)</th><th>Frontend (TypeScript)</th></tr>
+    <tr><th style="width:190px">Item</th><th>Backend, Kotlin</th><th>Frontend, TypeScript</th></tr>
     <tr><td class="n">Contains</td><td><code class="i">Amount</code>, <code class="i">Transaction</code>, <code class="i">Category</code>, <code class="i">BalanceSummary</code>, <code class="i">DomainException</code></td><td>Types in <code class="i">types.ts</code> and <code class="i">validateTransaction</code></td></tr>
-    <tr><td class="n">Never contains</td><td><code class="i">@Entity</code>, <code class="i">@Component</code>, Spring or JPA imports</td><td>React, fetch, display formatting (formatCurrency is in presentation)</td></tr>
-    <tr><td class="n">May depend on</td><td>Nothing (language standard library only)</td><td>Nothing</td></tr>
+    <tr><td class="n">Never contains</td><td><code class="i">@Entity</code>, <code class="i">@Component</code>, Spring or JPA imports</td><td>React, fetch, display formatting; formatCurrency is in presentation</td></tr>
+    <tr><td class="n">May depend on</td><td>Nothing but the language standard library</td><td>Nothing</td></tr>
     <tr><td class="n">In this app</td><td>Amount at least 1 yen, title required and up to 100 characters, balance = income − expense</td><td>Validates form input with the same business rules</td></tr>
   </table>
-  <div class="note " style="margin-top:16px;font-size:26px">Tests are plain unit tests with no mocks (JUnit 5 / Vitest) and finish in milliseconds</div>
+  <div class="note " style="margin-top:16px;font-size:26px">Tests are plain unit tests with no mocks, using JUnit 5 / Vitest, and finish in milliseconds</div>
   <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
 </section>
 
 <section class="slide" data-title="Layer 2 Use Cases">
   <span class="tag t-lec">Layer 2 of 4</span>
-  <h1 class="title"><span class="pill l2">Layer 2</span> Use Cases (usecase) holds the app-specific procedures</h1>
-  <p class="lead">It combines domain objects to express what the app does, and talks to the outside only through interfaces (ports)</p>
+  <h1 class="title"><span class="pill l2">Layer 2</span> Use Cases in the usecase layer hold the app-specific procedures</h1>
   <table class="t" style="font-size:25px">
-    <tr><th style="width:190px">Item</th><th>Backend (Kotlin)</th><th>Frontend (TypeScript)</th></tr>
-    <tr><td class="n">Contains</td><td>Input <code class="i">input/*UseCase</code>, output <code class="i">output/*Repository</code>, implementation <code class="i">interactor/*Interactor</code></td><td><code class="i">TransactionRepository</code> (interface) and the <code class="i">useTransactions</code> hook</td></tr>
+    <tr><th style="width:190px">Item</th><th>Backend, Kotlin</th><th>Frontend, TypeScript</th></tr>
+    <tr><td class="n">Contains</td><td>Input <code class="i">input/*UseCase</code>, output <code class="i">output/*Repository</code>, implementation <code class="i">interactor/*Interactor</code></td><td><code class="i">TransactionRepository</code> interface and the <code class="i">useTransactions</code> hook</td></tr>
     <tr><td class="n">Never contains</td><td>HTTP, JSON, JPA, imports of Controller or RepositoryImpl</td><td>fetch, imports of <code class="i">transactionApi</code>, JSX</td></tr>
     <tr><td class="n">May depend on</td><td>domain</td><td>domain</td></tr>
     <tr><td class="n">In this app</td><td><code class="i">CreateTransactionInteractor</code>: load category → create <code class="i">Transaction</code> → <code class="i">save</code></td><td>State handling and refetch for load, create and delete</td></tr>
   </table>
-  <div class="note " style="margin-top:16px;font-size:26px">Practical exceptions: Interactors use Spring's @Service / @Transactional and hooks use React state APIs. External I/O stays out of this layer</div>
+  <div class="note " style="margin-top:16px;font-size:26px"><ul class="pts"><li>Practical exceptions: Interactors use Spring's @Service / @Transactional and hooks use React state APIs</li><li>External I/O stays out of this layer</li></ul></div>
   <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
 </section>
 
 <section class="slide" data-title="Layer 3 Adapters">
   <span class="tag t-lec">Layer 3 of 4</span>
   <h1 class="title"><span class="pill l3">Layer 3</span> Adapters convert between inner and external formats</h1>
-  <p class="lead">Details of external technology such as HTTP, DB and UI are confined to this layer</p>
   <table class="t" style="font-size:25px">
-    <tr><th style="width:190px">Item</th><th>Backend (Kotlin)</th><th>Frontend (TypeScript)</th></tr>
-    <tr><td class="n">Contains</td><td>Controller, dto, <code class="i">GlobalExceptionHandler</code>, <code class="i">RepositoryImpl</code>, <code class="i">JpaEntity</code>, <code class="i">Jpa*Repository</code></td><td><code class="i">transactionApi</code> (fetch implementation), presentation UI parts, <code class="i">formatCurrency</code>, <code class="i">TransactionSection</code></td></tr>
-    <tr><td class="n">Never contains</td><td>Business rule decisions, references to framework</td><td>Business rules (domain) and state logic (usecase)</td></tr>
-    <tr><td class="n">May depend on</td><td>domain・usecase</td><td>domain, usecase (only TransactionSection wires in an adapter)</td></tr>
+    <tr><th style="width:190px">Item</th><th>Backend, Kotlin</th><th>Frontend, TypeScript</th></tr>
+    <tr><td class="n">Contains</td><td>Controller, dto, <code class="i">GlobalExceptionHandler</code>, <code class="i">RepositoryImpl</code>, <code class="i">JpaEntity</code>, <code class="i">Jpa*Repository</code></td><td><code class="i">transactionApi</code> fetch implementation, presentation UI parts, <code class="i">formatCurrency</code>, <code class="i">TransactionSection</code></td></tr>
+    <tr><td class="n">Never contains</td><td>Business rule decisions, references to framework</td><td>Business rules from domain and state logic from usecase</td></tr>
+    <tr><td class="n">May depend on</td><td>domain・usecase</td><td>domain, usecase; only TransactionSection wires in an adapter</td></tr>
     <tr><td class="n">In this app</td><td><code class="i">TransactionRepositoryImpl</code> converts between JPA Entity and <code class="i">Transaction</code> and implements the usecase interface</td><td><code class="i">transactionApi</code> implements <code class="i">TransactionRepository</code> with fetch</td></tr>
   </table>
-  <div class="note " style="margin-top:16px;font-size:26px">In the frontend, API communication (adapter) and UI (presentation) both belong to layer 3</div>
+  <div class="note " style="margin-top:16px;font-size:26px">In the frontend, API communication in adapter and UI in presentation both belong to layer 3</div>
   <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
 </section>
 
 <section class="slide" data-title="Layer 4 Frameworks">
   <span class="tag t-lec">Layer 4 of 4</span>
   <h1 class="title"><span class="pill l4">Layer 4</span> Frameworks only starts and wires the app</h1>
-  <p class="lead">The outermost and most volatile layer. It has no logic and only wires the inner layers</p>
   <table class="t" style="font-size:25px">
-    <tr><th style="width:190px">Item</th><th>Backend (Kotlin)</th><th>Frontend (TypeScript)</th></tr>
+    <tr><th style="width:190px">Item</th><th>Backend, Kotlin</th><th>Frontend, TypeScript</th></tr>
     <tr><td class="n">Contains</td><td>Entry class <code class="i">BudgetappApplication</code>, <code class="i">framework/config/CorsConfig</code></td><td><code class="i">app/</code>: <code class="i">layout.tsx</code>, <code class="i">page.tsx</code>, routing</td></tr>
     <tr><td class="n">Never contains</td><td>Business rules, conversion logic, DB access</td><td>State handling, API calls, business rules</td></tr>
     <tr><td class="n">May depend on</td><td>All inner layers</td><td>All inner layers</td></tr>
     <tr><td class="n">In this app</td><td><code class="i">CorsConfig</code> allows calls from <code class="i">localhost:3000</code></td><td><code class="i">page.tsx</code> just places <code class="i"><TransactionSection/></code></td></tr>
   </table>
-  <div class="note " style="margin-top:16px;font-size:26px">Treat frameworks as replaceable tools. Neither Spring Boot nor Next.js goes inside this layer</div>
+  <div class="note " style="margin-top:16px;font-size:26px"><ul class="pts"><li>Treat frameworks as replaceable tools</li><li>Neither Spring Boot nor Next.js goes inside this layer</li></ul></div>
   <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
 </section>
 
 <!-- 8. Dependency Rule -->
 <section class="slide" data-title="Dependency Rule">
-  <span class="tag t-lec">Lecture (Chapters 0-1)</span>
+  <span class="tag t-lec">Lecture, Chapters 0-1</span>
   <h1 class="title">Dependency arrows always point inward</h1>
-  <p class="lead">Here a "dependency" means an <code class="i">import</code> between packages we wrote</p>
   <svg viewBox="0 0 1700 300" width="1700" height="300" role="img" aria-label="Dependency direction between layers">
     <defs><marker id="a4" markerUnits="userSpaceOnUse" markerWidth="20" markerHeight="20" refX="18" refY="10" orient="auto"><path d="M0,0 L20,10 L0,20 z" fill="#000"/></marker></defs>
     <g font-weight="800" text-anchor="middle">
@@ -425,11 +354,11 @@
       <rect x="1362" y="40" width="338" height="150" rx="18" fill="#fff" stroke="#2f9e44" stroke-width="4"/><text x="1531" y="100" font-size="32">domain</text><text x="1531" y="144" font-size="23" fill="#000" font-weight="500">Layer 1 · Rules</text>
     </g>
     <g stroke="#000" stroke-width="5" marker-end="url(#a4)"><line x1="344" y1="115" x2="450" y2="115"/><line x1="798" y1="115" x2="904" y2="115"/><line x1="1252" y1="115" x2="1358" y2="115"/></g>
-    <text x="850" y="262" text-anchor="middle" font-size="28" fill="#000" font-weight="700">Import direction = dependency direction (reverse is forbidden)</text>
+    <text x="850" y="262" text-anchor="middle" font-size="28" fill="#000" font-weight="700">Import direction = dependency direction, reverse is forbidden</text>
   </svg>
   <div class="cols" style="margin-top:8px">
     <div class="card l1"><h3>domain depends on nothing</h3>References no other layer, Spring or JPA, and carries no <code class="i">@Entity</code></div>
-    <div class="card l2"><h3>usecase depends only on domain</h3>Does not reference adapter or framework (<code class="i">@Service</code> / <code class="i">@Transactional</code> are practical exceptions)</div>
+    <div class="card l2"><h3>usecase depends only on domain</h3>Does not reference adapter or framework, except <code class="i">@Service</code> / <code class="i">@Transactional</code> as practical exceptions</div>
     <div class="card l3"><h3>adapter depends only inward</h3>References only domain and usecase, and holds the JPA Entity and Repository implementation</div>
   </div>
   <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
@@ -437,13 +366,12 @@
 
 <!-- Dependency rule violations -->
 <section class="slide" data-title="Dependency rule violations">
-  <span class="tag t-lec">Lecture (Chapters 0-1)</span>
+  <span class="tag t-lec">Lecture, Chapters 0-1</span>
   <h1 class="title">Violations let the inside know about outside technology</h1>
-  <p class="lead">Two violations AI tends to produce, next to the intended form</p>
   <div class="cols" style="gap:36px">
     <div>
       <div class="note ng" style="font-size:28px;margin-bottom:14px"><b>NG</b>  The inside depends on the outside</div>
-<pre class="code" style="font-size:25px"><span class="c">// domain (layer 1)</span>
+<pre class="code" style="font-size:25px"><span class="c">// domain, layer 1</span>
 <span class="k">@Entity</span>
 <span class="k">class</span> Transaction(...)
 
@@ -462,7 +390,7 @@
 <span class="k">class</span> TransactionController(
   <span class="k">val</span> useCase: CreateTransactionUseCase
 )</pre>
-      <ul class="pts" style="font-size:27px"><li>The JPA Entity is a separate class in adapter</li><li>The Controller calls only the usecase entry point (Input Port)</li></ul>
+      <ul class="pts" style="font-size:27px"><li>The JPA Entity is a separate class in adapter</li><li>The Controller calls only the usecase entry point, that is, the Input Port</li></ul>
     </div>
   </div>
   <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
@@ -470,7 +398,7 @@
 
 <!-- 9. DIP -->
 <section class="slide" data-title="DIP">
-  <span class="tag t-lec">Lecture (Chapters 0-1)</span>
+  <span class="tag t-lec">Lecture, Chapters 0-1</span>
   <h1 class="title">DIP reverses the runtime flow and the import direction</h1>
   <svg viewBox="0 0 1700 560" width="1700" height="560" role="img" aria-label="Runtime flow and dependency direction">
     <defs><marker id="a5" markerUnits="userSpaceOnUse" markerWidth="20" markerHeight="20" refX="18" refY="10" orient="auto"><path d="M0,0 L20,10 L0,20 z" fill="#000"/></marker></defs>
@@ -484,7 +412,7 @@
     </g>
     <g stroke="#000" stroke-width="4" marker-end="url(#a5)"><line x1="274" y1="99" x2="353" y2="99"/><line x1="631" y1="99" x2="710" y2="99"/><line x1="988" y1="99" x2="1067" y2="99"/><line x1="1345" y1="99" x2="1424" y2="99"/></g>
 
-    <text x="0" y="262" font-size="28" font-weight="800" fill="#000">Source code dependency direction (import direction)</text>
+    <text x="0" y="262" font-size="28" font-weight="800" fill="#000">Source code dependency direction, that is, the import direction</text>
     <g font-size="26" font-weight="800" text-anchor="middle">
       <rect x="0" y="290" width="250" height="86" rx="14" fill="#fff" stroke="#e67700" stroke-width="3"/><text x="125" y="344">Controller</text>
       <rect x="326" y="290" width="250" height="86" rx="14" fill="#fff" stroke="#1c7ed6" stroke-width="3"/><text x="451" y="344">InputPort</text>
@@ -502,9 +430,9 @@
     <text x="614" y="412" text-anchor="middle" font-size="21" fill="#000">Implements</text>
     <text x="940" y="412" text-anchor="middle" font-size="21" fill="#000">Calls</text>
     <text x="1266" y="412" text-anchor="middle" font-size="21" fill="#000">Implements</text>
-    <text x="1502" y="412" text-anchor="middle" font-size="22" fill="#000">→ JpaRepository (in adapter)</text>
+    <text x="1502" y="412" text-anchor="middle" font-size="22" fill="#000">→ JpaRepository in adapter</text>
     <path d="M326 436 L326 454 L1228 454 L1228 436" fill="none" stroke="#1c7ed6" stroke-width="4"/>
-    <text x="777" y="504" text-anchor="middle" font-size="28" font-weight="800" fill="#1c7ed6">These 3 form the usecase layer (interfaces sit inside)</text>
+    <text x="777" y="504" text-anchor="middle" font-size="28" font-weight="800" fill="#1c7ed6">These 3 form the usecase layer, with interfaces on the inside</text>
   </svg>
   <div class="cols" style="margin-top:6px">
     <div class="note ok" style="font-size:27px">Benefit 1&emsp;Interactor tests only swap the Repository for MockK, no DB needed</div>
@@ -515,16 +443,15 @@
 
 <!-- Data crossing boundaries -->
 <section class="slide" data-title="Data crossing boundaries">
-  <span class="tag t-lec">Lecture (Chapters 0-1)</span>
+  <span class="tag t-lec">Lecture, Chapters 0-1</span>
   <h1 class="title">Each boundary has its own data type, converted on the outside</h1>
-  <p class="lead">Inner types do not know outer types. The outer layer converts to the inner type</p>
   <table class="t" style="font-size:27px">
     <tr><th style="width:430px">Boundary</th><th>Type used</th><th style="width:210px">Lives in</th></tr>
-    <tr><td>HTTP → Controller</td><td><code class="i">TransactionRequest</code> (JSON and input validation)</td><td><span class="pill l3">adapter</span></td></tr>
-    <tr><td>Controller → UseCase</td><td><code class="i">CreateTransactionInput</code> (via <code class="i">toUseCaseInput()</code>)</td><td><span class="pill l2">usecase</span></td></tr>
-    <tr><td>UseCase ⇄ Repository</td><td><code class="i">Transaction</code> (domain model)</td><td><span class="pill l1">domain</span></td></tr>
-    <tr><td>RepositoryImpl ⇄ DB</td><td><code class="i">TransactionJpaEntity</code> (table structure)</td><td><span class="pill l3">adapter</span></td></tr>
-    <tr><td>Controller → HTTP</td><td><code class="i">TransactionItemResponse</code> (via <code class="i">fromDomain()</code>)</td><td><span class="pill l3">adapter</span></td></tr>
+    <tr><td>HTTP → Controller</td><td><code class="i">TransactionRequest</code> for JSON and input validation</td><td><span class="pill l3">adapter</span></td></tr>
+    <tr><td>Controller → UseCase</td><td><code class="i">CreateTransactionInput</code> converted by <code class="i">toUseCaseInput()</code></td><td><span class="pill l2">usecase</span></td></tr>
+    <tr><td>UseCase ⇄ Repository</td><td><code class="i">Transaction</code>, the domain model</td><td><span class="pill l1">domain</span></td></tr>
+    <tr><td>RepositoryImpl ⇄ DB</td><td><code class="i">TransactionJpaEntity</code> for the table structure</td><td><span class="pill l3">adapter</span></td></tr>
+    <tr><td>Controller → HTTP</td><td><code class="i">TransactionItemResponse</code> converted by <code class="i">fromDomain()</code></td><td><span class="pill l3">adapter</span></td></tr>
   </table>
   <div class="note" style="margin-top:22px">DTOs and JPA Entities never enter the inside, so API or table changes do not reach domain</div>
   <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
@@ -532,7 +459,7 @@
 
 <!-- 10. Backend structure + DB -->
 <section class="slide" data-title="Backend structure">
-  <span class="tag t-lec">Lecture (Chapters 0-1)</span>
+  <span class="tag t-lec">Lecture, Chapters 0-1</span>
   <h1 class="title">Backend structure</h1>
   <div class="cols" style="gap:40px">
 <pre class="tree" style="flex:1;font-size:32px"><span class="cm">com.example.budgetapp/</span>
@@ -541,8 +468,8 @@
 │  │         TransactionType, BalanceSummary
 │  └ exception/ DomainException
 ├ <span class="l2">usecase/</span>
-│  ├ input/  *UseCase (entry contract)
-│  ├ output/ *Repository (exit contract)
+│  ├ input/  *UseCase: entry contract
+│  ├ output/ *Repository: exit contract
 │  └ interactor/ *Interactor
 ├ <span class="l3">adapter/</span>
 │  ├ controller/ Controller, dto/, advice/
@@ -557,13 +484,13 @@
 
 <!-- Request flow and error handling -->
 <section class="slide" data-title="Request flow and error handling">
-  <span class="tag t-lec">Lecture (Chapters 0-1)</span>
+  <span class="tag t-lec">Lecture, Chapters 0-1</span>
   <h1 class="title">POST /api/transactions passes through 4 layers; errors become HTTP on the outside</h1>
   <div class="cols" style="gap:40px">
     <ol class="steps" style="font-size:28px">
       <li><span class="pill l3">adapter</span> The Controller validates format with <code class="i">@Valid</code> and converts to Input</li>
       <li><span class="pill l2">usecase</span> The Interactor loads the category and creates a <code class="i">Transaction</code></li>
-      <li><span class="pill l1">domain</span> <code class="i">init</code> checks invariants (amount, title)</li>
+      <li><span class="pill l1">domain</span> <code class="i">init</code> checks invariants for amount and title</li>
       <li><span class="pill l2">usecase</span> It calls <code class="i">TransactionRepository.save</code></li>
       <li><span class="pill l3">adapter</span> RepositoryImpl converts to a JPA Entity, saves, and returns 201</li>
     </ol>
@@ -581,17 +508,17 @@
   <table class="t" style="font-size:26px">
     <tr><th style="width:250px">Aspect</th><th>Usual Spring 3 layers</th><th>This hands-on</th></tr>
     <tr><td class="n">Structure</td><td>Controller → Service → Repository</td><td>Controller → UseCase → Repository interface ← RepositoryImpl</td></tr>
-    <tr><td class="n">Service depends on</td><td>JPA Repository (concrete)</td><td>Repository interface (inside usecase)</td></tr>
+    <tr><td class="n">Service depends on</td><td>Concrete JPA Repository</td><td>Repository interface inside usecase</td></tr>
     <tr><td class="n">Entity</td><td>JPA Entity used directly in business logic</td><td>Domain model and JPA Entity are separate</td></tr>
     <tr><td class="n">Testing</td><td>Tends to need a DB or slice tests</td><td>Interactor is verified with MockK only</td></tr>
   </table>
-  <div class="note " style="margin-top:18px;font-size:26px">Spring Boot features (DI, JPA, MVC) are used in adapter and framework. domain and usecase stay free of Spring concerns</div>
+  <div class="note " style="margin-top:18px;font-size:26px"><ul class="pts"><li>Spring Boot features such as DI, JPA and MVC are used in adapter and framework</li><li>domain and usecase stay free of Spring concerns</li></ul></div>
   <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
 </section>
 
 <!-- 11. Frontend structure -->
 <section class="slide" data-title="Frontend structure">
-  <span class="tag t-lec">Lecture (Chapters 0-1)</span>
+  <span class="tag t-lec">Lecture, Chapters 0-1</span>
   <h1 class="title"><code class="i" style="font-size:.8em">features/transaction</code> uses the same 4 layers</h1>
   <div class="cols" style="gap:40px">
 <pre class="tree" style="flex:1"><span class="cm">src/</span>
@@ -606,12 +533,12 @@
 │  ├ <span class="l3">adapter/</span>
 │  │   transactionApi.ts
 │  └ <span class="l3">presentation/</span>
-│      TransactionSection.tsx (assembler)
+│      TransactionSection.tsx: assembler
 │      Form, List, SummaryCard
 │      utils/formatCurrency.ts
-└ mocks/  handlers.ts, server.ts (MSW)</pre>
+└ mocks/  MSW: handlers.ts, server.ts</pre>
     <div>
-      <div class="card l1" style="margin-bottom:18px"><h3>What goes in domain</h3>Types and input validation (business rules), with no React, fetch or formatting</div>
+      <div class="card l1" style="margin-bottom:18px"><h3>What goes in domain</h3>Types and input validation as business rules, with no React, fetch or formatting</div>
       <div class="card l3" style="margin-bottom:18px"><h3>What goes in presentation</h3>UI and display formatting, including <code class="i">formatCurrency</code></div>
       <div class="card l2"><h3>The usecase hook</h3><code class="i">useTransactions</code> does not import <code class="i">adapter</code> and goes through the <code class="i">TransactionRepository</code> interface</div>
     </div>
@@ -625,8 +552,8 @@
   <table class="t" style="font-size:26px">
     <tr><th style="width:440px">Next.js element</th><th style="width:230px">Placed in</th><th>In this app</th></tr>
     <tr><td class="n">page.tsx・layout.tsx</td><td><span class="pill l4">app/</span></td><td>Stays a Server Component and just places <code class="i"><TransactionSection/></code></td></tr>
-    <tr><td class="n">Client Components (state, events)</td><td><span class="pill l3">presentation</span></td><td><code class="i">'use client'</code> at the top of <code class="i">TransactionSection</code></td></tr>
-    <tr><td class="n">Data fetching (fetch)</td><td><span class="pill l3">adapter</span></td><td>The browser calls the Spring Boot API through <code class="i">transactionApi</code></td></tr>
+    <tr><td class="n">Client Components that handle state and events</td><td><span class="pill l3">presentation</span></td><td><code class="i">'use client'</code> at the top of <code class="i">TransactionSection</code></td></tr>
+    <tr><td class="n">Data fetching with fetch</td><td><span class="pill l3">adapter</span></td><td>The browser calls the Spring Boot API through <code class="i">transactionApi</code></td></tr>
     <tr><td class="n">State hooks</td><td><span class="pill l2">usecase</span></td><td><code class="i">useTransactions</code> communicates through an interface</td></tr>
   </table>
   <div class="note " style="margin-top:18px;font-size:26px">A Server Component cannot pass objects containing functions to a Client Component, so injection happens in the client-side TransactionSection</div>
@@ -639,12 +566,12 @@
   <table class="t" style="font-size:25px">
     <tr><th style="width:170px">Layer</th><th style="width:270px">Directory</th><th>May import</th><th style="width:480px">Role</th></tr>
     <tr><td class="n"><span class="pill l4">L4</span></td><td>app/</td><td>presentation</td><td>Routing and delivery</td></tr>
-    <tr><td class="n"><span class="pill l3">L3</span></td><td>presentation/</td><td>usecase, domain (only the wiring component also adapter)</td><td>UI and display formatting</td></tr>
+    <tr><td class="n"><span class="pill l3">L3</span></td><td>presentation/</td><td>usecase, domain; only the wiring component also adapter</td><td>UI and display formatting</td></tr>
     <tr><td class="n"><span class="pill l3">L3</span></td><td>adapter/</td><td>usecase・domain</td><td>API calls with fetch</td></tr>
     <tr><td class="n"><span class="pill l2">L2</span></td><td>usecase/</td><td>domain</td><td>Screen procedures and state</td></tr>
     <tr><td class="n"><span class="pill l1">L1</span></td><td>domain/</td><td>nothing</td><td>Types and input validation</td></tr>
   </table>
-  <div class="note ng" style="margin-top:18px;font-size:26px">Unlike the backend, frontend dependency rules are not checked by an architecture test (we rely on checkpoint reviews and tsc)</div>
+  <div class="note ng" style="margin-top:18px;font-size:26px">Unlike the backend, frontend dependency rules are not checked by an architecture test, so we rely on reviews and tsc</div>
   <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
 </section>
 
@@ -656,7 +583,7 @@
     <tr><td class="n">1</td><td><span class="pill l3">presentation</span></td><td><code class="i">TransactionForm</code> takes input and calls <code class="i">addTransaction</code> via <code class="i">onSubmit</code></td></tr>
     <tr><td class="n">2</td><td><span class="pill l2">usecase</span></td><td><code class="i">useTransactions</code> calls <code class="i">repository.createTransaction</code>, then refetches the list</td></tr>
     <tr><td class="n">3</td><td><span class="pill l3">adapter</span></td><td><code class="i">transactionApi</code> sends <code class="i">POST /api/transactions</code> and converts JSON to types</td></tr>
-    <tr><td class="n">4</td><td><span class="pill l2">usecase</span></td><td>The hook state (<code class="i">transactions</code>, <code class="i">summary</code>) is updated</td></tr>
+    <tr><td class="n">4</td><td><span class="pill l2">usecase</span></td><td>The hook state, <code class="i">transactions</code> and <code class="i">summary</code>, is updated</td></tr>
     <tr><td class="n">5</td><td><span class="pill l3">presentation</span></td><td><code class="i">TransactionList</code> and <code class="i">BalanceSummaryCard</code> re-render</td></tr>
   </table>
   <div class="note " style="margin-top:18px;font-size:26px">UI parts only receive state and callbacks and know nothing about how communication works</div>
@@ -665,9 +592,8 @@
 
 <!-- 12. Guardrails -->
 <section class="slide" data-title="Rules for the AI">
-  <span class="tag t-ai">Lecture (Chapters 0-1)</span>
+  <span class="tag t-ai">Lecture, Chapters 0-1</span>
   <h1 class="title">Four mechanisms make the AI follow the rules</h1>
-  <p class="lead">With vague instructions, violations are likely, such as JPA annotations in domain or a Controller calling a Repository directly</p>
   <svg viewBox="0 0 1700 480" width="1700" height="480" role="img" aria-label="Guardrails">
     <defs><marker id="a6" markerUnits="userSpaceOnUse" markerWidth="20" markerHeight="20" refX="18" refY="10" orient="auto"><path d="M0,0 L20,10 L0,20 z" fill="#000"/></marker></defs>
     <g text-anchor="middle">
@@ -679,12 +605,12 @@
       <text x="631" y="124" font-size="25">Detailed rules per area</text><text x="631" y="164" font-size="23" fill="#000">backend.md / frontend.md</text><text x="631" y="204" font-size="23" fill="#000">Applied to matching files</text>
       <rect x="872" y="20" width="390" height="300" rx="18" fill="#fff" stroke="#7048e8" stroke-width="4"/>
       <text x="1067" y="76" font-size="30" font-weight="800">Skills</text>
-      <text x="1067" y="124" font-size="25">Work procedures</text><text x="1067" y="164" font-size="23" fill="#000">/setup-env (Ch2)</text><text x="1067" y="204" font-size="23" fill="#000">/add-usecase (Ch7)</text>
+      <text x="1067" y="124" font-size="25">Work procedures</text><text x="1067" y="164" font-size="23" fill="#000">Ch2 /setup-env</text><text x="1067" y="204" font-size="23" fill="#000">Ch7 /add-usecase</text>
       <rect x="1308" y="20" width="392" height="300" rx="18" fill="#fff" stroke="#7048e8" stroke-width="4"/>
       <text x="1504" y="76" font-size="30" font-weight="800">Hooks</text>
       <text x="1504" y="124" font-size="25">Automatic checks</text><text x="1504" y="164" font-size="23" fill="#000">Runs right after edits</text><text x="1504" y="204" font-size="23" fill="#000">Failures go back to the AI</text>
       <rect x="0" y="352" width="1700" height="110" rx="18" fill="#fff" stroke="#000" stroke-width="3"/>
-      <text x="850" y="402" font-size="28" font-weight="800">+ Konsist architecture tests (Ch4)</text>
+      <text x="850" y="402" font-size="28" font-weight="800">+ Ch4 Konsist architecture tests</text>
       <text x="850" y="442" font-size="25" fill="#000">Rule violations show up as <code>./gradlew test</code> failures</text>
     </g>
     <text x="195" y="270" text-anchor="middle" font-size="22" fill="#7048e8" font-weight="700">Instructs</text>
@@ -699,7 +625,7 @@
   <span class="tag t-lec">Benefits in practice</span>
   <h1 class="title">Without layers, rules and the DB end up in one class</h1>
   <div class="cols" style="gap:28px">
-<div><div style="font-weight:700;font-size:24px;margin-bottom:6px">Anti-pattern (not code from this hands-on)</div><pre class="code" style="font-size:22px"><span class="k">@RestController</span>
+<div><div style="font-weight:700;font-size:24px;margin-bottom:6px">Anti-pattern example, not code from this hands-on</div><pre class="code" style="font-size:22px"><span class="k">@RestController</span>
 <span class="k">class</span> TransactionController(
   <span class="k">val</span> jpa: JpaTransactionRepository
 ) {
@@ -733,7 +659,7 @@
 <div>  <table class="t" style="font-size:26px">
     <tr><th style="width:190px">Layer</th><th>Change</th></tr>
     <tr><td class="n"><span class="pill l1">domain</span></td><td>None</td></tr>
-    <tr><td class="n"><span class="pill l2">usecase</span></td><td>None (still the interface)</td></tr>
+    <tr><td class="n"><span class="pill l2">usecase</span></td><td>None, still the interface</td></tr>
     <tr><td class="n"><span class="pill l3">adapter</span></td><td>Replace the RepositoryImpl</td></tr>
     <tr><td class="n"><span class="pill l4">framework</span></td><td>Connection settings only</td></tr>
   </table></div>
@@ -759,14 +685,14 @@
 <div><div class="note ok" style="font-size:27px"><ul class="pts" style="font-size:27px"><li>Interactor, Controller and JPA Entity stay unchanged</li><li>The new rule applies on every path that creates <code class="i">Transaction</code> or <code class="i">Amount</code></li><li>Only domain tests such as <code class="i">AmountTest</code> need updating</li></ul></div></div>
   </div>
   <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
-  <div class="note ng" style="margin-top:18px;font-size:26px">Note: adapter input validation (<code class="i">@Positive</code>) checks format; domain is the last line of defense for business rules</div>
+  <div class="note ng" style="margin-top:18px;font-size:26px">Note: adapter input validation with <code class="i">@Positive</code> checks format; domain is the last line of defense for business rules</div>
 </section>
 
 <section class="slide" data-title="Case 3 Easy testing">
   <span class="tag t-lec">Benefits in practice</span>
   <h1 class="title">Case 3  Test Interactor behavior without a DB</h1>
   <div class="cols" style="gap:28px">
-<div><div style="font-weight:700;font-size:24px;margin-bottom:6px">Backend (MockK)</div><pre class="code" style="font-size:21px"><span class="k">private val</span> transactionRepository = mockk&lt;TransactionRepository&gt;()
+<div><div style="font-weight:700;font-size:24px;margin-bottom:6px">Backend, MockK</div><pre class="code" style="font-size:21px"><span class="k">private val</span> transactionRepository = mockk&lt;TransactionRepository&gt;()
 <span class="k">private val</span> categoryRepository = mockk&lt;CategoryRepository&gt;()
 <span class="k">private val</span> interactor = CreateTransactionInteractor(
     transactionRepository, categoryRepository)
@@ -800,10 +726,10 @@ verify(exactly = 0) { transactionRepository.save(any()) }</pre></div>
     <tr><td class="n">Storage-proof</td><td>Repository interface in usecase</td><td>Only RepositoryImpl knows JPA</td></tr>
     <tr><td class="n">One place per rule</td><td>Invariants in domain</td><td>init of Amount and Transaction</td></tr>
     <tr><td class="n">Fast, DB-free tests</td><td>Dependency inversion</td><td>MockK, MockMvc and MSW tests</td></tr>
-    <tr><td class="n">Additive features</td><td>Build from inside out</td><td>The update (PUT) feature in Chapter 7</td></tr>
+    <tr><td class="n">Additive features</td><td>Build from inside out</td><td>The update feature using PUT in Chapter 7</td></tr>
     <tr><td class="n">Catch AI violations</td><td>Konsist architecture tests</td><td>4 ArchitectureTests and the hook</td></tr>
   </table>
-  <div class="note " style="margin-top:18px;font-size:27px">The cost is more layers and files. The payoff grows with change frequency, lifespan and team size</div>
+  <div class="note " style="margin-top:18px;font-size:27px"><ul class="pts"><li>The cost is more layers and files</li><li>The payoff grows with change frequency, lifespan and team size</li></ul></div>
   <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
 </section>
 
@@ -815,9 +741,9 @@ verify(exactly = 0) { transactionRepository.save(any()) }</pre></div>
     <tr><td class="n"><span class="pill l1">domain</span></td><td>Amount・Transaction・Category</td><td>types.ts・validateTransaction.ts</td></tr>
     <tr><td class="n"><span class="pill l2">usecase</span></td><td>CreateTransactionUseCase<br>TransactionRepository<br>CreateTransactionInteractor</td><td>TransactionRepository.ts<br>useTransactions.ts</td></tr>
     <tr><td class="n"><span class="pill l3">adapter</span></td><td>TransactionController・TransactionRequest<br>TransactionRepositoryImpl・TransactionJpaEntity</td><td>transactionApi.ts<br>TransactionForm・TransactionSection</td></tr>
-    <tr><td class="n"><span class="pill l4">framework</span></td><td>Spring DI wires it (BudgetappApplication)</td><td>app/transactions/page.tsx</td></tr>
+    <tr><td class="n"><span class="pill l4">framework</span></td><td>Spring DI wires it in BudgetappApplication</td><td>app/transactions/page.tsx</td></tr>
   </table>
-  <div class="note " style="margin-top:18px;font-size:27px">Order: domain → usecase → adapter → framework. Inner files are complete without knowing outer files</div>
+  <div class="note " style="margin-top:18px;font-size:27px"><ul class="pts"><li>Order: domain → usecase → adapter → framework</li><li>Inner files are complete without knowing outer files</li></ul></div>
   <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
 </section>
 
@@ -825,12 +751,12 @@ verify(exactly = 0) { transactionRepository.save(any()) }</pre></div>
   <span class="tag t-lec">Implementation examples</span>
   <h1 class="title">usecase defines input and output interfaces, and the Interactor writes the procedure</h1>
   <div class="cols" style="gap:28px">
-<div><pre class="code" style="font-size:21px"><span class="c">// Input port (called by the Controller)</span>
+<div><pre class="code" style="font-size:21px"><span class="c">// Input port, called by the Controller</span>
 <span class="k">interface</span> CreateTransactionUseCase {
   <span class="k">fun</span> execute(input: CreateTransactionInput): Transaction
 }
 
-<span class="c">// Output port (called by the Interactor)</span>
+<span class="c">// Output port, called by the Interactor</span>
 <span class="k">interface</span> TransactionRepository {
   <span class="k">fun</span> findById(id: Long): Transaction?
   <span class="k">fun</span> save(transaction: Transaction): Transaction
@@ -848,14 +774,14 @@ verify(exactly = 0) { transactionRepository.save(any()) }</pre></div>
 }</pre></div>
   </div>
   <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
-  <div class="note " style="margin-top:18px;font-size:26px">The Interactor imports only interfaces and domain (Spring annotations such as @Service aside)</div>
+  <div class="note " style="margin-top:18px;font-size:26px">The Interactor imports only interfaces and domain; Spring annotations such as @Service are excluded</div>
 </section>
 
 <section class="slide" data-title="Example adapter">
   <span class="tag t-lec">Implementation examples</span>
   <h1 class="title">adapter converts HTTP and DB formats into inner types</h1>
   <div class="cols" style="gap:28px">
-<div><div style="font-weight:700;font-size:24px;margin-bottom:6px">Controller (HTTP → UseCase)</div><pre class="code" style="font-size:22px"><span class="k">@PostMapping</span> <span class="k">@ResponseStatus</span>(CREATED)
+<div><div style="font-weight:700;font-size:24px;margin-bottom:6px">Controller: HTTP → UseCase</div><pre class="code" style="font-size:22px"><span class="k">@PostMapping</span> <span class="k">@ResponseStatus</span>(CREATED)
 <span class="k">fun</span> create(
   <span class="k">@Valid @RequestBody</span> request: TransactionRequest
 ): TransactionItemResponse {
@@ -863,7 +789,7 @@ verify(exactly = 0) { transactionRepository.save(any()) }</pre></div>
       .execute(request.toUseCaseInput())
   <span class="k">return</span> TransactionItemResponse.fromDomain(created)
 }</pre></div>
-<div><div style="font-weight:700;font-size:24px;margin-bottom:6px">RepositoryImpl (domain ⇄ JPA)</div><pre class="code" style="font-size:22px"><span class="k">@Component</span>
+<div><div style="font-weight:700;font-size:24px;margin-bottom:6px">RepositoryImpl: domain ⇄ JPA</div><pre class="code" style="font-size:22px"><span class="k">@Component</span>
 <span class="k">class</span> TransactionRepositoryImpl(...)
     : TransactionRepository {
   <span class="k">override fun</span> save(t: Transaction): Transaction {
@@ -905,7 +831,7 @@ verify(exactly = 0) { transactionRepository.save(any()) }</pre></div>
 repository = transactionApi</pre></div>
   </div>
   <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
-  <div class="note " style="margin-top:18px;font-size:26px">useTransactions knows nothing about fetch and transactionApi knows nothing about React. Only the default argument in TransactionSection joins them</div>
+  <div class="note " style="margin-top:18px;font-size:26px"><ul class="pts"><li>useTransactions knows nothing about fetch and transactionApi knows nothing about React</li><li>Only the default argument in TransactionSection joins them</li></ul></div>
 </section>
 
 <section class="slide" data-title="Deciding which layer">
@@ -920,23 +846,6 @@ repository = transactionApi</pre></div>
     <tr><td class="n">Formatting "¥1,000"</td><td><span class="pill l3">presentation</span></td><td>Concern of the screen</td></tr>
     <tr><td class="n">CORS and startup settings</td><td><span class="pill l4">framework</span></td><td>Framework configuration</td></tr>
   </table>
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
-</section>
-
-<!-- 13. Ch3 flow -->
-<section class="slide" data-title="Chapter 3 flow">
-  <span class="tag t-be">Chapter 3 Backend implementation</span>
-  <h1 class="title">Run checkpoints one at a time, from the inside out</h1>
-  <p class="lead">The 4 layers are not built at once, and the AI stops at each checkpoint to check the Dependency Rule</p>
-  <table class="t" style="font-size:28px">
-    <tr><th style="width:400px">Checkpoint</th><th>Creates</th><th style="width:520px">Check</th></tr>
-    <tr><td class="n">CP3-2 <span class="pill l1">domain</span></td><td>Amount・Transaction・BalanceSummary</td><td>No Spring / JPA imports</td></tr>
-    <tr><td class="n">CP3-3 <span class="pill l2">usecase</span></td><td>Input / Output Port・Interactor</td><td>No adapter or JPA imports</td></tr>
-    <tr><td class="n">CP3-4・5 <span class="pill l3">adapter</span></td><td>JPA Entity, Repository, DTO, Controller</td><td>No reference to framework</td></tr>
-    <tr><td class="n">CP3-6 <span class="pill l4">framework</span></td><td>CorsConfig</td><td>CORS allowed from :3000</td></tr>
-    <tr><td class="n">CP3-7〜10</td><td>Self-review, compileKotlin, curl checks</td><td>Each API works</td></tr>
-  </table>
-  <div class="note " style="margin-top:20px;font-size:28px">The AI runs one CP and stops → you check → "next checkpoint"</div>
   <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
 </section>
 
@@ -988,11 +897,11 @@ repository = transactionApi</pre></div>
         <polygon points="400,10 540,140 260,140" fill="#fff" stroke="#7048e8" stroke-width="4"/>
         <text x="400" y="106" font-size="26">Konsist</text>
         <polygon points="260,150 540,150 650,270 150,270" fill="#fff" stroke="#e67700" stroke-width="4"/>
-        <text x="400" y="222" font-size="26">MockMvc (Controller)</text>
+        <text x="400" y="222" font-size="26">MockMvc: Controller</text>
         <polygon points="150,280 650,280 760,400 40,400" fill="#fff" stroke="#1c7ed6" stroke-width="4"/>
-        <text x="400" y="352" font-size="26">MockK (Interactor)</text>
+        <text x="400" y="352" font-size="26">MockK: Interactor</text>
         <polygon points="40,410 760,410 800,530 0,530" fill="#fff" stroke="#2f9e44" stroke-width="4"/>
-        <text x="400" y="480" font-size="26">JUnit 5 (domain)</text>
+        <text x="400" y="480" font-size="26">JUnit 5: domain</text>
       </g>
       <text x="400" y="590" text-anchor="middle" font-size="24" fill="#000">Lower is faster and more independent</text>
     </svg>
@@ -1025,23 +934,6 @@ framework.dependsOn(domain, usecase, adapter)</pre>
   <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
 </section>
 
-<!-- 18. Ch5 flow -->
-<section class="slide" data-title="Chapter 5 flow">
-  <span class="tag t-fe">Chapters 5-6 Frontend</span>
-  <h1 class="title">Chapter 5 builds the frontend inside out</h1>
-  <table class="t" style="font-size:27px">
-    <tr><th style="width:400px">Checkpoint</th><th>Creates</th><th style="width:520px">Check</th></tr>
-    <tr><td class="n">CP5-2 <span class="pill n">Common UI</span></td><td>Button・Input</td><td>Type check passes</td></tr>
-    <tr><td class="n">CP5-3 <span class="pill l1">domain</span></td><td>types・validateTransaction</td><td>No React or fetch imports</td></tr>
-    <tr><td class="n">CP5-4 <span class="pill l2">usecase</span></td><td>TransactionRepository・useTransactions</td><td>Hook does not import adapter</td></tr>
-    <tr><td class="n">CP5-5 <span class="pill l3">adapter</span></td><td>transactionApi</td><td>Implements the interface</td></tr>
-    <tr><td class="n">CP5-6〜7 <span class="pill l3">presentation</span></td><td>UI parts, formatCurrency</td><td>No communication details</td></tr>
-    <tr><td class="n">CP5-8 <span class="pill l4">app</span></td><td>page.tsx</td><td>Build succeeds</td></tr>
-  </table>
-
-  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
-</section>
-
 <!-- 19. Frontend DIP -->
 <section class="slide" data-title="Frontend DIP">
   <span class="tag t-fe">Chapters 5-6 Frontend</span>
@@ -1050,10 +942,10 @@ framework.dependsOn(domain, usecase, adapter)</pre>
     <defs><marker id="a9" markerUnits="userSpaceOnUse" markerWidth="20" markerHeight="20" refX="18" refY="10" orient="auto"><path d="M0,0 L20,10 L0,20 z" fill="#000"/></marker>
     <marker id="a9b" markerUnits="userSpaceOnUse" markerWidth="20" markerHeight="20" refX="18" refY="10" orient="auto"><path d="M0,0 L20,10 L0,20 z" fill="#e67700"/></marker></defs>
     <g font-size="25" font-weight="800" text-anchor="middle">
-      <rect x="0" y="30" width="400" height="120" rx="16" fill="#fff" stroke="#e67700" stroke-width="4"/><text x="200" y="82">TransactionSection</text><text x="200" y="120" font-size="21" font-weight="500" fill="#000">Composition Root (presentation)</text>
-      <rect x="520" y="30" width="400" height="120" rx="16" fill="#fff" stroke="#1c7ed6" stroke-width="4"/><text x="720" y="82">useTransactions</text><text x="720" y="120" font-size="21" font-weight="500" fill="#000">Screen use case (usecase)</text>
-      <rect x="1040" y="30" width="400" height="120" rx="16" fill="#fff" stroke="#1c7ed6" stroke-width="4" stroke-dasharray="10 6"/><text x="1240" y="82">TransactionRepository</text><text x="1240" y="120" font-size="21" font-weight="500" fill="#000">interface (usecase)</text>
-      <rect x="1040" y="300" width="400" height="120" rx="16" fill="#fff" stroke="#e67700" stroke-width="4"/><text x="1240" y="352">transactionApi</text><text x="1240" y="390" font-size="21" font-weight="500" fill="#000">fetch implementation (adapter)</text>
+      <rect x="0" y="30" width="400" height="120" rx="16" fill="#fff" stroke="#e67700" stroke-width="4"/><text x="200" y="82">TransactionSection</text><text x="200" y="120" font-size="21" font-weight="500" fill="#000">Composition Root in presentation</text>
+      <rect x="520" y="30" width="400" height="120" rx="16" fill="#fff" stroke="#1c7ed6" stroke-width="4"/><text x="720" y="82">useTransactions</text><text x="720" y="120" font-size="21" font-weight="500" fill="#000">Screen use case in usecase</text>
+      <rect x="1040" y="30" width="400" height="120" rx="16" fill="#fff" stroke="#1c7ed6" stroke-width="4" stroke-dasharray="10 6"/><text x="1240" y="82">TransactionRepository</text><text x="1240" y="120" font-size="21" font-weight="500" fill="#000">interface in usecase</text>
+      <rect x="1040" y="300" width="400" height="120" rx="16" fill="#fff" stroke="#e67700" stroke-width="4"/><text x="1240" y="352">transactionApi</text><text x="1240" y="390" font-size="21" font-weight="500" fill="#000">fetch implementation in adapter</text>
       <rect x="1500" y="300" width="200" height="120" rx="16" fill="#fff" stroke="#000" stroke-width="3"/><text x="1600" y="372">fetch</text>
     </g>
     <g stroke="#000" stroke-width="4" marker-end="url(#a9)">
@@ -1081,7 +973,7 @@ framework.dependsOn(domain, usecase, adapter)</pre>
       <rect x="0" y="40" width="250" height="110" rx="14" fill="#fff" stroke="#2f9e44" stroke-width="4"/><text x="125" y="86">Testing Library</text><text x="125" y="120" font-size="20" font-weight="500" fill="#000">render / click</text>
       <rect x="340" y="40" width="270" height="110" rx="14" fill="#fff" stroke="#e67700" stroke-width="3"/><text x="475" y="86">TransactionSection</text><text x="475" y="120" font-size="20" font-weight="500" fill="#000">presentation</text>
       <rect x="700" y="40" width="250" height="110" rx="14" fill="#fff" stroke="#1c7ed6" stroke-width="3"/><text x="825" y="86">useTransactions</text><text x="825" y="120" font-size="20" font-weight="500" fill="#000">usecase</text>
-      <rect x="1040" y="40" width="250" height="110" rx="14" fill="#fff" stroke="#e67700" stroke-width="3"/><text x="1165" y="86">transactionApi</text><text x="1165" y="120" font-size="20" font-weight="500" fill="#000">adapter (fetch)</text>
+      <rect x="1040" y="40" width="250" height="110" rx="14" fill="#fff" stroke="#e67700" stroke-width="3"/><text x="1165" y="86">transactionApi</text><text x="1165" y="120" font-size="20" font-weight="500" fill="#000">adapter for fetch</text>
       <rect x="1380" y="40" width="320" height="110" rx="14" fill="#2f9e44" stroke="#2f9e44"/><text x="1540" y="86" fill="#fff">MSW server</text><text x="1540" y="120" font-size="20" font-weight="500" fill="#fff">In-memory handlers</text>
     </g>
     <g stroke="#000" stroke-width="4" marker-end="url(#a10)"><line x1="254" y1="95" x2="336" y2="95"/><line x1="614" y1="95" x2="696" y2="95"/><line x1="954" y1="95" x2="1036" y2="95"/><line x1="1294" y1="95" x2="1376" y2="95"/></g>
@@ -1113,8 +1005,8 @@ framework.dependsOn(domain, usecase, adapter)</pre>
     <text x="1350" y="442" text-anchor="middle" font-size="22" font-family="monospace">pnpm exec tsc --noEmit</text>
     <line x1="1450" y1="164" x2="1450" y2="226" stroke="#000" stroke-width="4" marker-end="url(#a11)"/>
     <g font-size="24" font-weight="800">
-      <rect x="0" y="230" width="640" height="100" rx="14" fill="#fff" stroke="#2f9e44" stroke-width="3"/><text x="320" y="288" text-anchor="middle" fill="#2f9e44">On success (exit 0), move on</text>
-      <rect x="0" y="360" width="640" height="100" rx="14" fill="#fff" stroke="#e67700" stroke-width="3"/><text x="320" y="406" text-anchor="middle" fill="#e67700">Failure (exit 2 and stderr)</text><text x="320" y="442" text-anchor="middle" font-size="22" font-weight="500" fill="#000">The error goes back to the AI, which fixes it</text>
+      <rect x="0" y="230" width="640" height="100" rx="14" fill="#fff" stroke="#2f9e44" stroke-width="3"/><text x="320" y="288" text-anchor="middle" fill="#2f9e44">On success with exit 0, move on</text>
+      <rect x="0" y="360" width="640" height="100" rx="14" fill="#fff" stroke="#e67700" stroke-width="3"/><text x="320" y="406" text-anchor="middle" fill="#e67700">Failure with exit 2 and stderr</text><text x="320" y="442" text-anchor="middle" font-size="22" font-weight="500" fill="#000">The error goes back to the AI, which fixes it</text>
       <rect x="745" y="290" width="190" height="100" rx="14" fill="#fff" stroke="#000" stroke-width="3"/><text x="840" y="348" text-anchor="middle">Result</text>
     </g>
     <line x1="996" y1="285" x2="940" y2="325" stroke="#000" stroke-width="4" marker-end="url(#a11)"/>
@@ -1129,27 +1021,68 @@ framework.dependsOn(domain, usecase, adapter)</pre>
 <section class="slide" data-title="Update feature exercise">
   <span class="tag t-ai">Chapter 7 Skills × Hooks</span>
   <h1 class="title">The exercise adds transaction editing to every layer</h1>
-  <p class="lead">Run <code class="i">/add-usecase</code> once, then type "Proceed to the next checkpoint"</p>
   <table class="t" style="font-size:26px">
     <tr><th style="width:250px">Layer</th><th>What is added or changed</th></tr>
     <tr><td class="n"><span class="pill l2">usecase</span></td><td><code class="i">UpdateTransactionUseCase</code> / <code class="i">UpdateTransactionInteractor</code></td></tr>
     <tr><td class="n"><span class="pill l3">adapter</span></td><td><code class="i">PUT /api/transactions/{id}</code>, DTO-to-input conversion</td></tr>
     <tr><td class="n"><span class="pill n">frontend</span></td><td><code class="i">updateTransaction</code> in <code class="i">TransactionRepository</code>, <code class="i">useTransactions</code>, an "Edit" button and an edit form</td></tr>
-    <tr><td class="n"><span class="pill n">Tests</span></td><td>Interactor (MockK), Controller (MockMvc), MSW PUT handler and integration test</td></tr>
+    <tr><td class="n"><span class="pill n">Tests</span></td><td>Interactor with MockK, Controller with MockMvc, MSW PUT handler and integration test</td></tr>
   </table>
+  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+</section>
+
+<!-- Free exercise -->
+<section class="slide" data-title="Free exercise">
+  <span class="tag t-ai">Chapter 7 Skills × Hooks</span>
+  <h1 class="title">Pick your own feature and implement it across all layers</h1>
+  <div class="cols" style="gap:40px">
+    <ol class="steps" style="font-size:28px">
+      <li>Choose one feature</li>
+      <li>Write down what to add in each layer</li>
+      <li>Implement inside out with <code class="i">/add-usecase</code></li>
+      <li>Verify with tests and the hook</li>
+      <li>Prepare your presentation</li>
+    </ol>
+    <div>
+      <table class="t" style="font-size:24px">
+        <tr><th>Feature idea</th><th>Layers mainly touched</th></tr>
+        <tr><td>Spending totals by category</td><td><span class="pill l2">usecase</span> <span class="pill l3">adapter</span> <span class="pill n">UI</span></td></tr>
+        <tr><td>Monthly income and expense summary</td><td><span class="pill l2">usecase</span> <span class="pill l3">adapter</span></td></tr>
+        <tr><td>Keyword search for transactions</td><td><span class="pill l2">usecase</span> <span class="pill l3">adapter</span> <span class="pill n">UI</span></td></tr>
+        <tr><td>Monthly budget and overspend display</td><td><span class="pill l1">domain</span> <span class="pill l2">usecase</span> <span class="pill l3">adapter</span></td></tr>
+        <tr><td>CSV export</td><td><span class="pill l2">usecase</span> <span class="pill l3">adapter</span></td></tr>
+        <tr><td>Automatic recurring transactions</td><td><span class="pill l1">domain</span> <span class="pill l2">usecase</span> <span class="pill l4">framework</span></td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+</section>
+
+<!-- Presentation -->
+<section class="slide" data-title="Presentation">
+  <span class="tag t-ai">Chapter 7 Skills × Hooks</span>
+  <h1 class="title">Present what you did and why</h1>
+  <table class="t" style="font-size:27px">
+    <tr><th style="width:430px">Topic</th><th>What to say</th></tr>
+    <tr><td class="n">What you built</td><td>The feature you added and how it behaves on screen or in the API</td></tr>
+    <tr><td class="n">Why this feature</td><td>Why you chose it and when it is used</td></tr>
+    <tr><td class="n">What went in which layer</td><td>What you placed in each layer and why</td></tr>
+    <tr><td class="n">How you kept the Dependency Rule</td><td>Where the AI nearly broke it and how you fixed it</td></tr>
+  </table>
+  <div class="note" style="margin-top:22px"><ul class="pts"><li>About 3 to 5 minutes per person</li><li>1 minute to introduce the feature, 2 to 3 minutes for layer placement and the Dependency Rule, 1 minute for questions</li></ul></div>
   <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
 </section>
 
 <!-- Impact of change -->
 <section class="slide" data-title="Impact of change">
-  <span class="tag t-lec">Lecture (Chapters 0-1)</span>
+  <span class="tag t-lec">Lecture, Chapters 0-1</span>
   <h1 class="title">Changes stay in the outer layers that change often</h1>
   <table class="t" style="font-size:27px">
     <tr><th style="width:430px">Change</th><th>Layer to modify</th><th style="width:420px">Layers untouched</th></tr>
     <tr><td>DB product or table structure</td><td>Repository implementation in <span class="pill l3">adapter</span></td><td>domain, usecase</td></tr>
     <tr><td>API JSON format or UI</td><td>DTOs and presentation in <span class="pill l3">adapter</span></td><td>domain, usecase</td></tr>
-    <tr><td>Business rule (e.g. amount limit)</td><td><span class="pill l1">domain</span> and its tests</td><td>How adapters are implemented</td></tr>
-    <tr><td>New feature (e.g. update)</td><td>Add usecase → adapter → UI in order</td><td>Existing Interactors</td></tr>
+    <tr><td>Business rule, for example the amount limit</td><td><span class="pill l1">domain</span> and its tests</td><td>How adapters are implemented</td></tr>
+    <tr><td>New feature, for example update</td><td>Add usecase → adapter → UI in order</td><td>Existing Interactors</td></tr>
   </table>
   <div class="note" style="margin-top:22px">Because dependencies point inward, inner layers can be tested without knowing outer changes</div>
   <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
@@ -1157,7 +1090,7 @@ framework.dependsOn(domain, usecase, adapter)</pre>
 
 <!-- Trade-offs -->
 <section class="slide" data-title="Design trade-offs">
-  <span class="tag t-lec">Lecture (Chapters 0-1)</span>
+  <span class="tag t-lec">Lecture, Chapters 0-1</span>
   <h1 class="title">The 4-layer design has costs, and this hands-on simplifies some parts</h1>
   <div class="cols" style="gap:36px">
     <div class="card l3"><h3>Costs</h3>
@@ -1165,7 +1098,7 @@ framework.dependsOn(domain, usecase, adapter)</pre>
     <div class="card l2"><h3>Simplifications here</h3>
       <ul class="pts" style="font-size:27px"><li>Interactors carry <code class="i">@Service</code> and <code class="i">@Transactional</code>, so usecase depends on Spring</li><li>UseCases return domain models directly</li></ul></div>
   </div>
-  <div class="note" style="margin-top:26px">Decide by business-rule complexity, lifespan, and team size. The team decides how much simplification to allow</div>
+  <div class="note" style="margin-top:26px"><ul class="pts"><li>Decide by business-rule complexity, lifespan, and team size</li><li>The team decides how much simplification to allow</li></ul></div>
   <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
 </section>
 
@@ -1188,13 +1121,118 @@ framework.dependsOn(domain, usecase, adapter)</pre>
   <div class="hero" style="top:360px">
     <h1>Q&amp;A and retrospective</h1>
     <div class="sub">Share what worked and where you got stuck</div>
-    <div class="meta">As a next step, try adding another use case (category management, monthly totals) with <code style="font-family:var(--mono)">/add-usecase</code></div>
+    <div class="meta">As a next step, try adding another use case, such as category management or monthly totals, with <code style="font-family:var(--mono)">/add-usecase</code></div>
   </div>
   <div class="foot" style="left:130px;right:130px"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
 </section>
 
+<!-- Appendix -->
+<section class="slide dark" data-title="Appendix">
+  <div class="hero" style="top:360px">
+    <h1>Appendix</h1>
+    <div class="sub">Checkpoint workflow</div>
+    <div class="meta">Workflow, app state per checkpoint, and the Chapter 3 and 5 checkpoint tables</div>
+  </div>
+  <div class="foot" style="left:130px;right:130px"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+</section>
+
+<!-- Checkpoint workflow -->
+<section class="slide" data-title="Checkpoint workflow">
+  <span class="tag">Appendix</span>
+  <h1 class="title">Work proceeds one checkpoint at a time</h1>
+  <svg viewBox="0 0 1700 300" width="1700" height="300" role="img" aria-label="How checkpoints proceed">
+    <defs><marker id="acp" markerUnits="userSpaceOnUse" markerWidth="20" markerHeight="20" refX="18" refY="10" orient="auto"><path d="M0,0 L20,10 L0,20 z" fill="#000"/></marker></defs>
+    <g text-anchor="middle" font-weight="800">
+      <rect x="0" y="20" width="380" height="150" rx="18" fill="#fff" stroke="#1c7ed6" stroke-width="4"/>
+      <text x="190" y="82" font-size="30" fill="#1c7ed6">Human</text><text x="190" y="126" font-size="26" font-weight="700" fill="#000">Enter the start prompt</text>
+      <rect x="440" y="20" width="380" height="150" rx="18" fill="#fff" stroke="#7048e8" stroke-width="4"/>
+      <text x="630" y="82" font-size="30" fill="#7048e8">AI</text><text x="630" y="126" font-size="26" font-weight="700" fill="#000">Run one CP only</text>
+      <rect x="880" y="20" width="380" height="150" rx="18" fill="#fff" stroke="#7048e8" stroke-width="4"/>
+      <text x="1070" y="82" font-size="30" fill="#7048e8">AI</text><text x="1070" y="126" font-size="26" font-weight="700" fill="#000">Report and stop</text>
+      <rect x="1320" y="20" width="380" height="150" rx="18" fill="#fff" stroke="#1c7ed6" stroke-width="4"/>
+      <text x="1510" y="82" font-size="30" fill="#1c7ed6">Human</text><text x="1510" y="126" font-size="26" font-weight="700" fill="#000">Review, then proceed</text>
+    </g>
+    <g stroke="#000" stroke-width="4" fill="none" marker-end="url(#acp)"><line x1="384" y1="95" x2="436" y2="95"/><line x1="824" y1="95" x2="876" y2="95"/><line x1="1264" y1="95" x2="1316" y2="95"/><path d="M1510,176 V250 H630 V176"/></g>
+    <text x="1070" y="284" text-anchor="middle" font-size="26" font-weight="700" fill="#1c7ed6">Type "Proceed to the next checkpoint"</text>
+  </svg>
+  <table class="t" style="margin-top:20px">
+    <tr><th style="width:230px">Kind</th><th>What the AI does</th><th style="width:560px">What the human checks</th></tr>
+    <tr><td class="n">Design</td><td>Presents classes, dependency direction and APIs, no code</td><td>Fit with rules, dependency direction</td></tr>
+    <tr><td class="n">Implementation</td><td>Implements one layer or part, then compiles and type-checks</td><td>No Dependency Rule violations</td></tr>
+    <tr><td class="n">Test</td><td>Adds and runs tests, checks for rule violations</td><td>Number of tests run and passed</td></tr>
+    <tr><td class="n">Verification</td><td>Starts the server and checks APIs and screens per feature</td><td>Expected values and display</td></tr>
+  </table>
+  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+</section>
+
+<!-- State per checkpoint, backend -->
+<section class="slide" data-title="App state per checkpoint, setup and backend">
+  <span class="tag">Appendix</span>
+  <h1 class="title">App state per checkpoint, setup and backend</h1>
+  <table class="t" style="font-size:28px">
+    <tr><th style="width:250px">Completed CP</th><th style="width:680px">Added at this point</th><th>State at this point</th></tr>
+    <tr><td class="n"><span class="tag t-ops" style="margin:0;font-size:24px;padding:0 14px">Ch2</span></td><td>Scaffold, DB, CLAUDE.md, rules, skills</td><td>5 seed rows in DB, build passes, no app features yet</td></tr>
+    <tr><td class="n"><span class="tag t-be" style="margin:0;font-size:24px;padding:0 14px">CP3-2</span></td><td>6 domain files</td><td>Compiles with no external libraries</td></tr>
+    <tr><td class="n"><span class="tag t-be" style="margin:0;font-size:24px;padding:0 14px">CP3-3</span></td><td>10 usecase files, Ports and Interactors</td><td>Compile only, not yet connected to DB or HTTP</td></tr>
+    <tr><td class="n"><span class="tag t-be" style="margin:0;font-size:24px;padding:0 14px">CP3-4~5</span></td><td>12 adapter files, JPA, DTO and Controller</td><td>Connected to HTTP and DB, ready to start</td></tr>
+    <tr><td class="n"><span class="tag t-be" style="margin:0;font-size:24px;padding:0 14px">CP3-6~10</span></td><td>1 framework file, 29 in total</td><td>4 APIs work: list, create, delete, 400 on bad input</td></tr>
+    <tr><td class="n"><span class="tag t-test" style="margin:0;font-size:24px;padding:0 14px">CP4-2~4</span></td><td>16 tests for domain, usecase, Controller</td><td>Business rules checked in milliseconds, no DB</td></tr>
+    <tr><td class="n"><span class="tag t-test" style="margin:0;font-size:24px;padding:0 14px">CP4-5~7</span></td><td>4 Konsist architecture tests</td><td>20 tests pass, dependency violations caught automatically</td></tr>
+  </table>
+  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+</section>
+
+<!-- State per checkpoint, frontend -->
+<section class="slide" data-title="App state per checkpoint, frontend and new feature">
+  <span class="tag">Appendix</span>
+  <h1 class="title">App state per checkpoint, frontend and new feature</h1>
+  <table class="t" style="font-size:28px">
+    <tr><th style="width:250px">Completed CP</th><th style="width:680px">Added at this point</th><th>State at this point</th></tr>
+    <tr><td class="n"><span class="tag t-fe" style="margin:0;font-size:24px;padding:0 14px">CP5-2~5</span></td><td>Shared UI, domain, usecase, adapter</td><td>Type check only, no screen yet</td></tr>
+    <tr><td class="n"><span class="tag t-fe" style="margin:0;font-size:24px;padding:0 14px">CP5-6~9</span></td><td>presentation, app pages</td><td>Build passes, screens render</td></tr>
+    <tr><td class="n"><span class="tag t-fe" style="margin:0;font-size:24px;padding:0 14px">CP5-10~12</span></td><td>No code added</td><td>List, create, delete, errors verified on screen</td></tr>
+    <tr><td class="n"><span class="tag t-test" style="margin:0;font-size:24px;padding:0 14px">CP6-2~7</span></td><td>MSW, Vitest, 13 unit and integration tests</td><td>Whole screen tested automatically, no backend</td></tr>
+    <tr><td class="n"><span class="tag t-ai" style="margin:0;font-size:24px;padding:0 14px">CP7-2~3</span></td><td>Update API using PUT and its tests</td><td>Hook catches dependency violations, all backend tests pass</td></tr>
+    <tr><td class="n"><span class="tag t-ai" style="margin:0;font-size:24px;padding:0 14px">CP7-4~7</span></td><td>Edit UI and its tests</td><td>Create, edit, delete work on screen, all tests pass</td></tr>
+  </table>
+  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+</section>
+
+<!-- 13. Ch3 flow -->
+<section class="slide" data-title="Chapter 3 flow">
+  <span class="tag">Appendix</span>
+  <h1 class="title">Run checkpoints one at a time, from the inside out</h1>
+  <table class="t" style="font-size:28px">
+    <tr><th style="width:400px">Checkpoint</th><th>Creates</th><th style="width:520px">Check</th></tr>
+    <tr><td class="n">CP3-2 <span class="pill l1">domain</span></td><td>Amount・Transaction・BalanceSummary</td><td>No Spring / JPA imports</td></tr>
+    <tr><td class="n">CP3-3 <span class="pill l2">usecase</span></td><td>Input / Output Port・Interactor</td><td>No adapter or JPA imports</td></tr>
+    <tr><td class="n">CP3-4・5 <span class="pill l3">adapter</span></td><td>JPA Entity, Repository, DTO, Controller</td><td>No reference to framework</td></tr>
+    <tr><td class="n">CP3-6 <span class="pill l4">framework</span></td><td>CorsConfig</td><td>CORS allowed from :3000</td></tr>
+    <tr><td class="n">CP3-7〜10</td><td>Self-review, compileKotlin, curl checks</td><td>Each API works</td></tr>
+  </table>
+  <div class="note " style="margin-top:20px;font-size:28px">The AI runs one CP and stops → you check → "next checkpoint"</div>
+  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+</section>
+
+<!-- 18. Ch5 flow -->
+<section class="slide" data-title="Chapter 5 flow">
+  <span class="tag">Appendix</span>
+  <h1 class="title">Chapter 5 builds the frontend inside out</h1>
+  <table class="t" style="font-size:27px">
+    <tr><th style="width:400px">Checkpoint</th><th>Creates</th><th style="width:520px">Check</th></tr>
+    <tr><td class="n">CP5-2 <span class="pill n">Common UI</span></td><td>Button・Input</td><td>Type check passes</td></tr>
+    <tr><td class="n">CP5-3 <span class="pill l1">domain</span></td><td>types・validateTransaction</td><td>No React or fetch imports</td></tr>
+    <tr><td class="n">CP5-4 <span class="pill l2">usecase</span></td><td>TransactionRepository・useTransactions</td><td>Hook does not import adapter</td></tr>
+    <tr><td class="n">CP5-5 <span class="pill l3">adapter</span></td><td>transactionApi</td><td>Implements the interface</td></tr>
+    <tr><td class="n">CP5-6〜7 <span class="pill l3">presentation</span></td><td>UI parts, formatCurrency</td><td>No communication details</td></tr>
+    <tr><td class="n">CP5-8 <span class="pill l4">app</span></td><td>page.tsx</td><td>Build succeeds</td></tr>
+  </table>
+
+  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+</section>
+
 </div>
-<div class="ui-hint" id="hint">← → / Space to move | Ctrl/⌘+P to save as PDF (1920×1080)</div>
+<div class="ui-hint" id="hint">← → / Space to move | Ctrl/⌘+P to save as a 1920×1080 PDF</div>
 
 <script>
 (function () {

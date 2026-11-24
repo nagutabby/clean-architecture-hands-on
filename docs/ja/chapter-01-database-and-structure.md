@@ -2,13 +2,13 @@
 
 ## このチャプターの目的
 
-コードを書き始める前に、データベースのテーブル設計と、バックエンド・フロントエンド双方のディレクトリ構成を確定させます。どのファイルがクリーンアーキテクチャのどの層に属するのか、そして依存の矢印が常に「外側から内側へ」向かう構造を把握することがこのチャプターのゴールです。
+コードを書き始める前に、データベースのテーブル設計と、バックエンド・フロントエンド両方のディレクトリ構成を決めます。どのファイルがクリーンアーキテクチャのどの層に属するのか、そして依存の矢印が常に「外側から内側へ」向かう構造を理解することが、このチャプターのゴールです。
 
 ---
 
-## 1. データベース設計（2テーブル構成）
+## 1. データベース設計: 2テーブル構成
 
-収支の区別（収入・支出）とカテゴリ紐付けのリレーションを扱う2テーブル構成を採用します。アプリケーション層のドメインルールだけでなく、データベース側の制約（`NOT NULL`・`FOREIGN KEY`・`CHECK`）でもデータの整合性を担保します。
+収入・支出という収支の区別と、リレーションによるカテゴリとの紐付けを扱うために、2テーブル構成を採用します。アプリケーション層のドメインルールだけでなく、データベース側の制約である `NOT NULL`・`FOREIGN KEY`・`CHECK` でもデータの整合性を守ります。
 
 ```text
 +------------------+          +------------------------+
@@ -23,17 +23,17 @@
                               +------------------------+
 ```
 
-### `categories`（カテゴリテーブル）
+### `categories`: カテゴリテーブル
 
-収支の分類（食費、日用品、給与など）を管理するマスタテーブルです。
+食費、日用品、給与などの収支の分類を管理するマスタテーブルです。
 
 | カラム名 | 物理名 | 型 | 制約 | 説明 |
 | :--- | :--- | :--- | :--- | :--- |
 | カテゴリID | `id` | `BIGSERIAL` | `PRIMARY KEY` | 自動採番ID |
 | カテゴリ名 | `name` | `VARCHAR(50)` | `NOT NULL` | 例:「食費」「日用品」「給与」 |
-| 収支タイプ | `type` | `VARCHAR(10)` | `NOT NULL`, `CHECK (type IN ('INCOME', 'EXPENSE'))` | `INCOME`（収入） / `EXPENSE`（支出） |
+| 収支タイプ | `type` | `VARCHAR(10)` | `NOT NULL`, `CHECK (type IN ('INCOME', 'EXPENSE'))` | `INCOME` は収入、`EXPENSE` は支出 |
 
-### `transactions`（家計簿明細テーブル）
+### `transactions`: 家計簿明細テーブル
 
 日々の収支明細を記録するトランザクションテーブルです。
 
@@ -48,11 +48,11 @@
 
 ---
 
-## 2. バックエンド（Spring Boot）のディレクトリ構成
+## 2. Spring Boot バックエンドのディレクトリ構成
 
-パッケージ名 `com.example.budgetapp` の直下に、クリーンアーキテクチャの4つの円に対応するパッケージを配置します。
+パッケージ名 `com.example.budgetapp` の直下に、クリーンアーキテクチャの4つの円に対応するパッケージを置きます。
 
-DB とのデータ変換（OR マッピング）およびクエリインターフェース定義は「外側の技術と内側のドメインを仲介する責務」であるため、第3層（`adapter.repository`）に配置します。これにより、第3層が第4層（`framework`）を参照する必要がなくなり、依存方向が一方向に統一されます。
+DB とのデータ変換である OR マッピングと、クエリインターフェースの定義は、「外側の技術と内側のドメインを仲介する」責務を持つため、第3層の `adapter.repository` に置きます。こうすると、第3層が第4層の `framework` を参照する必要がなくなり、依存の方向を一方向にそろえられます。
 
 ```text
 backend/
@@ -132,7 +132,7 @@ backend/
 
 ### 実行時の処理の流れとソースコードの依存方向
 
-クリーンアーキテクチャで最も重要なのは、「実行時に処理が呼ばれる順番」と「ソースコード上の依存方向」が逆転する構造です。
+クリーンアーキテクチャで最も重要なのは、「実行時に処理が呼ばれる順番」と「ソースコード上の依存方向」が逆向きになる構造です。
 
 ```text
 【実行時の処理の流れ（データの移動方向）】
@@ -144,16 +144,16 @@ Controller ──> InputPort <── Interactor ──> OutputPort <── Repos
 ```
 
 1. 層の飛び越えと逆向き依存の禁止
-   - すべての Controller は必ず Input Port（`GetCategoriesUseCase` など）を呼び出し、Output Port（`*Repository`）や `adapter.repository`（JPA）を直接参照しません。
-   - 第3層（`adapter`）は第1層（`domain`）と第2層（`usecase`）のみを参照し、外側の第4層（`framework`）には一切依存しません。
+   - すべての Controller は必ず `GetCategoriesUseCase` などの Input Port を呼び出します。Output Port である `*Repository` や、JPA を使う `adapter.repository` を直接参照してはいけません。
+   - 第3層の `adapter` は、第1層の `domain` と第2層の `usecase` だけを参照します。外側の第4層である `framework` には一切依存しません。
 2. Presenter に関する設計上の簡略化
-   本来のクリーンアーキテクチャには Use Case から出力を受け取る Output Boundary（Presenter）が存在しますが、JSON を返す現代の REST API では、Interactor の戻り値（Output Data）を Controller で DTO へ変換する構成が一般的です。本ハンズオンでもこの実践的な構成を採用します。
+   本来のクリーンアーキテクチャには、Use Case から出力を受け取る Output Boundary、つまり Presenter があります。しかし、JSON を返す現代の REST API では、Output Data である Interactor の戻り値を Controller で DTO に変換する構成が一般的です。本ハンズオンでもこの実践的な構成を採用します。
 
 ---
 
-## 3. フロントエンド（Next.js）のディレクトリ構成
+## 3. Next.js フロントエンドのディレクトリ構成
 
-フロントエンドにも同じく、内側のビジネスロジックが外側の通信手段やルーティング基盤に依存しない構成をとります。
+フロントエンドでも同様に、内側のビジネスロジックが、外側の通信手段やルーティング基盤に依存しない構成にします。
 
 ```text
 frontend/
@@ -200,18 +200,18 @@ frontend/
 
 ### フロントエンドにおける責務分離のポイント
 
-- `presentation` と `adapter` がともに第3層（Interface Adapters）に属する理由
-  クリーンアーキテクチャの同心円では、「UI の入力受付・画面描画（Controller / Presenter に相当）」と「外部システムとの入出力変換（Gateway / API クライアントに相当）」は、どちらも内側のドメイン・ユースケースを外側の世界とつなぐ役割を持つため、同じ第3層（Interface Adapters）に位置づけられます。
-- UI コンポーネントからの `adapter` 直接参照の制限（Composition Root）
-  `presentation` 内の純粋な表示コンポーネント（`BalanceSummaryCard`, `TransactionForm`, `TransactionList`）は `adapter/` を直接 import してはなりません。また、Next.js App Router では Server Component（`app/transactions/page.tsx`）から Client Component へ関数を含むオブジェクトを props で直接渡せないため、機能のルートコンテナである `TransactionSection.tsx` のみが Composition Root（依存性注入の組み立て役）として `adapter/transactionApi` をデフォルト引数で受け取り、`useTransactions` へ注入します。
+- `presentation` と `adapter` がともに第3層の Interface Adapters に属する理由
+  クリーンアーキテクチャの同心円では、「UI の入力受付・画面描画」は Controller / Presenter に相当し、「外部システムとの入出力変換」は Gateway / API クライアントに相当します。どちらも内側のドメイン・ユースケースを外側の世界とつなぐ役割を持ちます。そのため、同じ第3層の Interface Adapters に位置づけます。
+- UI コンポーネントから `adapter` を直接参照しない、Composition Root の考え方
+  `presentation` 内の純粋な表示コンポーネントである `BalanceSummaryCard`, `TransactionForm`, `TransactionList` は、`adapter/` を直接 import してはいけません。また、Next.js App Router では、`app/transactions/page.tsx` などの Server Component から Client Component へ、関数を含むオブジェクトを props で直接渡せません。そこで、機能のルートコンテナである `TransactionSection.tsx` だけが Composition Root、つまり依存性注入の組み立て役になります。`adapter/transactionApi` をデフォルト引数で受け取り、`useTransactions` に注入します。
 - Domain 層と Presentation 層の分離
-  通貨フォーマット（`formatCurrency.ts`）は画面表示のためのロジックであるため `presentation/utils/` に配置します。一方、金額やタイトルの業務ルール検証（`validateTransaction.ts`）は純粋なドメインルールとして `domain/` に配置します。
+  通貨フォーマットの `formatCurrency.ts` は画面表示のためのロジックなので、`presentation/utils/` に置きます。一方、金額やタイトルの業務ルールを検証する `validateTransaction.ts` は純粋なドメインルールなので、`domain/` に置きます。
 
 ---
 
 ## 4. Claude Code で進める際の確認事項
 
-この構成をベースに、次の Chapter 2 で Claude Code 用の設計ルールファイル（`CLAUDE.md` および `.claude/rules/`）を作成します。
+この構成をもとに、次の Chapter 2 で Claude Code 用の設計ルールファイルである `CLAUDE.md` と `.claude/rules/` を作成します。
 
-1. 新しいファイルを作成する際は、必ず上記のディレクトリ構成のどの層（`domain` / `usecase` / `adapter` / `framework`、または `domain` / `usecase` / `adapter` / `presentation` / `app`）に属するかを確認してから配置します。
-2. 内側の層のファイルを作成・編集した直後は、外側の層のパッケージやフレームワーク固有の `import` が混入していないかを確認します。
+1. 新しいファイルを作るときは、先に上記のディレクトリ構成を見て、そのファイルがどの層に属するかを確認してから配置します。層の名前は、バックエンドでは `domain` / `usecase` / `adapter` / `framework`、フロントエンドでは `domain` / `usecase` / `adapter` / `presentation` / `app` です。
+2. 内側の層のファイルを作成・編集した直後は、外側の層のパッケージやフレームワーク固有の `import` が紛れ込んでいないかを確認します。

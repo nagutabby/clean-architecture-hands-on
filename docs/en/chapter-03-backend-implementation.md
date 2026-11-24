@@ -1,29 +1,29 @@
-# Chapter 3: Backend Implementation (Spring Boot / Kotlin)
+# Chapter 3: Backend Implementation with Spring Boot / Kotlin
 
 ## Purpose of This Chapter
 
-Based on the `CLAUDE.md` and `.claude/rules/backend.md` created in Chapter 2, you have Claude Code (the AI) implement the four backend layers.
+Based on the `CLAUDE.md` and `.claude/rules/backend.md` created in Chapter 2, you have Claude Code, an AI, implement the four backend layers.
 
-To experience the Dependency Rule of Clean Architecture, you implement step by step from the innermost layer 1 (Entities) to the outermost layer 4 (Frameworks & Drivers), moving from the inside out. Each checkpoint lists the instruction to give Claude Code, the implementation code the AI should produce, and the design points to note.
+To experience the Dependency Rule of Clean Architecture, you implement from the innermost layer 1, Entities, to the outermost layer 4, Frameworks & Drivers, working from the inside out. Each checkpoint gives the instruction for Claude Code, the implementation code the AI should produce, and the design points to note.
 
-Implement the layers in order from the inner layers to the outer layers, and then verify the behavior feature by feature.
+Implement the layers from the inside out, then verify the behavior feature by feature.
 
 | CP | Kind | Content |
 | :--- | :--- | :--- |
-| CP3-1 | Design | Have the AI present the backend design (class list, dependency directions, API specification) and approve it |
+| CP3-1 | Design | Have the AI present a backend design that includes the class list, dependency directions, and API specification, and approve it |
 | CP3-2 | Implementation | Layer 1 `domain`: value objects, entities, aggregation logic |
 | CP3-3 | Implementation | Layer 2 `usecase`: Output Port, Input Port, Interactor |
-| CP3-4 | Implementation | Layer 3 `adapter` (DB side): JPA Entity, JPA Repository, Repository implementation |
-| CP3-5 | Implementation | Layer 3 `adapter` (Web side): DTO, Controller, exception handler |
+| CP3-4 | Implementation | Layer 3 `adapter`, DB side: JPA Entity, JPA Repository, Repository implementation |
+| CP3-5 | Implementation | Layer 3 `adapter`, Web side: DTO, Controller, exception handler |
 | CP3-6 | Implementation | Layer 4 `framework`: CORS configuration |
 | CP3-7 | Test | Dependency direction rule check and compile check |
-| CP3-8 | Verification | Start the server; category list and transaction list (empty state) |
-| CP3-9 | Verification | Create transactions, reflection in the list and totals, input errors (400) |
+| CP3-8 | Verification | Start the server, category list, and transaction list in the empty state |
+| CP3-9 | Verification | Create transactions, check the list and totals, and input errors returning 400 |
 | CP3-10 | Verification | Delete transactions, delete a non-existent ID, stop the server |
 
 ## How to Proceed in This Chapter
 
-In this chapter, you proceed through the checkpoints (CPs) in the table above **one at a time**. After finishing each CP, Claude Code reports the result, stops, and waits for the next instruction (this is defined in the "Checkpoint operation" section of `CLAUDE.md`).
+In this chapter, you proceed through the checkpoints, or CPs, in the table above **one at a time**. After finishing each CP, Claude Code reports the result, stops, and waits for the next instruction. This behavior is defined in the "Checkpoint operation" section of `CLAUDE.md`.
 
 1. Start Claude Code and enter the "Start prompt" below. Claude Code carries out only the first CP and stops.
 2. Compare the report with the "Points to check" of each CP to verify the result.
@@ -122,9 +122,9 @@ After verifying, stop the started server and confirm that port 8080 has been rel
 
 ## CP3-1 [Design] Present and Approve the Backend Design
 
-Before writing code, have Claude Code produce only a design. In Clean Architecture, deciding in advance which classes go in which layer and who depends on whom makes it harder for later implementation to skip layers.
+Before writing code, have Claude Code produce only a design. In Clean Architecture, deciding in advance which classes go in which layer and who depends on whom makes it less likely that later implementation skips a layer.
 
-Claude Code creates no files. Review the presented design against `.claude/rules/backend.md` and the directory structure from Chapter 1.
+Claude Code creates no files. Check that the presented design matches `.claude/rules/backend.md` and the directory structure from Chapter 1.
 
 ### Guideline for the Design
 
@@ -133,25 +133,25 @@ If the following is presented, you can proceed to the later CPs.
 | Layer | Classes | Content |
 | :--- | :--- | :--- |
 | `domain` | 6 | `DomainException`, `TransactionType`, `Amount`, `Category`, `Transaction`, `BalanceSummary` |
-| `usecase` | 10 | 2 Output Ports, 4 Input Ports (get Categories, get Transactions, Create, Delete), 4 Interactors |
+| `usecase` | 10 | 2 Output Ports, 4 Input Ports for getting Categories, getting Transactions, Create, and Delete, and 4 Interactors |
 | `adapter` | 12 | 2 JPA Entities, 2 Spring Data Repositories, 2 Repository implementations, 3 DTOs, 2 Controllers, 1 `GlobalExceptionHandler` |
 | `framework` | 1 | `CorsConfig` |
 
-There are four REST APIs: `GET /api/categories`, `GET /api/transactions`, `POST /api/transactions` (201), and `DELETE /api/transactions/{id}` (204).
+There are four REST APIs: `GET /api/categories`, `GET /api/transactions`, `POST /api/transactions`, and `DELETE /api/transactions/{id}`. A successful POST returns 201 and a successful DELETE returns 204.
 
 ### Points to Check
 
-- All dependency directions are "outer -> inner" (`domain` depends on nothing)
-- `TransactionRepository` (Output Port) is placed in `usecase`, and its implementation class is placed in `adapter`
-- Controllers depend only on `*UseCase` (Input Port)
+- All dependency directions are "outer -> inner". `domain` depends on nothing
+- `TransactionRepository`, the Output Port, is placed in `usecase`, and its implementation class is placed in `adapter`
+- Controllers depend only on `*UseCase`, the Input Port
 
-When the checks pass, type "Proceed to the next checkpoint" in Claude Code. (Next: CP3-2)
+When the checks pass, type "Proceed to the next checkpoint" in Claude Code. Next is CP3-2.
 
 ---
 
-## CP3-2 [Implementation] Layer 1: Entities (`domain` package)
+## CP3-2 [Implementation] Layer 1 Entities: `domain` Package
 
-First, have the AI implement the domain layer at the core of the system. The rule is that this layer contains no `import` statements from Spring Framework or JPA.
+First, have the AI implement the domain layer at the core of the system. The rule is that this layer contains no `import` statements from Spring Framework or JPA at all.
 
 ### Implementation Code and Design Points
 
@@ -178,8 +178,8 @@ enum class TransactionType {
 }
 ```
 
-#### `Amount.kt` (value object)
-Instead of leaving the business rule "an amount must be a positive integer of 1 yen or more" in a primitive type (`Int`), it is enclosed in a value object. Using a `value class` provides type safety without runtime memory overhead.
+#### `Amount.kt`: Value Object
+Instead of leaving the business rule "an amount must be a positive integer of 1 yen or more" in a primitive `Int`, enclose it in a value object. A `value class` gives you type safety without runtime memory overhead.
 
 `backend/src/main/kotlin/com/example/budgetapp/domain/model/Amount.kt`
 
@@ -211,10 +211,10 @@ data class Category(
 )
 ```
 
-#### `Transaction.kt` (entity)
-This model expresses the business concepts of the application rather than the database table definition. By holding the `Category` object itself instead of `categoryId: Long`, it can have behavior that determines whether it is income or expense (`isIncome()` / `isExpense()`).
+#### `Transaction.kt`: Entity
+This model expresses the business concepts of the application rather than the database table definition. By holding the `Category` object itself instead of `categoryId: Long`, it can have behavior that determines whether it is income or expense, namely `isIncome()` and `isExpense()`.
 
-In addition, by verifying that the title is present and at most 100 characters in the `init` block, it guarantees that no invalid state exists regardless of the path through which an instance is created (the model invariant).
+In addition, the `init` block checks that the title is present and at most 100 characters. This guarantees that no instance can be in an invalid state, however it is created. This is the model invariant.
 
 `backend/src/main/kotlin/com/example/budgetapp/domain/model/Transaction.kt`
 
@@ -246,7 +246,7 @@ data class Transaction(
 }
 ```
 
-#### `BalanceSummary.kt` (domain model for income and expense totals)
+#### `BalanceSummary.kt`: Domain Model for Income and Expense Totals
 `backend/src/main/kotlin/com/example/budgetapp/domain/model/BalanceSummary.kt`
 
 ```kotlin
@@ -283,19 +283,19 @@ data class BalanceSummary(
 - Claude Code's report includes that there were 0 `org.springframework` / `jakarta` imports and that `compileKotlin` succeeded
 - `Amount` rejects values below 1 yen, and `Transaction` rejects an empty title and a title of 101 or more characters, with `DomainException`
 
-When the checks pass, type "Proceed to the next checkpoint" in Claude Code. (Next: CP3-3)
+When the checks pass, type "Proceed to the next checkpoint" in Claude Code. Next is CP3-3.
 
 ---
 
-## CP3-3 [Implementation] Layer 2: Use Cases (`usecase` package)
+## CP3-3 [Implementation] Layer 2 Use Cases: `usecase` Package
 
-Next, have the AI implement the operations (use cases) the application offers to users. This layer references only layer 1 (`domain`) and does not depend at all on the outer layer 3 (`adapter` / JPA) or layer 4 (`framework`). As explained in Chapter 0, as a practical trade-off this hands-on uses only Spring's `@Service` and `@Transactional` as annotations.
+Next, have the AI implement the use cases, which are the operations the application offers to users. This layer references only layer 1, `domain`, and does not depend at all on the outer layer 3, `adapter` and JPA, or layer 4, `framework`. As explained in Chapter 0, this hands-on uses only Spring's `@Service` and `@Transactional` as annotations, as a practical trade-off.
 
 ### Implementation Code and Design Points
 
-#### Output Port (the outgoing contract interface)
+#### Output Port: The Outgoing Contract Interface
 
-These are the interfaces through which a use case asks the outside (the database, etc.) to persist data. Because the implementation classes are placed in layer 3 (`adapter.repository`), the Dependency Inversion Principle (DIP) holds.
+These are the interfaces through which a use case asks the outside, such as the database, to save data. Because the implementation classes are placed in layer 3, `adapter.repository`, the Dependency Inversion Principle holds.
 
 `backend/src/main/kotlin/com/example/budgetapp/usecase/output/CategoryRepository.kt`
 
@@ -325,7 +325,7 @@ interface TransactionRepository {
 }
 ```
 
-#### Input Port (the incoming contract interface)
+#### Input Port: The Incoming Contract Interface
 
 This is the contract through which the outer Controller calls a use case. Defining one interface per operation prevents responsibilities from growing too large.
 
@@ -390,7 +390,7 @@ interface DeleteTransactionUseCase {
 }
 ```
 
-#### Interactor (implementation of the use cases)
+#### Interactor: Implementation of the Use Cases
 
 `backend/src/main/kotlin/com/example/budgetapp/usecase/interactor/GetCategoriesInteractor.kt`
 
@@ -516,21 +516,21 @@ class DeleteTransactionInteractor(
 - The `Interactor` classes do not import classes from `adapter` and depend only on the `*Repository` interfaces
 - Claude Code's report includes that there were 0 `adapter` / `framework` / `jakarta.persistence` imports and that `compileKotlin` succeeded
 
-When the checks pass, type "Proceed to the next checkpoint" in Claude Code. (Next: CP3-4)
+When the checks pass, type "Proceed to the next checkpoint" in Claude Code. Next is CP3-4.
 
 ---
 
-## CP3-4 [Implementation] Layer 3: Interface Adapters (DB side `adapter.repository`)
+## CP3-4 [Implementation] Layer 3 Interface Adapters: DB Side `adapter.repository`
 
-Next, have the AI implement the adapter layer, which converts data formats between layer 2 (Use Cases) and the outside (DB, HTTP). This layer is divided into two subpackages: the DB side is implemented in CP3-4 and the Web side in CP3-5.
+Next, have the AI implement the adapter layer, which converts data formats between layer 2, Use Cases, and the outside, such as the DB and HTTP. This layer is divided into two subpackages: the DB side is implemented in CP3-4 and the Web side in CP3-5.
 
-- `adapter.repository` (DB adapter): JPA Entities, Spring Data JPA interfaces, and `*RepositoryImpl` classes that implement the Output Ports
-- `adapter.controller` (Web adapter): REST Controllers, DTOs, and the common exception handler
+- `adapter.repository`, the DB adapter: JPA Entities, Spring Data JPA interfaces, and `*RepositoryImpl` classes that implement the Output Ports
+- `adapter.controller`, the Web adapter: REST Controllers, DTOs, and the common exception handler
 
 ### Implementation Code and Design Points
 
-#### JPA Entity (mapping to DB tables)
-By separating JPA entities from domain models, you prevent the RDB table structure (the foreign key `categoryId: Long` and the constraint of a default-argument constructor) from affecting the design of the domain layer.
+#### JPA Entity: Mapping to DB Tables
+By keeping JPA entities separate from domain models, the RDB table structure does not affect the design of the domain layer. Examples of that structure are the foreign key `categoryId: Long` and the default-argument constructor constraint.
 
 `backend/src/main/kotlin/com/example/budgetapp/adapter/repository/entity/CategoryJpaEntity.kt`
 
@@ -616,7 +616,7 @@ interface JpaTransactionRepository : JpaRepository<TransactionJpaEntity, Long> {
 }
 ```
 
-#### Repository Implementation (conversion between the DB and domain models)
+#### Repository Implementation: Conversion Between the DB and Domain Models
 
 `backend/src/main/kotlin/com/example/budgetapp/adapter/repository/CategoryRepositoryImpl.kt`
 
@@ -728,21 +728,21 @@ class TransactionRepositoryImpl(
 ### Points to Check
 
 - Under `adapter/repository/`, 2 files in `entity`, 2 files in `jpa`, and 2 `*RepositoryImpl` files are created
-- JPA annotations (such as `@Entity`) exist only in `adapter/repository/entity` and are not attached to `domain` classes
+- JPA annotations such as `@Entity` exist only in `adapter/repository/entity` and are not attached to `domain` classes
 - `*RepositoryImpl` implements the `usecase.output` interfaces and converts between JPA Entities and domain models in both directions
 - Claude Code's report includes that `compileKotlin` succeeded
 
-When the checks pass, type "Proceed to the next checkpoint" in Claude Code. (Next: CP3-5)
+When the checks pass, type "Proceed to the next checkpoint" in Claude Code. Next is CP3-5.
 
 ---
 
-## CP3-5 [Implementation] Layer 3: Interface Adapters (Web side `adapter.controller`)
+## CP3-5 [Implementation] Layer 3 Interface Adapters: Web Side `adapter.controller`
 
 After the DB side, have the AI implement the Web side, which handles HTTP input and output. The important points are that Controllers depend only on the `usecase.input` interfaces and never call a Repository directly.
 
 ### Implementation Code and Design Points
 
-#### DTO (type definitions for HTTP requests and responses)
+#### DTO: Type Definitions for HTTP Requests and Responses
 
 Instead of returning domain models directly as JSON, converting them to API-specific DTOs separates changes to the API response format from changes to domain logic.
 
@@ -862,7 +862,7 @@ data class TransactionListResponse(
 )
 ```
 
-#### Controller (REST API endpoints)
+#### Controller: REST API Endpoints
 
 `backend/src/main/kotlin/com/example/budgetapp/adapter/controller/CategoryController.kt`
 
@@ -931,7 +931,7 @@ class TransactionController(
 }
 ```
 
-#### GlobalExceptionHandler (common exception handling)
+#### GlobalExceptionHandler: Common Exception Handling
 
 `backend/src/main/kotlin/com/example/budgetapp/adapter/controller/advice/GlobalExceptionHandler.kt`
 
@@ -985,13 +985,13 @@ class GlobalExceptionHandler {
 - `GlobalExceptionHandler` handles three kinds: `MethodArgumentNotValidException`, `HttpMessageNotReadableException`, and `DomainException`
 - Claude Code's report includes that `compileKotlin` succeeded
 
-When the checks pass, type "Proceed to the next checkpoint" in Claude Code. (Next: CP3-6)
+When the checks pass, type "Proceed to the next checkpoint" in Claude Code. Next is CP3-6.
 
 ---
 
-## CP3-6 [Implementation] Layer 4: Frameworks & Drivers (`framework` package)
+## CP3-6 [Implementation] Layer 4 Frameworks & Drivers: `framework` Package
 
-In the outermost layer 4 (`framework`), place cross-cutting settings for the framework as a whole, such as the CORS configuration that allows communication from the frontend (`http://localhost:3000`).
+In the outermost layer 4, `framework`, place settings that apply to the framework as a whole, such as the CORS configuration that allows communication from the frontend running at `http://localhost:3000`.
 
 ### Implementation Code and Design Points
 
@@ -1022,47 +1022,47 @@ class CorsConfig : WebMvcConfigurer {
 - Only `framework/config/CorsConfig.kt` is created
 - The allowed origin is `http://localhost:3000`, and it is limited to `/api/**`
 
-When the checks pass, type "Proceed to the next checkpoint" in Claude Code. (Next: CP3-7)
+When the checks pass, type "Proceed to the next checkpoint" in Claude Code. Next is CP3-7.
 
 ---
 
 ## CP3-7 [Test] Architecture Rule Check and Compile Check
 
-Once the implementation is complete, have Claude Code run a self-review of the architecture rules and a compile check. Automated tests (Konsist) are introduced in Chapter 4, so this check here is equivalent to a visual review by the AI.
+Once the implementation is complete, have Claude Code run a self-review of the architecture rules and a compile check. Automated tests with Konsist are introduced in Chapter 4. The check here has the AI do what a person would do in a visual review.
 
 ### Points to Check
 
 - Claude Code's report shows 0 violations of the four-layer dependency direction rules and the rule prohibiting skipping layers
 - `./gradlew compileKotlin` succeeds
 
-When the checks pass, type "Proceed to the next checkpoint" in Claude Code. (Next: CP3-8)
+When the checks pass, type "Proceed to the next checkpoint" in Claude Code. Next is CP3-8.
 
 ---
 
-## CP3-8 [Verification] Start the Server; Category List and Transaction List (Empty State)
+## CP3-8 [Verification] Start the Server, Category List, and Transaction List in the Empty State
 
-From here on, you verify the API behavior feature by feature. Leave the server running until CP3-10. Before starting it, confirm that the Docker PostgreSQL (`budget-app-db`) is running.
+From here on, you verify the API behavior feature by feature. Leave the server running until CP3-10. Before starting it, confirm that the Docker PostgreSQL, `budget-app-db`, is running.
 
 ### Points to Check
 
 - `GET /api/categories` returns 200 with the 5 initial master data records
 - `GET /api/transactions` returns 200, `transactions` is an empty array, and all three `summary` fields are 0
-- The Flyway migration was applied at startup (startup log)
+- The Flyway migration was applied at startup. Check the startup log
 
-When the checks pass, type "Proceed to the next checkpoint" in Claude Code. (Next: CP3-9)
+When the checks pass, type "Proceed to the next checkpoint" in Claude Code. Next is CP3-9.
 
 ---
 
-## CP3-9 [Verification] Create Transactions, Reflection in the List and Totals, Input Errors (400)
+## CP3-9 [Verification] Create Transactions, Check the List and Totals, and Input Errors Returning 400
 
 ### Points to Check
 
 - Creating the salary of 300000 yen and the food expense of 1500 yen both return 201 Created
 - `summary` in `GET /api/transactions` is `totalIncome` 300000, `totalExpense` 1500, `balance` 298500
 - When `amount` is 0, 400 and an error JSON of the form `{"message": ..., "details": [...]}` are returned
-- When `transactionDate` is invalid, 400 and `{"message": "リクエストの形式が不正です。"}` ("The request format is invalid.") are returned (the response must not be in Spring's default error format)
+- When `transactionDate` is invalid, 400 and `{"message": "リクエストの形式が不正です。"}`, which means "The request format is invalid.", are returned. Confirm that the response is not in Spring's default error format.
 
-When the checks pass, type "Proceed to the next checkpoint" in Claude Code. (Next: CP3-10)
+When the checks pass, type "Proceed to the next checkpoint" in Claude Code. Next is CP3-10.
 
 ---
 
@@ -1074,4 +1074,4 @@ When the checks pass, type "Proceed to the next checkpoint" in Claude Code. (Nex
 - Deleting a non-existent ID returns 400 and an error message
 - The server is stopped and port 8080 is released
 
-Once the API behavior of the four features (category list, transaction list, create, delete) is confirmed, the backend implementation is complete. In Chapter 4, you will build automated tests (domain unit tests, use case tests with MockK, MockMvc integration tests, Konsist architecture tests) for the code implemented here.
+Once you have confirmed the API behavior of the four features, namely category list, transaction list, create, and delete, the backend implementation is complete. In Chapter 4, you will build automated tests for the code implemented here. Specifically, these are domain unit tests, use case tests with MockK, MockMvc integration tests, and Konsist architecture tests.

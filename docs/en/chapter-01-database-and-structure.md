@@ -2,13 +2,13 @@
 
 ## Purpose of This Chapter
 
-Before writing any code, you finalize the database table design and the directory structure of both the backend and the frontend. The goal of this chapter is to understand which Clean Architecture layer each file belongs to, and the structure in which dependency arrows always point "from the outside in".
+Before writing any code, you decide the database table design and the directory structure of both the backend and the frontend. The goal of this chapter is to understand which Clean Architecture layer each file belongs to, and the structure in which dependency arrows always point "from the outside in".
 
 ---
 
-## 1. Database Design (Two-Table Structure)
+## 1. Database Design: Two-Table Structure
 
-We adopt a two-table structure that handles the distinction between income and expense and the relationship linking transactions to categories. Data integrity is guaranteed not only by domain rules in the application layer but also by database constraints (`NOT NULL`, `FOREIGN KEY`, `CHECK`).
+We adopt a two-table structure to handle the distinction between income and expense, and the relationship that links each transaction to a category. Data integrity is protected not only by domain rules in the application layer but also by the database constraints `NOT NULL`, `FOREIGN KEY`, and `CHECK`.
 
 ```text
 +------------------+          +------------------------+
@@ -23,17 +23,17 @@ We adopt a two-table structure that handles the distinction between income and e
                               +------------------------+
 ```
 
-### `categories` (Category table)
+### `categories`: Category table
 
-A master table that manages the classification of income and expenses (food, daily necessities, salary, etc.).
+A master table that manages the classification of income and expenses, such as food, daily necessities, and salary.
 
 | Column | Physical name | Type | Constraints | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | Category ID | `id` | `BIGSERIAL` | `PRIMARY KEY` | Auto-generated ID |
-| Category name | `name` | `VARCHAR(50)` | `NOT NULL` | Examples: "食費" (food), "日用品" (daily necessities), "給与" (salary) |
-| Transaction type | `type` | `VARCHAR(10)` | `NOT NULL`, `CHECK (type IN ('INCOME', 'EXPENSE'))` | `INCOME` (income) / `EXPENSE` (expense) |
+| Category name | `name` | `VARCHAR(50)` | `NOT NULL` | Examples: "食費" for food, "日用品" for daily necessities, "給与" for salary |
+| Transaction type | `type` | `VARCHAR(10)` | `NOT NULL`, `CHECK (type IN ('INCOME', 'EXPENSE'))` | `INCOME` is income, `EXPENSE` is expense |
 
-### `transactions` (Transaction table)
+### `transactions`: Transaction table
 
 A transaction table that records daily income and expense entries.
 
@@ -41,18 +41,18 @@ A transaction table that records daily income and expense entries.
 | :--- | :--- | :--- | :--- | :--- |
 | Transaction ID | `id` | `BIGSERIAL` | `PRIMARY KEY` | Auto-generated ID |
 | Category ID | `category_id` | `BIGINT` | `NOT NULL`, `FOREIGN KEY` | Foreign key to `categories.id` |
-| Title | `title` | `VARCHAR(100)` | `NOT NULL` | Example: "スーパーで買い物" (shopping at the supermarket) |
+| Title | `title` | `VARCHAR(100)` | `NOT NULL` | Example: "スーパーで買い物", meaning shopping at the supermarket |
 | Amount | `amount` | `INT` | `NOT NULL`, `CHECK (amount >= 1)` | A positive integer of at least 1 yen |
 | Transaction date | `transaction_date` | `DATE` | `NOT NULL` | The date on which the income or expense occurred |
 | Memo | `memo` | `TEXT` | `NULL` allowed | Free text |
 
 ---
 
-## 2. Backend (Spring Boot) Directory Structure
+## 2. Spring Boot Backend Directory Structure
 
-Directly under the package name `com.example.budgetapp`, place packages corresponding to the four circles of Clean Architecture.
+Directly under the package name `com.example.budgetapp`, place the packages that correspond to the four circles of Clean Architecture.
 
-Data conversion with the DB (OR mapping) and query interface definitions have the responsibility of "mediating between outer technology and the inner domain", so they are placed in Layer 3 (`adapter.repository`). This removes the need for Layer 3 to reference Layer 4 (`framework`), and unifies the dependency direction into one way.
+Data conversion with the DB, which is OR mapping, and the definition of query interfaces have the responsibility of "mediating between outer technology and the inner domain", so they are placed in `adapter.repository` in Layer 3. This removes the need for Layer 3 to reference `framework` in Layer 4, and keeps the dependency direction one-way.
 
 ```text
 backend/
@@ -132,28 +132,28 @@ backend/
 
 ### Runtime Flow of Processing and Source Code Dependency Direction
 
-The most important point of Clean Architecture is the structure in which "the order in which processing is called at runtime" and "the dependency direction in the source code" are reversed.
+The most important point of Clean Architecture is the structure in which "the order in which processing is called at runtime" and "the dependency direction in the source code" run in opposite directions.
 
 ```text
-[Runtime flow of processing (direction of data movement)]
+[Runtime flow of processing: direction of data movement]
 Controller ──> Interactor ──> RepositoryImpl ──> JpaRepository ──> PostgreSQL
 
-[Source code dependency direction (direction of imports)]
+[Source code dependency direction: direction of imports]
 Controller ──> InputPort <── Interactor ──> OutputPort <── RepositoryImpl ──> JpaRepository ──> Spring Data JPA (external library)
 (Layer 3)      (Layer 2)      (Layer 2)      (Layer 2)       (Layer 3)           (Layer 3)         (library; outside the scope of the Dependency Rule)
 ```
 
 1. Prohibition of layer skipping and reverse dependencies
-   - Every Controller always calls an Input Port (such as `GetCategoriesUseCase`), and never directly references an Output Port (`*Repository`) or `adapter.repository` (JPA).
-   - Layer 3 (`adapter`) references only Layer 1 (`domain`) and Layer 2 (`usecase`), and never depends on the outer Layer 4 (`framework`).
+   - Every Controller always calls an Input Port such as `GetCategoriesUseCase`. It must not directly reference an Output Port such as `*Repository`, or `adapter.repository`, which uses JPA.
+   - `adapter` in Layer 3 references only `domain` in Layer 1 and `usecase` in Layer 2. It never depends on `framework` in the outer Layer 4.
 2. Design simplification regarding the Presenter
-   The original Clean Architecture has an Output Boundary (Presenter) that receives output from the Use Case. However, in modern REST APIs that return JSON, it is common to convert the Interactor's return value (Output Data) into a DTO in the Controller. This hands-on also adopts this practical structure.
+   The original Clean Architecture has an Output Boundary, that is, a Presenter, that receives output from the Use Case. However, in modern REST APIs that return JSON, it is common to convert the Interactor's return value, which is the Output Data, into a DTO in the Controller. This hands-on also adopts this practical structure.
 
 ---
 
-## 3. Frontend (Next.js) Directory Structure
+## 3. Next.js Frontend Directory Structure
 
-The frontend likewise uses a structure in which the inner business logic does not depend on the outer communication means or routing infrastructure.
+The frontend likewise uses a structure in which the inner business logic does not depend on the outer means of communication or the routing infrastructure.
 
 ```text
 frontend/
@@ -200,18 +200,18 @@ frontend/
 
 ### Key Points of Responsibility Separation on the Frontend
 
-- Why `presentation` and `adapter` both belong to Layer 3 (Interface Adapters)
-  In the concentric circles of Clean Architecture, "accepting UI input and rendering screens (equivalent to Controller / Presenter)" and "converting input and output with external systems (equivalent to Gateway / API client)" both play the role of connecting the inner domain and use cases with the outside world, so both are placed in the same Layer 3 (Interface Adapters).
-- Restriction on direct references to `adapter` from UI components (Composition Root)
-  The pure display components in `presentation` (`BalanceSummaryCard`, `TransactionForm`, `TransactionList`) must not import `adapter/` directly. In addition, in the Next.js App Router a Server Component (`app/transactions/page.tsx`) cannot pass an object containing functions directly to a Client Component via props, so only `TransactionSection.tsx`, the root container of the feature, acts as the Composition Root (the assembler of dependency injection): it receives `adapter/transactionApi` as a default argument and injects it into `useTransactions`.
+- Why `presentation` and `adapter` both belong to Layer 3, Interface Adapters
+  In the concentric circles of Clean Architecture, "accepting UI input and rendering screens" corresponds to Controller / Presenter, and "converting input and output with external systems" corresponds to Gateway / API client. Both play the role of connecting the inner domain and use cases with the outside world. For that reason, both are placed in the same Layer 3, Interface Adapters.
+- Why UI components do not reference `adapter` directly: the Composition Root
+  The pure display components in `presentation`, which are `BalanceSummaryCard`, `TransactionForm`, and `TransactionList`, must not import `adapter/` directly. In addition, in the Next.js App Router, a Server Component such as `app/transactions/page.tsx` cannot pass an object containing functions directly to a Client Component via props. So only `TransactionSection.tsx`, the root container of the feature, acts as the Composition Root, that is, the assembler of dependency injection. It receives `adapter/transactionApi` as a default argument and injects it into `useTransactions`.
 - Separation of the Domain layer and the Presentation layer
-  Currency formatting (`formatCurrency.ts`) is logic for screen display, so it is placed in `presentation/utils/`. On the other hand, validation of business rules for amount and title (`validateTransaction.ts`) is a pure domain rule, so it is placed in `domain/`.
+  Currency formatting in `formatCurrency.ts` is logic for screen display, so it is placed in `presentation/utils/`. On the other hand, `validateTransaction.ts`, which validates the business rules for amount and title, is a pure domain rule, so it is placed in `domain/`.
 
 ---
 
 ## 4. Points to Check When Proceeding with Claude Code
 
-Based on this structure, the next Chapter 2 creates the design rule files for Claude Code (`CLAUDE.md` and `.claude/rules/`).
+Based on this structure, the next Chapter 2 creates the design rule files for Claude Code, which are `CLAUDE.md` and `.claude/rules/`.
 
-1. When creating a new file, always check which layer of the directory structure above it belongs to (`domain` / `usecase` / `adapter` / `framework`, or `domain` / `usecase` / `adapter` / `presentation` / `app`) before placing it.
-2. Immediately after creating or editing a file in an inner layer, check that no outer-layer packages or framework-specific `import` statements have slipped in.
+1. When creating a new file, first look at the directory structure above and check which layer the file belongs to, then place it. The layer names are `domain` / `usecase` / `adapter` / `framework` on the backend, and `domain` / `usecase` / `adapter` / `presentation` / `app` on the frontend.
+2. Immediately after creating or editing a file in an inner layer, check that no outer-layer packages or framework-specific `import` statements have crept in.

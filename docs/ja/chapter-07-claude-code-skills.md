@@ -2,33 +2,33 @@
 
 ## このチャプターの目的
 
-クリーンアーキテクチャを採用すると、1つの機能を追加する際にも「Input Port → Interactor → Repository → Controller → テスト」のように複数の層へ順番にファイルを作成・変更する必要があります。手作業や単純な指示だけでは、層の飛び越えやテストの書き忘れが発生しがちです。
+クリーンアーキテクチャを採用すると、1つの機能を追加する際にも「Input Port → Interactor → Repository → Controller → テスト」のように複数の層へ順番にファイルを作成・変更する必要があります。手作業や単純な指示だけでは、層の飛び越えやテストの書き忘れが起きがちです。
 
-この最終チャプターでは、Claude Code の拡張機能である Agent Skills（`.claude/skills/`）と Hooks（`.claude/settings.json`）を構築し、設計ルールとテストを自動担保しながら新機能「家計簿明細の編集（更新）機能」をフルスタックで追加します。
+この最終チャプターでは、Claude Code の拡張機能である Agent Skills の `.claude/skills/` と Hooks の `.claude/settings.json`を構築し、設計ルールの遵守とテストを自動で保証しながら、新機能「家計簿明細の編集機能」、つまり更新機能をフルスタックで追加します。
 
 7-1・7-2 は人が実施する準備です。7-3 で `/add-usecase` スキルを実行すると、Claude Code が CP7-1〜CP7-7 を1つずつ進めます。
 
 | CP | 種別 | 内容 |
 | :--- | :--- | :--- |
-| 7-1 | 準備（人） | `add-usecase` スキルの作成 |
-| 7-2 | 準備（人） | フック（`verify-changes.mjs`・`settings.json`）の設定 |
-| CP7-1 | 設計 | 変更対象の全層のファイル一覧（実装計画）を提示させ、承認する |
-| CP7-2 | 実装 | バックエンド：domain → usecase → adapter（更新 API） |
+| 7-1 | 人による準備 | `add-usecase` スキルの作成 |
+| 7-2 | 人による準備 | `verify-changes.mjs` と `settings.json` によるフックの設定 |
+| CP7-1 | 設計 | 変更対象の全層のファイル一覧、つまり実装計画を提示させ、承認する |
+| CP7-2 | 実装 | バックエンド：domain → usecase → adapter の順に更新 API を実装 |
 | CP7-3 | テスト | バックエンドのテスト：Interactor 単体・Controller 統合・全テスト |
-| CP7-4 | 実装 | フロントエンド：domain → usecase → adapter → presentation（編集 UI） |
+| CP7-4 | 実装 | フロントエンド：domain → usecase → adapter → presentation の順に編集 UI を実装 |
 | CP7-5 | テスト | フロントエンドのテスト：MSW ハンドラー・結合テスト・ビルド |
-| CP7-6 | 動作確認 | 更新 API の動作確認（curl） |
-| CP7-7 | 動作確認 | 画面での最終確認（新規登録 → 編集 → 削除）と全テストの実行 |
+| CP7-6 | 動作確認 | curl による更新 API の動作確認 |
+| CP7-7 | 動作確認 | 新規登録 → 編集 → 削除の順の画面での最終確認と、全テストの実行 |
 
 ---
 
-## 7-1. 準備（人が実施）：ユースケース追加スキル（`SKILL.md`）の作成
+## 7-1. 人が実施する準備：ユースケース追加スキル `SKILL.md` の作成
 
 Chapter 2 で作成した `setup-env` スキルと同様に、新しいユースケースをクリーンアーキテクチャの4層すべてに漏れなく実装するための手順書をスキルとして定義します。
 
 ### 1. スキル用ディレクトリの作成
 
-プロジェクトのルートディレクトリ（`budget-app-handson`）で以下のコマンドを実行します。
+プロジェクトのルートディレクトリ `budget-app-handson`で以下のコマンドを実行します。
 
 ```bash
 mkdir -p .claude/skills/add-usecase
@@ -89,24 +89,24 @@ CLAUDE.md の「チェックポイント運用」に従い、1つの CP を終�
 3. 追加・変更したファイルの一覧と、手順 2 のテスト結果を完了報告としてまとめ、ブラウザ（`http://localhost:3000/transactions`）での確認をユーザーに依頼して待機する。
 ```
 
-このスキルは、チェックポイントごとに停止する進め方そのものを手順書に埋め込んでいます。`CLAUDE.md` の「チェックポイント運用」と合わせて、機能追加でも1つずつ確認しながら進められます。
+このスキルには、チェックポイントごとに止まる進め方そのものが書き込まれています。`CLAUDE.md` の「チェックポイント運用」と合わせて、機能追加でも1つずつ確認しながら進められます。
 
 ---
 
-## 7-2. 準備（人が実施）：Hooks（`.claude/settings.json`）による自動検証の設定
+## 7-2. 人が実施する準備：Hooks `.claude/settings.json` による自動検証の設定
 
-Claude Code の Hooks 機能を使うと、ツール実行の前後（`PreToolUse` / `PostToolUse`）や応答完了時（`Stop`）に任意のコマンドを自動実行できます。
+Claude Code の Hooks 機能を使うと、ツール実行の前後である `PreToolUse` と `PostToolUse`、および応答完了時の `Stop` に任意のコマンドを自動実行できます。
 
-ここでは、Claude Code がファイルを新規作成（`Write`）または編集（`Edit`）した直後に、対象ファイルの拡張子に応じて自動検証スクリプトを実行するフックを設定します。
+ここでは、Claude Code がファイルを `Write` で新規作成または `Edit` で編集した直後に、対象ファイルの拡張子に応じて自動検証スクリプトを実行するフックを設定します。
 
-- Kotlin ファイル（`.kt`）を編集した直後：`./gradlew cleanTest test --tests "*ArchitectureTest"` を実行し、パッケージ間の依存ルール違反がないかをチェックする
-- TypeScript ファイル（`.ts` / `.tsx`）を編集した直後：`pnpm exec tsc --noEmit` を実行し、型エラーを検知する
+- 拡張子 `.kt` の Kotlin ファイルを編集した直後：`./gradlew cleanTest test --tests "*ArchitectureTest"` を実行し、パッケージ間の依存ルール違反がないか確認する
+- 拡張子 `.ts` / `.tsx` の TypeScript ファイルを編集した直後：`pnpm exec tsc --noEmit` を実行し、型エラーを検知する
 
-### 1. 検証スクリプト（`.claude/hooks/verify-changes.mjs`）の作成
+### 1. 検証スクリプト `.claude/hooks/verify-changes.mjs` の作成
 
-JSON 内に複雑なワンライナーを埋め込むとエスケープの保守が困難になるため、独立した Node.js スクリプトとして切り出します。
+JSON の中に複雑なワンライナーを書くと、エスケープの管理が難しくなります。そのため、独立した Node.js スクリプトに切り出します。
 
-ルートディレクトリ（`budget-app-handson`）でディレクトリを作成します。
+ルートディレクトリ `budget-app-handson`でディレクトリを作成します。
 
 ```bash
 mkdir -p .claude/hooks
@@ -147,7 +147,7 @@ if (filePath.endsWith('.kt')) {
 
 ### 2. `.claude/settings.json` の作成
 
-プロジェクトルートの `.claude/settings.json` を作成し、環境変数 `$CLAUDE_PROJECT_DIR` を用いて上記スクリプトを呼び出す設定を記述します。
+プロジェクトルートの `.claude/settings.json` を作成し、環境変数 `$CLAUDE_PROJECT_DIR` を使って、上記のスクリプトを呼び出す設定を書きます。
 
 ```json
 {
@@ -169,24 +169,24 @@ if (filePath.endsWith('.kt')) {
 
 ### 設定のポイント
 
-- `$CLAUDE_PROJECT_DIR` の利用：Claude Code のセッション中にカレントディレクトリが移動していても、常にプロジェクトルートを基準に `backend/` と `frontend/` のパスを正しく解決します。
-- `stderr` へのエラー出力と終了コード `2`：Claude Code のフック仕様では、終了コード `2` を返した際に **標準エラー出力（`stderr`）** に書き込まれた内容が AI へフィードバックされます。スクリプト内で `stdout` と `stderr` の両方を結合して `process.stderr.write` に流すことで、Gradle や `tsc` のエラー詳細を確実に Claude Code へ伝えて自律修正を促します。
+- `$CLAUDE_PROJECT_DIR` の利用：セッション中にカレントディレクトリが変わっても、常にプロジェクトルートを基準に `backend/` と `frontend/` のパスを正しく解決します。
+- `stderr` へのエラー出力と終了コード `2`：Claude Code のフックは、終了コード `2` を返すと、**標準エラー出力の `stderr`** に書き込まれた内容を AI にフィードバックします。スクリプト内で `stdout` と `stderr` の両方を結合して `process.stderr.write` に流すことで、Gradle や `tsc` のエラー詳細が確実に Claude Code に伝わり、AI が自分で修正できます。
 - `cleanTest` を付ける理由：Konsist は Kotlin のソースファイルを直接読みますが、Gradle はソースファイルを `test` タスクの入力として扱いません。`import` 文だけを追加してバイトコードが変わらない場合、`test` が `UP-TO-DATE` と判定されて Konsist が実行されず、違反を見逃します。`cleanTest` で毎回再実行させます。
-- 実行時間に関する補足：対象テストを `ArchitectureTest` のみに絞っていますが、Gradle（JVM）の起動には数秒〜十数秒の時間がかかります。
+- 実行時間に関する補足：対象テストを `ArchitectureTest` のみに絞っていますが、JVM 上で動く Gradle の起動には数秒〜十数秒かかります。
 - 実装途中の失敗に関する補足：Output Port にメソッドを追加した直後など、実装クラスが未対応の間はコンパイルエラーでフックが失敗します。これは想定内の挙動で、AI は続けて実装クラスを修正するため、最終的にフックが成功すれば問題ありません。
-- `Stop` への変更について：`Stop`（応答完了時に1回だけ実行）に変更する場合、`Stop` イベントの入力には `tool_input.file_path` が含まれないため、本スクリプトのままでは何も検証されません。その場合はスクリプトを書き換え、拡張子による分岐をやめて `backend` と `frontend` の両方の検証を無条件に実行してください。
+- `Stop` への変更について：`Stop` は応答完了時に1回だけ実行されます。`Stop` に変更する場合、`Stop` イベントの入力には `tool_input.file_path` が含まれないため、このスクリプトのままでは何も検証されません。その場合はスクリプトを書き換え、拡張子による分岐をやめて `backend` と `frontend` の両方の検証を無条件に実行してください。
 
 ---
 
 ## 7-3. 実践演習：`/add-usecase` スキルを使った「明細更新機能」の実装
 
-ここまでで、設計ルール（`CLAUDE.md` / `.claude/rules/`）、実装手順スキル（`add-usecase`）、そして自動検証フック（`PostToolUse`）がすべて揃いました。
+ここまでで、設計ルールの `CLAUDE.md` と `.claude/rules/`、実装手順スキルの `add-usecase`、そして自動検証フックの `PostToolUse` がすべて揃いました。
 
 実際に Claude Code を起動し、新しいユースケースとして「登録済みの家計簿明細を編集・更新する機能」を追加します。進め方は Chapter 3〜6 と同じで、CP を1つ終えるたびに Claude Code が停止するので、確認して「次のチェックポイントに進む」と入力します。
 
-### 1. Claude Code の起動（または設定の再読み込み）
+### 1. Claude Code の起動、または設定の再読み込み
 
-ルートディレクトリ（`budget-app-handson`）で Claude Code を起動します（すでに起動中の場合は一度 `/exit` で終了してから再起動すると新しいスキルとフックが確実に読み込まれます）。
+ルートディレクトリ `budget-app-handson`で Claude Code を起動します。すでに起動中の場合は、いったん `/exit` で終了して再起動すると、新しいスキルとフックを確実に読み込めます。
 
 ```bash
 claude
@@ -194,7 +194,7 @@ claude
 
 ### 2. `/add-usecase` スキルの実行
 
-チャット欄に以下のコマンドを入力して実行します。Claude Code は CP7-1（設計）だけを実施して停止します。
+チャット欄に以下のコマンドを入力して実行します。Claude Code は CP7-1 の設計だけを実施して停止します。
 
 ```text
 /add-usecase 家計簿明細の編集（更新）機能を追加してください。バックエンドには PUT /api/transactions/{id} エンドポイント（UpdateTransactionUseCase / UpdateTransactionInteractor）を追加し、存在しないカテゴリIDや存在しない明細IDの場合は DomainException をスローしてください。フロントエンドでは明細一覧の各行に「編集」ボタンを追加し、クリックするとその明細の内容を編集して保存できるUIを実装してください。
@@ -202,26 +202,26 @@ claude
 
 ### 3. チェックポイントごとの確認
 
-各 CP で Claude Code が停止したら、次の内容を確認して「次のチェックポイントに進む」と入力します。実装系の CP（CP7-2・CP7-4）では、ファイルを作成・編集するたびに `PostToolUse` フックが起動し、`ArchitectureTest`（`.kt`）と `tsc --noEmit`（`.ts` / `.tsx`）が自動実行されます。
+各 CP で Claude Code が停止したら、次の内容を確認して「次のチェックポイントに進む」と入力します。実装系の CP である CP7-2 と CP7-4 では、ファイルを作成・編集するたびに `PostToolUse` フックが起動し、`.kt` に対する `ArchitectureTest` と、`.ts` / `.tsx` に対する `tsc --noEmit` が自動実行されます。
 
 #### CP7-1 〔設計〕実装計画の提示
 
 Claude Code は、変更対象となる全層のファイル一覧を提示して停止します。コードはまだ書かれません。
 
 - バックエンドの `domain` / `usecase` / `adapter`、フロントエンドの `domain` / `usecase` / `adapter` / `presentation` のすべてが一覧に含まれていること
-- `UpdateTransactionUseCase`（Input Port）、`UpdateTransactionInteractor`、`TransactionRepository` の利用（`save` による更新）が計画されていること
+- Input Port である `UpdateTransactionUseCase`、`UpdateTransactionInteractor`、`save` による更新を行う `TransactionRepository` の利用が計画されていること
 - Controller が `usecase/input` のみに依存する計画になっていること
 
 #### CP7-2 〔実装〕バックエンドの実装
 
 - 内側の層から順にファイルが作成・編集され、`UpdateTransactionInteractor` が、最初に `transactionRepository.findById(input.id)` と `categoryRepository.findById(input.categoryId)` で対象の存在を検証し、存在しない場合に `DomainException` をスローしていること
 - 存在が確認された場合のみ、既存の `id` を保持した `Transaction` を構築して `transactionRepository.save()` を呼び出していること
-- フックが失敗した場合は、Claude Code が自動で修正して再実行していること（途中の一時的な失敗は想定内です）
+- フックが失敗した場合は、Claude Code が自動で修正して再実行していること。途中の一時的な失敗は想定内です
 - `compileKotlin` が成功していること
 
 #### CP7-3 〔テスト〕バックエンドのテスト
 
-- `UpdateTransactionInteractorTest`（MockK）と、`PUT /api/transactions/{id}` の MockMvc テストが追加されていること
+- MockK を使った `UpdateTransactionInteractorTest` と、`PUT /api/transactions/{id}` の MockMvc テストが追加されていること
 - 既存の `TransactionControllerTest` の `TestConfig` に `UpdateTransactionUseCase` の Bean が追加されていること
 - `./gradlew test` が、`ArchitectureTest` を含めてすべてパスしていること
 
@@ -258,10 +258,10 @@ Claude Code がバックエンドとフロントエンドを起動し、全テ�
 本ハンズオンでは、シンプル家計簿アプリの構築を通じて以下の設計原則と開発ワークフローを実践しました。
 
 1. 関心事の分離と4層構造
-   ビジネスルール（`domain`）、アプリケーション手順（`usecase`）、入出力変換（`adapter`）、技術詳細（`framework` / `app`）を明確に分離しました。
-2. 依存性逆転の原則（DIP）
-   Use Case 層に `TransactionRepository` インターフェースを定義し、外側の実装クラスや API クライアントを注入することで、内側のコードが外部技術に依存しない構造を実現しました。
+   ビジネスルールの `domain`、アプリケーション手順の `usecase`、入出力変換の `adapter`、技術詳細の `framework` / `app` を明確に分離しました。
+2. 依存性逆転の原則、つまり DIP
+   Use Case 層に `TransactionRepository` インターフェースを定義し、外側の実装クラスや API クライアントを注入することで、内側のコードが外部技術に依存しない構造にしました。
 3. 多層的な自動テストとアーキテクチャ検証
-   JUnit 5、MockK、MockMvc、Vitest、MSW に加え、Konsist によるアーキテクチャテストを導入し、依存性ルール違反を自動的に防止する仕組みを構築しました。
+   JUnit 5、MockK、MockMvc、Vitest、MSW に加え、Konsist によるアーキテクチャテストを導入し、依存性ルール違反を自動で防ぐ仕組みを作りました。
 4. AI 開発におけるガードレール設計
-   `CLAUDE.md`、`.claude/rules/`、Agent Skills（`SKILL.md`）、Hooks（`settings.json`）を組み合わせることで、AI エージェントが設計規約を遵守しながら自律的に実装と検証を進められる開発環境を整えました。
+   `CLAUDE.md`、`.claude/rules/`、Agent Skills の `SKILL.md`、Hooks の `settings.json`を組み合わせることで、AI エージェントが設計規約を守りながら、自分で実装と検証を進められる開発環境を整えました。

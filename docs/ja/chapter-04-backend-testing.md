@@ -1,31 +1,31 @@
-# Chapter 4: バックエンドのテスト実装（単体テスト・統合テスト・アーキテクチャテスト）
+# Chapter 4: バックエンドのテスト実装：単体テスト・統合テスト・アーキテクチャテスト
 
 ## このチャプターの目的
 
-Chapter 3 で実装したバックエンドの各層に対して、性質の異なる4種類の自動テストを Claude Code（AI）に実装させます。
+Chapter 3 で実装したバックエンドの各層に対して、性質の異なる4種類の自動テストを、AI である Claude Code に実装させます。
 
-クリーンアーキテクチャを採用する利点は、ビジネスロジックと外部技術を分離したことで、データベースや Web サーバーを起動せずに高速かつ網羅的なテストを書ける点にあります。また、アーキテクチャテストを導入することで、今後の機能追加や AI によるコード生成時にも依存性ルール違反を自動で検知できる状態を作ります。
+クリーンアーキテクチャを採用すると、ビジネスロジックと外部技術が分離されます。そのため、データベースや Web サーバーを起動しなくても、高速で網羅的なテストを書けます。また、アーキテクチャテストを導入すれば、今後の機能追加や AI のコード生成でも、依存性ルールの違反を自動で検知できます。
 
 テストの種類ごとにチェックポイントを分け、最後に「テストが本当に違反を検出できるか」を確認します。
 
 | CP | 種別 | 内容 |
 | :--- | :--- | :--- |
-| CP4-1 | 設計 | テスト設計（対象・種類・検証ケース）を提示させ、承認する |
-| CP4-2 | テスト | `domain` の単体テスト（JUnit 5）：値オブジェクト・エンティティ・集計 |
-| CP4-3 | テスト | `usecase` の単体テスト（JUnit 5 + MockK）：Output Port をモック化 |
-| CP4-4 | テスト | `adapter.controller` の統合テスト（MockMvc）：HTTP・バリデーション・例外ハンドリング |
-| CP4-5 | テスト | アーキテクチャテスト（Konsist）：依存方向と層の飛び越え禁止 |
+| CP4-1 | 設計 | テスト設計として、対象・種類・検証ケースを提示させ、承認する |
+| CP4-2 | テスト | `domain` の JUnit 5 による単体テスト：値オブジェクト・エンティティ・集計 |
+| CP4-3 | テスト | `usecase` の JUnit 5 と MockK による単体テスト：Output Port をモック化 |
+| CP4-4 | テスト | `adapter.controller` の MockMvc による統合テスト：HTTP・バリデーション・例外ハンドリング |
+| CP4-5 | テスト | Konsist によるアーキテクチャテスト：依存方向と層の飛び越え禁止 |
 | CP4-6 | 動作確認 | アーキテクチャテストが違反を実際に検出することの確認 |
 | CP4-7 | 動作確認 | 全テストの実行とテストレビュー |
 
 ## このチャプターの進め方
 
-このチャプターは、上の表のチェックポイント（CP）を **1つずつ** 進めます。Claude Code は CP を1つ終えるたびに結果を報告して停止し、次の指示を待ちます（`CLAUDE.md` の「チェックポイント運用」で定義済みです）。
+このチャプターでは、上の表のチェックポイント、つまり CP を **1つずつ** 進めます。Claude Code は CP を1つ終えるたびに結果を報告して停止し、次の指示を待ちます。これは `CLAUDE.md` の「チェックポイント運用」で定めています。
 
 1. Claude Code を起動し、下の「開始プロンプト」を入力します。Claude Code は最初の CP だけを実施して停止します。
-2. 報告内容と、各 CP の「確認ポイント」を照らし合わせて結果を確認します。
+2. 報告内容を、各 CP の「確認ポイント」と照らし合わせて確認します。
 3. 問題がなければ「次のチェックポイントに進む」と入力します。Claude Code が次の CP を1つだけ実施します。
-4. 問題があれば、次へ進まずに「CPx-y をやり直して。〇〇が違う」のように指示して、その CP の中で直させます。
+4. 問題があれば、次へ進まずに「CPx-y をやり直して。〇〇が違う」のように指示し、その CP の中で直させます。
 
 ### 開始プロンプト
 
@@ -97,7 +97,7 @@ Spring Boot 4 に対応するため、@WebMvcTest は org.springframework.boot.w
 
 ## CP4-1 〔設計〕テスト設計の提示と承認
 
-テストコードを書く前に、何をどの層でどの道具を使って検証するかを Claude Code に整理させます。層ごとに適切なテスト手段を選べているかを確認するのが目的です。
+テストコードを書く前に、どの層を何のツールで検証するかを Claude Code に整理させます。層ごとに適切なテスト手段を選べているかを確認します。
 
 Claude Code が作成するファイルはありません。
 
@@ -105,23 +105,23 @@ Claude Code が作成するファイルはありません。
 
 | 層 | 種類・ツール | 主な検証内容 | DB / Web サーバー |
 | :--- | :--- | :--- | :--- |
-| `domain` | 単体テスト（JUnit 5） | 金額・タイトルの不変条件、集計ロジック | 不要 |
-| `usecase` | 単体テスト（JUnit 5 + MockK） | Repository をモック化した業務フロー | 不要 |
-| `adapter.controller` | 統合テスト（MockMvc） | HTTP ステータス、バリデーション、例外ハンドリング | 不要（`@WebMvcTest`） |
-| 全層 | アーキテクチャテスト（Konsist） | 依存方向、層の飛び越え禁止 | 不要 |
+| `domain` | JUnit 5 による単体テスト | 金額・タイトルの不変条件、集計ロジック | 不要 |
+| `usecase` | JUnit 5 と MockK による単体テスト | Repository をモック化した業務フロー | 不要 |
+| `adapter.controller` | MockMvc による統合テスト | HTTP ステータス、バリデーション、例外ハンドリング | 不要。`@WebMvcTest` を使用する |
+| 全層 | Konsist によるアーキテクチャテスト | 依存方向、層の飛び越え禁止 | 不要 |
 
 ### 確認ポイント
 
 - 4種類のテストの対象とツールが、上の目安と大きく食い違っていないこと
-- 異常系・境界値（0 円、101 文字のタイトル、存在しない ID、形式不正の JSON など）が挙がっていること
+- 異常系・境界値として、0 円、101 文字のタイトル、存在しない ID、形式不正の JSON などが挙がっていること
 
-確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。（次は CP4-2）
+確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。次は CP4-2 です。
 
 ---
 
-## CP4-2 〔テスト〕ドメイン層の単体テスト（JUnit 5）
+## CP4-2 〔テスト〕JUnit 5 によるドメイン層の単体テスト
 
-第1層（`domain`）は外部ライブラリを一切使っていない純粋な Kotlin クラスで構成されているため、モックすら不要でそのままインスタンス化してテストできます。
+第1層の `domain` は外部ライブラリを一切使わない純粋な Kotlin クラスなので、モックも不要で、そのままインスタンス化してテストできます。
 
 ### 実装コードと設計のポイント
 
@@ -265,13 +265,13 @@ class BalanceSummaryTest {
 - Claude Code の報告に、`domain` のテストが成功したことと実行件数が含まれていること
 - モックを使わず、クラスを直接インスタンス化してテストしていること
 
-確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。（次は CP4-3）
+確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。次は CP4-3 です。
 
 ---
 
-## CP4-3 〔テスト〕ユースケース層の単体テスト（JUnit 5 + MockK）
+## CP4-3 〔テスト〕JUnit 5 と MockK によるユースケース層の単体テスト
 
-第2層（`usecase`）は Output Port（`TransactionRepository` / `CategoryRepository`）インターフェースのみに依存しています。そのため、PostgreSQL を起動せずに MockK でリポジトリをモック化するだけで、ユースケースの業務フローをミリ秒単位で検証できます。
+第2層の `usecase` は、Output Port、つまり `TransactionRepository` / `CategoryRepository` インターフェースのみに依存しています。そのため、PostgreSQL を起動しなくても、MockK でリポジトリをモック化するだけで、ユースケースの業務フローをミリ秒単位で検証できます。
 
 ### 実装コードと設計のポイント
 
@@ -401,18 +401,18 @@ class DeleteTransactionInteractorTest {
 ### 確認ポイント
 
 - `usecase/interactor/` 配下に `CreateTransactionInteractorTest.kt` と `DeleteTransactionInteractorTest.kt` が作成されていること
-- 存在しない ID の場合に、`save` / `deleteById` が呼ばれないこと（`verify(exactly = 0)`）を検証していること
+- 存在しない ID の場合に、`save` / `deleteById` が呼ばれないことを、`verify(exactly = 0)` で検証していること
 - Claude Code の報告に、`usecase` のテストが成功したことと実行件数が含まれていること
 
-確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。（次は CP4-4）
+確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。次は CP4-4 です。
 
 ---
 
-## CP4-4 〔テスト〕コントローラー層の統合テスト（MockMvc）
+## CP4-4 〔テスト〕MockMvc によるコントローラー層の統合テスト
 
-第3層（`adapter.controller`）では、HTTP リクエストのデシリアライズ、Bean Validation（`@Valid`）、DTO への変換、および `GlobalExceptionHandler` によるエラーレスポンス整形を MockMvc で検証します。
+第3層の `adapter.controller` では、HTTP リクエストのデシリアライズ、`@Valid` による Bean Validation、DTO への変換、`GlobalExceptionHandler` によるエラーレスポンスの整形を MockMvc で検証します。
 
-Controller は Input Port（`*UseCase`）のみに依存しているため、テスト用の `@TestConfiguration` でユースケースのモックを Bean 登録するだけで Web 層のテストが完結します。
+Controller は Input Port、つまり `*UseCase` のみに依存しているため、テスト用の `@TestConfiguration` でユースケースのモックを Bean 登録するだけで、Web 層のテストを書けます。
 
 ### 実装コードと設計のポイント
 
@@ -570,28 +570,28 @@ class TransactionControllerTest {
 
 ### 確認ポイント
 
-- `adapter/controller/TransactionControllerTest.kt` が作成され、5種類の検証ケース（一覧・登録・バリデーションエラー・形式不正 JSON・削除時の `DomainException`）が含まれていること
-- `@WebMvcTest` が `org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest` から import されていること（Spring Boot 4 の配置）
+- `adapter/controller/TransactionControllerTest.kt` が作成され、一覧・登録・バリデーションエラー・形式不正 JSON・削除時の `DomainException` の5種類の検証ケースが含まれていること
+- `@WebMvcTest` が `org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest` から import されていること。これは Spring Boot 4 での配置です
 - Claude Code の報告に、`adapter` のテストが成功したことと実行件数が含まれていること
 
-確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。（次は CP4-5）
+確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。次は CP4-5 です。
 
 ---
 
-## CP4-5 〔テスト〕アーキテクチャテスト（Konsist）
+## CP4-5 〔テスト〕Konsist によるアーキテクチャテスト
 
-人がレビューで気をつけるだけでなく、Kotlin のアーキテクチャ検証ライブラリである Konsist を使い、クリーンアーキテクチャの依存方向ルールを JUnit のテストとして自動化します。
+レビューで人が気をつけるだけでなく、Kotlin のアーキテクチャ検証ライブラリ Konsist を使って、クリーンアーキテクチャの依存方向ルールを JUnit のテストとして自動化します。
 
-JPA Entity と Spring Data JPA Repository を第3層（`adapter.repository`）に配置したことで、自作パッケージ間の依存方向が一方向（外側から内側へのみ依存）になります（外部ライブラリの import は検証対象外です）。
+JPA Entity と Spring Data JPA Repository を第3層の `adapter.repository` に配置したので、自作パッケージ間の依存は、外側から内側へのみの一方向になります。外部ライブラリの import は検証対象外です。
 
-1. `domain`（第1層）：どの層にも依存しない（`dependsOnNothing()`）
-2. `usecase`（第2層）：`domain` のみに依存する（`dependsOn(domain)`）
-3. `adapter`（第3層）：`domain` と `usecase` のみに依存し、外側の `framework` には依存しない（`dependsOn(domain, usecase)`）
-4. `framework`（第4層）：内側の層にのみ依存する（`dependsOn(domain, usecase, adapter)`）
+1. 第1層の `domain`：どの層にも依存しない。`dependsOnNothing()` で宣言する
+2. 第2層の `usecase`：`domain` のみに依存する。`dependsOn(domain)` で宣言する
+3. 第3層の `adapter`：`domain` と `usecase` のみに依存し、外側の `framework` には依存しない。`dependsOn(domain, usecase)` で宣言する
+4. 第4層の `framework`：内側の層にのみ依存する。`dependsOn(domain, usecase, adapter)` で宣言する
 
-Konsist の `dependsOn(...)` は「その層が依存してよい（依存している）層」の宣言であり、宣言していない外側の層への依存を禁止するものではありません（`dependsOnNothing()` だけが厳密な禁止になります）。そのため、外側への逆向き依存（`usecase` → `adapter` / `framework`、`adapter` → `framework`）は `doesNotDependOn(...)` で明示的に禁止します。
+Konsist の `dependsOn(...)` は、その層が依存してよい層、つまり依存している層を宣言するものです。宣言していない外側の層への依存を禁止するわけではなく、厳密に禁止できるのは `dependsOnNothing()` だけです。そのため、外側への逆向き依存、つまり `usecase` → `adapter` / `framework` と `adapter` → `framework` は、`doesNotDependOn(...)` で明示的に禁止します。
 
-さらに個別ルールとして、第1層・第2層のフレームワーク非依存性と、`adapter.controller`（Web 側）から `usecase.output` や `adapter.repository`（DB 側）への層の飛び越え禁止を検証します。
+さらに個別ルールとして、第1層・第2層がフレームワークに依存していないことと、Web 側の `adapter.controller` から、`usecase.output` や DB 側の `adapter.repository` への層の飛び越えがないことを検証します。
 
 ### 実装コードと設計のポイント
 
@@ -672,35 +672,35 @@ class ArchitectureTest {
 - `architecture/ArchitectureTest.kt` が作成され、`doesNotDependOn` による逆向き依存の禁止が含まれていること
 - `./gradlew cleanTest test --tests '*ArchitectureTest'` が成功していること
 
-確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。（次は CP4-6）
+確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。次は CP4-6 です。
 
 ---
 
 ## CP4-6 〔動作確認〕アーキテクチャテストが違反を実際に検出することの確認
 
-テストは「成功すること」だけでなく「違反を見逃さないこと」も確認して初めて信頼できます。ここでは、わざと依存方向に違反する `import` を入れてテストが失敗することを確認し、元に戻します。
+テストは、成功することに加えて、違反を見逃さないことを確認して初めて信頼できます。ここでは、依存方向に違反する `import` をわざと入れてテストが失敗することを確認し、元に戻します。
 
-`./gradlew test` は入力が変わらないと `UP-TO-DATE` として再実行されないため、`cleanTest` を付けて毎回実行します（Chapter 7 のフックでも同じ理由で `cleanTest` を使います）。
+`./gradlew test` は入力が変わらないと `UP-TO-DATE` となって再実行されません。そのため、`cleanTest` を付けて毎回実行します。Chapter 7 のフックでも同じ理由で `cleanTest` を使います。
 
 ### 確認ポイント
 
-- `domain` → `usecase`（内側から外側への依存）を追加したときに、テストが失敗すること
-- `usecase` → `adapter`（`doesNotDependOn` で禁止した依存）を追加したときに、テストが失敗すること
-- 追加した `import` がすべて元に戻され、テストが再び成功すること（`git diff` などでソースに差分が残っていないこと）
+- `domain` → `usecase` という、内側から外側への依存を追加したときに、テストが失敗すること
+- `usecase` → `adapter` という、`doesNotDependOn` で禁止した依存を追加したときに、テストが失敗すること
+- 追加した `import` がすべて元に戻され、テストが再び成功すること。`git diff` などで確認して、ソースに差分が残っていないこと
 
-確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。（次は CP4-7）
+確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。次は CP4-7 です。
 
 ---
 
 ## CP4-7 〔動作確認〕全テストの実行とテストレビュー
 
-すべてのテストコードが揃ったら、Claude Code にテストの全件実行と、不足ケースのレビューを依頼します。
+すべてのテストコードが揃ったら、Claude Code に全テストの実行と、不足ケースのレビューを依頼します。
 
 ### 確認ポイント
 
 - `./gradlew cleanTest test` が `BUILD SUCCESSFUL` になり、全テストがパスしていること
-- レビューで挙がった追加ケースの提案を読み、必要なものを選ぶこと（自動では実装されません）
+- レビューで挙がった追加ケースの提案を読み、必要なものを選ぶこと。自動では実装されません
 
 全テストがパスすればバックエンドの実装とテストは完了です。
 
-次の Chapter 5 では、フロントエンド（Next.js 16 / TypeScript）において、同じくクリーンアーキテクチャの4層構造と依存性逆転の原則を取り入れた実装を進めます。
+次の Chapter 5 では、Next.js 16 / TypeScript を使ったフロントエンドにおいて、同じくクリーンアーキテクチャの4層構造と依存性逆転の原則を取り入れた実装を進めます。

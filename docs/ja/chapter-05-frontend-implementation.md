@@ -1,22 +1,22 @@
-# Chapter 5: フロントエンド実装（Next.js 16 / TypeScript）
+# Chapter 5: フロントエンド実装：Next.js 16 / TypeScript
 
 ## このチャプターの目的
 
-Chapter 2 で作成した `.claude/rules/frontend.md` を前提として、Claude Code（AI）にフロントエンドの4層を実装させます。
+Chapter 2 で作成した `.claude/rules/frontend.md` に従って、AI である Claude Code にフロントエンドの4層を実装させます。
 
-バックエンドと同様に、内側の層から外側へ向かって実装を進めます。また、画面ロジックを担う Use Case 層（カスタムフック）が外部通信の具体実装（`fetch`）に直接依存しないよう、Repository インターフェースを用いた依存性逆転（DIP）をフロントエンドにも適用します。
+バックエンドと同様に、内側の層から外側へ向かって実装を進めます。また、画面ロジックを担う Use Case 層のカスタムフックが、外部通信の具体実装である `fetch` に直接依存しないよう、Repository インターフェースによる依存性逆転、つまり DIP をフロントエンドにも適用します。
 
-バックエンドと同じく内側の層から実装し、その後に画面の機能ごとの動作確認を行います。
+実装を終えたら、画面の機能ごとに動作を確認します。
 
 | CP | 種別 | 内容 |
 | :--- | :--- | :--- |
-| CP5-1 | 設計 | フロントエンドの設計案（画面構成・4層のファイル・依存方向）を提示させ、承認する |
-| CP5-2 | 実装 | 共通 UI パーツ（`components/ui`）：`Button`・`Input` |
+| CP5-1 | 設計 | フロントエンドの設計案として画面構成、4層のファイル、依存方向を提示させ、承認する |
+| CP5-2 | 実装 | 共通 UI パーツ `components/ui` の `Button`・`Input` |
 | CP5-3 | 実装 | 第1層 `domain`：型定義と入力バリデーション |
 | CP5-4 | 実装 | 第2層 `usecase`：Repository インターフェースと `useTransactions` フック |
 | CP5-5 | 実装 | 第3層 `adapter`：`fetch` による API 通信クライアント |
-| CP5-6 | 実装 | 第3層 `presentation`（部品）：金額整形・サマリー・登録フォーム・明細一覧 |
-| CP5-7 | 実装 | 第3層 `presentation`（画面統括）：`TransactionSection`（Composition Root） |
+| CP5-6 | 実装 | 第3層 `presentation` の部品：金額整形・サマリー・登録フォーム・明細一覧 |
+| CP5-7 | 実装 | 第3層 `presentation` の画面統括：`TransactionSection`、Composition Root |
 | CP5-8 | 実装 | 第4層 `app`：ルーティングページへの組み込みとビルド確認 |
 | CP5-9 | テスト | アーキテクチャ規約の検査とビルド確認 |
 | CP5-10 | 動作確認 | サーバー起動と、一覧・サマリーの初期表示 |
@@ -25,12 +25,12 @@ Chapter 2 で作成した `.claude/rules/frontend.md` を前提として、Claud
 
 ## このチャプターの進め方
 
-このチャプターは、上の表のチェックポイント（CP）を **1つずつ** 進めます。Claude Code は CP を1つ終えるたびに結果を報告して停止し、次の指示を待ちます（`CLAUDE.md` の「チェックポイント運用」で定義済みです）。
+このチャプターは、上の表のチェックポイントである CP を **1つずつ** 進めます。Claude Code は CP を1つ終えるたびに結果を報告して停止し、次の指示を待ちます。この運用は `CLAUDE.md` の「チェックポイント運用」で定めています。
 
 1. Claude Code を起動し、下の「開始プロンプト」を入力します。Claude Code は最初の CP だけを実施して停止します。
-2. 報告内容と、各 CP の「確認ポイント」を照らし合わせて結果を確認します。
+2. Claude Code の報告を、各 CP の「確認ポイント」と見比べて確認します。
 3. 問題がなければ「次のチェックポイントに進む」と入力します。Claude Code が次の CP を1つだけ実施します。
-4. 問題があれば、次へ進まずに「CPx-y をやり直して。〇〇が違う」のように指示して、その CP の中で直させます。
+4. 問題があれば、次へ進まずに「CPx-y をやり直して。〇〇が違う」のように指示し、その CP の中で直させます。
 
 ### 開始プロンプト
 
@@ -125,7 +125,7 @@ usecase/TransactionRepository.ts の TransactionRepository インターフェー
 
 ## CP5-1 〔設計〕フロントエンドの設計案の提示と承認
 
-コードを書く前に、画面の構成と4層の割り当て、依存方向を Claude Code に設計案として出させます。フロントエンドでも、`usecase`（フック）が `adapter`（`fetch`）に直接依存しない仕組みを先に決めておくことが重要です。
+コードを書く前に、画面の構成、4層への割り当て、依存方向を Claude Code に設計案として出させます。フロントエンドでも、`usecase` のフックが `adapter` の `fetch` に直接依存しない仕組みを先に決めておくことが重要です。
 
 Claude Code が作成するファイルはありません。
 
@@ -135,24 +135,24 @@ Claude Code が作成するファイルはありません。
 | :--- | :--- | :--- |
 | 共通 UI | 2 | `components/ui/Button.tsx`、`Input.tsx` |
 | `domain` | 2 | `types.ts`、`validateTransaction.ts` |
-| `usecase` | 2 | `TransactionRepository.ts`（インターフェース）、`useTransactions.ts` |
+| `usecase` | 2 | インターフェースの `TransactionRepository.ts`、`useTransactions.ts` |
 | `adapter` | 1 | `transactionApi.ts` |
 | `presentation` | 5 | `formatCurrency.ts`、`BalanceSummaryCard`、`TransactionForm`、`TransactionList`、`TransactionSection` |
-| `app` | 2 | `transactions/page.tsx`、`page.tsx`（`/transactions` へリダイレクト） |
+| `app` | 2 | `transactions/page.tsx`、`/transactions` へリダイレクトする `page.tsx` |
 
 ### 確認ポイント
 
-- `useTransactions` が `TransactionRepository`（インターフェース）を引数で受け取り、`adapter` を import しない設計になっていること
+- `useTransactions` が インターフェースである `TransactionRepository` を引数で受け取り、`adapter` を import しない設計になっていること
 - `transactionApi` を注入する Composition Root が `TransactionSection` の1か所だけになっていること
 - 状態遷移に、初期表示・登録・削除・エラー表示が含まれていること
 
-確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。（次は CP5-2）
+確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。次は CP5-2 です。
 
 ---
 
-## CP5-2 〔実装〕共通 UI パーツの作成（`components/ui`）
+## CP5-2 〔実装〕共通 UI パーツの作成: `components/ui`
 
-各機能モジュールから共通利用する汎用ボタンと入力フォームパーツを先に作成します。
+各機能モジュールで共通して使う、汎用のボタンと入力フォームのパーツを先に作成します。
 
 ### 実装コードと設計のポイント
 
@@ -189,7 +189,7 @@ export function Button({
 ```
 
 #### `Input.tsx`
-`useId()` をフォールバックとして設定しておくことで、呼び出し側で `id` を明示指定しない場合でもラベルクリック時のフォーカス移動やテスト時の `getByLabelText` が正しく機能します。
+`useId()` をフォールバックとして設定しておくことで、呼び出し側が `id` を指定しない場合でも、ラベルをクリックしたときのフォーカス移動やテストでの `getByLabelText` が正しく動作します。
 
 `frontend/src/components/ui/Input.tsx`
 
@@ -227,13 +227,13 @@ export function Input({ id, label, className = '', ...props }: InputProps) {
 - `Input` が `useId()` を使い、`label` と `input` が紐付いていること
 - Claude Code の報告に `tsc --noEmit` の成功が含まれていること
 
-確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。（次は CP5-3）
+確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。次は CP5-3 です。
 
 ---
 
-## CP5-3 〔実装〕第1層：Domain（型定義と純粋なビジネスルール）
+## CP5-3 〔実装〕第1層：Domain、型定義と純粋なビジネスルール
 
-`features/transaction/domain/` には、React や `fetch`、DOM 操作に一切依存しない純粋な TypeScript の型定義と業務ルール関数を配置します。表示用の通貨フォーマットは UI 側の責務であるため、この層には含めません。
+`features/transaction/domain/` には、React・`fetch`・DOM 操作に一切依存しない、純粋な TypeScript の型定義と業務ルール関数を置きます。通貨の表示形式は UI 側の責務なので、この層には含めません。
 
 ### 実装コードと設計のポイント
 
@@ -281,7 +281,7 @@ export interface CreateTransactionInput {
 ```
 
 #### `validateTransaction.ts`
-バックエンドの `Amount` や `Transaction` と同じ業務ルールをフロントエンド側のドメイン関数としても定義します。フレームワークに依存しない純粋関数のため、React を起動せずに単体テストが可能です。
+バックエンドの `Amount` や `Transaction` と同じ業務ルールを、フロントエンド側でもドメイン関数として定義します。フレームワークに依存しない純粋関数なので、React を起動せずに単体テストできます。
 
 `frontend/src/features/transaction/domain/validateTransaction.ts`
 
@@ -322,21 +322,21 @@ export function validateTransactionInput(input: Partial<CreateTransactionInput>)
 
 - `domain/` に `types.ts` と `validateTransaction.ts` の2ファイルが作成されていること
 - Claude Code の報告に、React / `fetch` の import が 0 件だったことと、`tsc --noEmit` の成功が含まれていること
-- `validateTransactionInput` がバックエンドの `Amount` / `Transaction` と同じ業務ルール（金額 1 円以上、タイトル 100 文字以内）を持っていること
+- `validateTransactionInput` がバックエンドの `Amount` / `Transaction` と同じ業務ルール、つまり金額 1 円以上とタイトル 100 文字以内を持っていること
 
-確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。（次は CP5-4）
+確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。次は CP5-4 です。
 
 ---
 
-## CP5-4 〔実装〕第2層：Use Case（Repository インターフェースとカスタムフック）
+## CP5-4 〔実装〕第2層：Use Case、Repository インターフェースとカスタムフック
 
-第2層（`usecase/`）では、外部 API との通信契約を表す `TransactionRepository` インターフェース（Output Port）と、画面の状態遷移・ユースケース手順を制御するカスタムフック `useTransactions` を実装します。
+第2層の `usecase/` では、外部 API との通信の取り決めを表す `TransactionRepository` インターフェースである Output Port と、画面の状態遷移やユースケースの手順を制御するカスタムフック `useTransactions` を実装します。
 
-重要なポイントは、`useTransactions.ts` の中で `adapter/` 配下の具体実装を直接 `import` しないことです。インターフェースを引数で受け取ることで、依存性逆転の原則をフロントエンドでも実現します。
+重要なのは、`useTransactions.ts` が `adapter/` 配下の具体実装を直接 `import` しないことです。インターフェースを引数で受け取ることで、依存性逆転の原則をフロントエンドでも実現します。
 
 ### 実装コードと設計のポイント
 
-#### `TransactionRepository.ts`（Output Port）
+#### `TransactionRepository.ts`: Output Port
 `frontend/src/features/transaction/usecase/TransactionRepository.ts`
 
 ```ts
@@ -355,7 +355,7 @@ export interface TransactionRepository {
 }
 ```
 
-#### `useTransactions.ts`（画面ユースケースフック）
+#### `useTransactions.ts`: 画面ユースケースフック
 `frontend/src/features/transaction/usecase/useTransactions.ts`
 
 ```ts
@@ -457,16 +457,16 @@ export function useTransactions(repository: TransactionRepository) {
 ### 確認ポイント
 
 - `usecase/` に `TransactionRepository.ts` と `useTransactions.ts` が作成されていること
-- `useTransactions.ts` が `adapter` を import していないこと（Claude Code の報告に grep 結果が含まれていること）
+- `useTransactions.ts` が `adapter` を import していないこと。Claude Code の報告に grep 結果が含まれていること
 - `repository` を `useRef` で保持し、`useEffect` が無限ループしない実装になっていること
 
-確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。（次は CP5-5）
+確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。次は CP5-5 です。
 
 ---
 
-## CP5-5 〔実装〕第3層：Adapter（API 通信クライアント）
+## CP5-5 〔実装〕第3層：Adapter、API 通信クライアント
 
-第3層の `adapter/` では、第2層で定義した `TransactionRepository` インターフェースを実装し、Spring Boot バックエンドとの HTTP 通信（`fetch`）とエラーレスポンスの解析をカプセル化します。
+第3層の `adapter/` では、第2層で定義した `TransactionRepository` インターフェースを実装します。Spring Boot バックエンドとの HTTP 通信である `fetch` とエラーレスポンスの解析は、このクラスの中に閉じ込めます。
 
 ### 実装コードと設計のポイント
 
@@ -533,13 +533,13 @@ export const transactionApi: TransactionRepository = {
 - `adapter/transactionApi.ts` が作成され、`TransactionRepository` を実装していること
 - POST / DELETE のエラー時に、レスポンス JSON の `message` を取り出して `Error` をスローしていること
 
-確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。（次は CP5-6）
+確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。次は CP5-6 です。
 
 ---
 
-## CP5-6 〔実装〕第3層：Presentation（表示整形と UI 部品）
+## CP5-6 〔実装〕第3層：Presentation、表示整形と UI 部品
 
-第3層の `presentation/` には、表示用フォーマット関数と React の UI コンポーネントを配置します。コンポーネント内には `fetch` を一切書かず、`useTransactions` フックから受け取ったデータとハンドラー関数を画面に結びつけます。
+第3層の `presentation/` には、表示用のフォーマット関数と React の UI コンポーネントを置きます。コンポーネント内には `fetch` を一切書かず、`useTransactions` フックから受け取ったデータとハンドラー関数を画面に結びつけます。
 
 ### 実装コードと設計のポイント
 
@@ -593,7 +593,7 @@ export function BalanceSummaryCard({ summary }: BalanceSummaryCardProps) {
 ```
 
 #### `TransactionForm.tsx`
-`new Date().toISOString()` は UTC 基準のため、日本時間（UTC+9）の午前0時〜午前9時に実行すると前日の日付になります。`getTodayLocalDate()` を使ってローカルタイムゾーン基準の当日日付を初期値に設定します。
+`new Date().toISOString()` は UTC 基準なので、日本時間つまり UTC+9 の午前0時〜午前9時に実行すると前日の日付になります。そこで `getTodayLocalDate()` を使い、ローカルタイムゾーン基準の当日の日付を初期値にします。
 
 `frontend/src/features/transaction/presentation/TransactionForm.tsx`
 
@@ -837,21 +837,21 @@ export function TransactionList({ transactions, onDelete }: TransactionListProps
 ### 確認ポイント
 
 - `presentation/` に `BalanceSummaryCard`、`TransactionForm`、`TransactionList`、`utils/formatCurrency.ts` が作成されていること
-- 3つの表示コンポーネントが `adapter` を import していないこと（Claude Code の報告に grep 結果が含まれていること）
-- `TransactionForm` の決済日の初期値が、`toISOString()`（UTC）ではなくローカルタイムゾーン基準になっていること
+- 3つの表示コンポーネントが `adapter` を import していないこと。Claude Code の報告に grep 結果が含まれていること
+- `TransactionForm` の決済日の初期値が、UTC 基準の `toISOString()` ではなくローカルタイムゾーン基準になっていること
 
-確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。（次は CP5-7）
+確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。次は CP5-7 です。
 
 ---
 
-## CP5-7 〔実装〕第3層：Presentation（`TransactionSection`：Composition Root）
+## CP5-7 〔実装〕第3層：Presentation、`TransactionSection` と Composition Root
 
-表示部品を束ね、`useTransactions` フックに `transactionApi` を注入する画面統括コンポーネントを実装させます。`adapter` を import してよいのは、この `TransactionSection` だけです。
+表示部品をまとめ、`useTransactions` フックに `transactionApi` を注入する、画面全体を統括するコンポーネントを実装させます。`adapter` を import してよいのは、この `TransactionSection` だけです。
 
 ### 実装コードと設計のポイント
 
-#### `TransactionSection.tsx`（Composition Root と画面統括）
-このコンポーネントのみが `transactionApi`（具体実装）を `useTransactions`（Use Case）へ注入します。また、通信エラー発生時もフォームや一覧の画面構造を維持したまま上部にエラーバナーを表示します。
+#### `TransactionSection.tsx`: Composition Root と画面統括
+具体実装の `transactionApi` を、Use Case の `useTransactions` へ注入するのは、このコンポーネントだけです。また、通信エラーが起きても、フォームや一覧の構造は残したまま、上部にエラーバナーを表示します。
 
 `frontend/src/features/transaction/presentation/TransactionSection.tsx`
 
@@ -913,13 +913,13 @@ export function TransactionSection({ repository = transactionApi }: TransactionS
 - `repository` のデフォルト引数が `transactionApi` になっていること
 - エラー時に画面全体が消えず、画面上部にエラーバナーが表示される実装になっていること
 
-確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。（次は CP5-8）
+確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。次は CP5-8 です。
 
 ---
 
 ## CP5-8 〔実装〕第4層：App Router ページへの組み込み
 
-最後に、第4層である Next.js App Router のルーティングページへ `TransactionSection` を配置します。
+最後に、第4層である Next.js App Router のルーティングページに `TransactionSection` を配置します。
 
 ### 実装コード
 
@@ -961,38 +961,38 @@ export default function HomePage() {
 - `app/transactions/page.tsx` が作成され、`app/page.tsx` が `/transactions` へリダイレクトしていること
 - `pnpm build` が成功していること
 
-確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。（次は CP5-9）
+確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。次は CP5-9 です。
 
 ---
 
 ## CP5-9 〔テスト〕アーキテクチャ規約の検査とビルド確認
 
-実装が完了したら、Claude Code にフロントエンド側の依存ルール違反がないかレビューさせ、ビルドで型エラーがないことを確認します。
+実装が終わったら、フロントエンドに依存ルール違反がないか Claude Code にレビューさせ、ビルドして型エラーがないことを確認します。
 
 ### 確認ポイント
 
 - Claude Code の報告で、4層の依存制約の違反が 0 件であること
 - `pnpm build` が成功していること
 
-確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。（次は CP5-10）
+確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。次は CP5-10 です。
 
 ---
 
 ## CP5-10 〔動作確認〕サーバー起動と、一覧・サマリーの初期表示
 
-ここからは画面の機能ごとにブラウザで動作を確認します。確認はブラウザ上で人が行い、Claude Code はサーバーの起動と状態の維持を担当します。
+ここからは、画面の機能ごとにブラウザで動作を確認します。確認は人がブラウザで行い、Claude Code はサーバーの起動と稼働の維持を担当します。
 
-ブラウザで `http://localhost:3000/transactions` を開きます（`http://localhost:3000` でも `/transactions` へ転送されます）。
+ブラウザで `http://localhost:3000/transactions` を開きます。`http://localhost:3000` でも `/transactions` へ転送されます。
 
 ### 確認ポイント
 
-- Claude Code の報告で、PostgreSQL・バックエンド（8080）・フロントエンド（3000）がすべて起動していること
+- Claude Code の報告で、PostgreSQL・バックエンドの 8080 番ポート・フロントエンドの 3000 番ポートがすべて起動していること
 - 「総収入」「総支出」「現在の残高」の3枚のカードが、いずれも `￥0` で表示されること
 - 明細一覧に「登録された明細がありません。」と表示されること
 - 登録フォームのカテゴリ選択に、バックエンドから取得した5件のカテゴリが表示されること
-- 登録フォームの決済日の初期値が、今日の日付（ローカル日付）になっていること
+- 登録フォームの決済日の初期値が、ローカル日付の今日の日付になっていること
 
-確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。（次は CP5-11）
+確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。次は CP5-11 です。
 
 ---
 
@@ -1002,18 +1002,18 @@ export default function HomePage() {
 
 ### 確認ポイント
 
-- **登録（収入）**：カテゴリ「給与（収入）」、タイトル「月給」、金額「300000」で「登録する」を押すと、一覧に1行追加され、総収入と現在の残高が `￥300,000` になること
-- **登録（支出）**：カテゴリ「食費（支出）」、タイトル「ランチ」、金額「1500」で登録すると、総支出が `￥1,500`、現在の残高が `￥298,500` に更新されること
+- **登録: 収入**：収入カテゴリの「給与」、タイトル「月給」、金額「300000」で「登録する」を押すと、一覧に1行追加され、総収入と現在の残高が `￥300,000` になること
+- **登録: 支出**：支出カテゴリの「食費」、タイトル「ランチ」、金額「1500」で登録すると、総支出が `￥1,500`、現在の残高が `￥298,500` に更新されること
 - **入力エラー**：タイトルと金額を空にして登録しようとすると、バリデーションエラーが表示され、一覧が変わらないこと
-- **削除**：一覧の「削除」ボタンを押すと、その行が消え、サマリーの金額が再計算されること（2件とも削除すると、`￥0` と「登録された明細がありません。」に戻ること）
+- **削除**：一覧の「削除」ボタンを押すと、その行が消え、サマリーの金額が再計算されること。2件とも削除すると、`￥0` と「登録された明細がありません。」に戻ること
 
-確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。（次は CP5-12）
+確認できたら、Claude Code に「次のチェックポイントに進む」と入力します。次は CP5-12 です。
 
 ---
 
 ## CP5-12 〔動作確認〕バックエンド停止時のエラー表示
 
-Claude Code にバックエンドだけを停止させ、通信エラー時の画面の挙動を確認します。
+Claude Code にバックエンドだけを停止させ、通信エラー時の画面の動きを確認します。
 
 ### 確認ポイント
 

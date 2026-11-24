@@ -2,37 +2,37 @@
 
 ## このチャプターの目的
 
-このチャプターでは、人と AI（Claude Code）の役割を明確に分けて開発環境を構築します。
+このチャプターでは、人と AI である Claude Code の役割を明確に分けて開発環境を構築します。
 
-- 2-0（人が実施）: Homebrew、Rancher Desktop（Docker 互換）、mise をシステムにインストールします。
-- 2-1（人が実施）: 作業ディレクトリの作成、mise による言語・ランタイムの導入、環境構築スキル（`SKILL.md`）の作成、およびクリーンアーキテクチャの設計ルール（`CLAUDE.md` / `.claude/rules/`）の配置を行います。
-- 2-2（AI が実施）: 人が作成したスキルとルールを Claude Code に読み込ませ、PostgreSQL 18・Spring Boot 4・Next.js 16 の環境構築から初期ビルド・マイグレーション確認までを、途中で停止させずに最後まで AI に実行させます（Chapter 2 にチェックポイントはありません）。
+- 2-0 は人が実施します。Homebrew、Docker 互換の Rancher Desktop、mise をシステムにインストールします。
+- 2-1 は人が実施します。作業ディレクトリを作成し、mise で言語・ランタイムを導入し、環境構築スキルの `SKILL.md` を作成し、クリーンアーキテクチャの設計ルールである `CLAUDE.md` と `.claude/rules/` を配置します。
+- 2-2 は AI が実施します。人が作成したスキルとルールを Claude Code に読み込ませ、PostgreSQL 18・Spring Boot 4・Next.js 16 の環境構築から初期ビルド、マイグレーションの確認まで、途中で止めずに最後まで AI に実行させます。なお、Chapter 2 にチェックポイントはありません。
 
 ---
 
-## 2-0. 前提ツールのインストール（人が実施）
+## 2-0. 前提ツールのインストール：人が実施
 
-本ハンズオンでは、コンテナ実行環境に Docker 互換の Rancher Desktop を使用し、Java・Node.js・pnpm のバージョン管理に mise を使用します。
+本ハンズオンでは、コンテナの実行環境に Docker 互換の Rancher Desktop を、Java・Node.js・pnpm のバージョン管理に mise を使います。
 
 ### 1. Homebrew のインストール確認
 
-以降のインストールは Homebrew を使用します。次のコマンドでインストール済みか確認します。
+以降のインストールには Homebrew を使います。次のコマンドで、インストール済みか確認します。
 
 ```bash
 brew --version
 ```
 
-`command not found` と表示された場合は、Homebrew 公式サイト（https://brew.sh/）の手順でインストールします。
+`command not found` と表示された場合は、Homebrew 公式サイト https://brew.sh/ の手順でインストールします。
 
 ```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
-インストール完了時に表示される「Next steps」のコマンド（`brew` を PATH に追加する `eval "$(/opt/homebrew/bin/brew shellenv)"` など）を実行し、再度 `brew --version` でバージョンが表示されることを確認します。
+インストール完了時に表示される「Next steps」のコマンド、例えば `brew` を PATH に追加する `eval "$(/opt/homebrew/bin/brew shellenv)"` を実行し、もう一度 `brew --version` を実行し、バージョンが表示されることを確認します。
 
 ### 2. Rancher Desktop のインストール
 
-Rancher Desktop は Docker CLI（`docker` / `docker compose`）を同梱しており、コンテナエンジンに `dockerd (moby)` を選択すると Docker Desktop と同じコマンドで操作できます。
+Rancher Desktop は Docker CLI として `docker` と `docker compose` を同梱しており、コンテナエンジンに `dockerd (moby)` を選択すると Docker Desktop と同じコマンドで操作できます。
 
 ```bash
 brew install --cask rancher
@@ -60,13 +60,13 @@ exec $SHELL -l
 
 ---
 
-## 2-1. プロジェクト初期化と Claude Code 設定の作成（人が実施）
+## 2-1. プロジェクト初期化と Claude Code 設定の作成：人が実施
 
-ここからの手順は、学習者自身がターミナルおよびエディタで上から順に実施します。
+ここからは、ターミナルとエディタを使って、上から順に自分で進めます。
 
 ### 1. 作業用ルートディレクトリの作成
 
-ターミナルを開き、プロジェクト全体を格納するルートディレクトリと `.claude` 配下の設定用ディレクトリを作成し、移動します。
+ターミナルを開き、プロジェクト全体を置くルートディレクトリと、`.claude` 配下の設定用ディレクトリを作成し、ルートディレクトリに移動します。
 
 ```bash
 mkdir -p budget-app-handson/.claude/skills/setup-env
@@ -74,7 +74,7 @@ mkdir -p budget-app-handson/.claude/rules
 cd budget-app-handson
 ```
 
-勉強会で配布された `.env.example` を、このルートディレクトリ（`budget-app-handson`）直下に置きます。DB の接続情報（ユーザー名・パスワード・DB 名）が書かれたファイルで、Step 2 で `.env` にコピー（またはリネーム）して使います。
+勉強会で配布された `.env.example` を、このルートディレクトリ `budget-app-handson` 直下に置きます。DB のユーザー名・パスワード・DB 名といった接続情報が書かれたファイルで、Step 2 で `.env` にコピーまたはリネームして使います。
 
 ```text
 DB_NAME=budget_db
@@ -84,9 +84,9 @@ DB_PASSWORD=budget_password
 
 `.env.example` の値は勉強会専用です。自分のプロジェクトでは、パスワードを推測されにくい値に変え、`.env` を Git にコミットしないでください。
 
-### 2. Java 25 / Node.js 26 / pnpm 11 の導入（`mise.toml`）
+### 2. `mise.toml` による Java 25 / Node.js 26 / pnpm 11 の導入
 
-ルートディレクトリ（`budget-app-handson`）直下に `mise.toml` を作成し、プロジェクトで使用するツールバージョンを固定してインストールします。
+ルートディレクトリ `budget-app-handson` 直下に `mise.toml` を作成し、プロジェクトで使うツールのバージョンを固定し、インストールします。
 
 ```bash
 cat > mise.toml <<'EOF'
@@ -107,7 +107,7 @@ node -v         # v26.x
 pnpm -v         # 11.x
 ```
 
-### 3. 環境構築スキル（`.claude/skills/setup-env/SKILL.md`）の作成
+### 3. 環境構築スキル `.claude/skills/setup-env/SKILL.md` の作成
 
 次の「2-2」で Claude Code に環境構築を実行させるためのスキルファイルを作成します。
 
@@ -293,7 +293,7 @@ mkdir -p frontend/src/components/ui \
 - 実行した手順とスキップした手順の一覧（再実行の場合は、スキップした理由を含める）
 ````
 
-### 4. プロジェクト共通ガイドライン（`CLAUDE.md`）の作成
+### 4. プロジェクト共通ガイドライン `CLAUDE.md` の作成
 
 Claude Code がセッション開始時に自動で読み込む共通ルールファイルを作成します。
 ルートディレクトリ直下に `CLAUDE.md` を新規作成し、以下の内容を記述してください。
@@ -330,9 +330,9 @@ Claude Code がセッション開始時に自動で読み込む共通ルール�
 5. CP に書かれていないファイルは作成しない。
 ```
 
-### 5. 領域別アーキテクチャ規約（`.claude/rules/`）の作成
+### 5. 領域別アーキテクチャ規約 `.claude/rules/` の作成
 
-対象ディレクトリのファイルを編集する際だけに自動適用される詳細ルールを作成します。
+対象ディレクトリのファイルを編集するときだけ自動で適用される、詳細なルールを作成します。
 
 #### `.claude/rules/backend.md` の作成
 
@@ -402,9 +402,9 @@ paths:
 
 ---
 
-## 2-2. 開発環境の構築と動作確認（AI が実施）
+## 2-2. 開発環境の構築と動作確認：AI が実施
 
-ここからは、ルートディレクトリ（`budget-app-handson`）で Claude Code を起動し、AI に環境構築を実行させます。
+ここからは、ルートディレクトリ `budget-app-handson`で Claude Code を起動し、AI に環境構築を実行させます。
 
 ### 1. Claude Code の起動とルールの読み込み確認
 
@@ -414,13 +414,13 @@ paths:
 claude
 ```
 
-起動後、チャット欄に以下のプロンプトを入力し、`2-1` で作成したルールとスキルが認識されているかを確認します。
+起動後、チャット欄に以下のプロンプトを入力し、`2-1` で作成したルールとスキルが認識されているか確認します。
 
 ```text
 CLAUDE.md と .claude/rules/ に定義された、バックエンドとフロントエンドの4層構造と依存禁止ルールを要約してください。また、利用可能なスキルを確認してください。
 ```
 
-4層構造のルールと `setup-env` スキルが認識されている回答が返ってくれば準備完了です。
+回答に4層構造のルールと `setup-env` スキルが含まれていれば、準備完了です。
 
 ### 2. `/setup-env` スキルによる環境構築の実行
 
@@ -434,21 +434,21 @@ Claude Code は `.claude/skills/setup-env/SKILL.md` の手順に従い、次の 
 
 | Step | 内容 |
 | :--- | :--- |
-| Step 1 | 前提ツールのバージョンとポート（5432, 8080, 3000）の空き状況の確認 |
+| Step 1 | 前提ツールのバージョンと、ポート 5432, 8080, 3000 の空き状況の確認 |
 | Step 2 | `.env` の作成、`compose.yaml` の生成、Docker による PostgreSQL 18 の起動・ヘルスチェック |
 | Step 3 | Spring Initializr からの `backend` 生成、依存ライブラリの追加、`.env` を参照する `application.yml` と Flyway SQL の配置、`psql` によるテーブルと初期マスタデータの確認 |
 | Step 4 | `mise.toml` の確認、`frontend` の生成、テストライブラリの導入、4層用ディレクトリの作成、ビルド確認 |
-| Step 5 | 完了報告（実行した手順とスキップした手順の一覧） |
+| Step 5 | 実行した手順とスキップした手順の一覧による完了報告 |
 
-途中で止まるのは、前提ツールの不足・ポートの競合・既存ファイルとの差分の確認が必要なときだけです。止まった場合は、報告された理由を確認して対処し、もう一度 `/setup-env` を実行します（再実行しても問題ありません）。
+途中で止まるのは、前提ツールの不足・ポートの競合・既存ファイルとの差分の確認が必要なときだけです。止まった場合は、報告された理由を確認して対処し、もう一度 `/setup-env` を実行します。再実行しても問題ありません。
 
 ### 3. AI による構築完了後の確認ポイント
 
-完了報告が出力されたら、以下の状態になっていることを確認してください。
+完了報告が出たら、次の状態になっているか確認してください。
 
 - ルートディレクトリ直下に `.env`、`compose.yaml`、`backend/`、`frontend/` が作成されていること。
-- `.env` が Git で追跡されていないこと（`git status` に表示されない）。
-- PostgreSQL 18 コンテナ（`budget-app-db`）が稼働中であり、`categories` テーブル（初期データ5件）と `transactions` テーブルが作成されていること。
+- `.env` が Git で追跡されていないこと。`git status` に表示されなければ追跡されていません。
+- PostgreSQL 18 コンテナ `budget-app-db` が稼働中であり、初期データ5件を持つ `categories` テーブルと `transactions` テーブルが作成されていること。
 - バックエンドの `./gradlew test` およびフロントエンドの `pnpm --dir frontend build` がエラーなく完了していること。
 
-これで開発環境と AI 開発基盤のセットアップはすべて完了です。次の Chapter 3 以降も、Claude Code にアーキテクチャ規約を遵守させながら実装とテストを進めていきます。
+これで開発環境と AI 開発基盤のセットアップはすべて完了です。次の Chapter 3 以降も、Claude Code にアーキテクチャ規約を守らせながら、実装とテストを進めていきます。

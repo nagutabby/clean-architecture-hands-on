@@ -1,22 +1,22 @@
-# Chapter 5: Frontend Implementation (Next.js 16 / TypeScript)
+# Chapter 5: Frontend Implementation: Next.js 16 / TypeScript
 
 ## Goal of this chapter
 
-Based on the `.claude/rules/frontend.md` created in Chapter 2, you have Claude Code (the AI) implement the four layers of the frontend.
+Following the `.claude/rules/frontend.md` created in Chapter 2, you have Claude Code, the AI, implement the four layers of the frontend.
 
-As in the backend, implementation proceeds from the inner layers outward. The Use Cases layer (custom hooks), which holds the screen logic, must not depend directly on the concrete implementation of external communication (`fetch`), so the frontend also applies Dependency Inversion (DIP) through a Repository interface.
+As in the backend, implementation proceeds from the inner layers outward. The custom hooks in the Use Cases layer hold the screen logic, and they must not depend directly on `fetch`, the concrete implementation of external communication. So the frontend also applies Dependency Inversion, or DIP, through a Repository interface.
 
-As in the backend, you implement the inner layers first, then verify each screen feature in the browser.
+When the implementation is done, you verify each screen feature in the browser.
 
 | CP | Kind | Content |
 | :--- | :--- | :--- |
-| CP5-1 | Design | Have Claude Code present the frontend design proposal (screen structure, files for the four layers, dependency direction) and approve it |
-| CP5-2 | Implementation | Shared UI parts (`components/ui`): `Button`, `Input` |
+| CP5-1 | Design | Have Claude Code present a frontend design proposal covering the screen structure, the files for the four layers, and the dependency direction, then approve it |
+| CP5-2 | Implementation | Shared UI parts `Button` and `Input` in `components/ui` |
 | CP5-3 | Implementation | Layer 1 `domain`: type definitions and input validation |
 | CP5-4 | Implementation | Layer 2 `usecase`: Repository interface and the `useTransactions` hook |
 | CP5-5 | Implementation | Layer 3 `adapter`: API client using `fetch` |
-| CP5-6 | Implementation | Layer 3 `presentation` (parts): amount formatting, summary, entry form, transaction list |
-| CP5-7 | Implementation | Layer 3 `presentation` (screen coordination): `TransactionSection` (Composition Root) |
+| CP5-6 | Implementation | Layer 3 `presentation` parts: amount formatting, summary, entry form, transaction list |
+| CP5-7 | Implementation | Layer 3 `presentation` screen coordination: `TransactionSection`, the Composition Root |
 | CP5-8 | Implementation | Layer 4 `app`: wiring into the routing page and build check |
 | CP5-9 | Test | Architecture rule check and build check |
 | CP5-10 | Verification | Starting the servers and the initial display of the list and summary |
@@ -25,7 +25,7 @@ As in the backend, you implement the inner layers first, then verify each screen
 
 ## How to work through this chapter
 
-This chapter proceeds through the checkpoints (CPs) in the table above **one at a time**. After finishing each CP, Claude Code reports the result, stops, and waits for the next instruction (this is defined in the "Checkpoint operation" section of `CLAUDE.md`).
+This chapter proceeds through the checkpoints, or CPs, in the table above **one at a time**. After finishing each CP, Claude Code reports the result, stops, and waits for the next instruction. This operation is defined in the "Checkpoint operation" section of `CLAUDE.md`.
 
 1. Start Claude Code and enter the "Start prompt" below. Claude Code performs only the first CP and then stops.
 2. Compare the report with the "Points to check" of each CP to confirm the result.
@@ -125,7 +125,7 @@ I will do the browser checks myself.
 
 ## CP5-1 [Design] Presenting and approving the frontend design proposal
 
-Before any code is written, have Claude Code present a design proposal covering the screen structure, the assignment of the four layers, and the dependency direction. In the frontend as well, it is important to decide up front how `usecase` (the hook) avoids depending directly on `adapter` (`fetch`).
+Before any code is written, have Claude Code present a design proposal covering the screen structure, the assignment of the four layers, and the dependency direction. In the frontend as well, it is important to decide up front how the `usecase` hook avoids depending directly on the `adapter` `fetch` code.
 
 Claude Code creates no files in this CP.
 
@@ -135,22 +135,22 @@ Claude Code creates no files in this CP.
 | :--- | :--- | :--- |
 | Shared UI | 2 | `components/ui/Button.tsx`, `Input.tsx` |
 | `domain` | 2 | `types.ts`, `validateTransaction.ts` |
-| `usecase` | 2 | `TransactionRepository.ts` (interface), `useTransactions.ts` |
+| `usecase` | 2 | `TransactionRepository.ts` as the interface, and `useTransactions.ts` |
 | `adapter` | 1 | `transactionApi.ts` |
 | `presentation` | 5 | `formatCurrency.ts`, `BalanceSummaryCard`, `TransactionForm`, `TransactionList`, `TransactionSection` |
-| `app` | 2 | `transactions/page.tsx`, `page.tsx` (redirects to `/transactions`) |
+| `app` | 2 | `transactions/page.tsx`, and `page.tsx`, which redirects to `/transactions` |
 
 ### Points to check
 
-- `useTransactions` takes `TransactionRepository` (the interface) as an argument and is designed not to import `adapter`
+- `useTransactions` takes the `TransactionRepository` interface as an argument and is designed not to import `adapter`
 - The Composition Root that injects `transactionApi` is `TransactionSection` only, a single place
 - The state transitions include initial display, registration, deletion, and error display
 
-When the checks pass, type "Proceed to the next checkpoint" in Claude Code. (Next: CP5-2)
+When the checks pass, type "Proceed to the next checkpoint" in Claude Code. Next is CP5-2.
 
 ---
 
-## CP5-2 [Implementation] Creating shared UI parts (`components/ui`)
+## CP5-2 [Implementation] Creating shared UI parts: `components/ui`
 
 First create the generic button and input form parts that every feature module shares.
 
@@ -189,7 +189,7 @@ export function Button({
 ```
 
 #### `Input.tsx`
-Setting `useId()` as a fallback means that focus moving on label click and `getByLabelText` in tests work correctly even when the caller does not specify `id` explicitly.
+Setting `useId()` as a fallback means that moving focus when the label is clicked, and `getByLabelText` in tests, work correctly even when the caller does not specify an `id`.
 
 `frontend/src/components/ui/Input.tsx`
 
@@ -227,11 +227,11 @@ export function Input({ id, label, className = '', ...props }: InputProps) {
 - `Input` uses `useId()` and the `label` and `input` are linked
 - Claude Code's report includes a successful `tsc --noEmit`
 
-When the checks pass, type "Proceed to the next checkpoint" in Claude Code. (Next: CP5-3)
+When the checks pass, type "Proceed to the next checkpoint" in Claude Code. Next is CP5-3.
 
 ---
 
-## CP5-3 [Implementation] Layer 1: Domain (type definitions and pure business rules)
+## CP5-3 [Implementation] Layer 1: Domain, type definitions and pure business rules
 
 `features/transaction/domain/` holds pure TypeScript type definitions and business rule functions that depend on none of React, `fetch`, or DOM operations. Currency formatting for display is the responsibility of the UI side, so it is not included in this layer.
 
@@ -322,21 +322,21 @@ export function validateTransactionInput(input: Partial<CreateTransactionInput>)
 
 - Two files, `types.ts` and `validateTransaction.ts`, are created in `domain/`
 - Claude Code's report states that there were 0 imports of React / `fetch` and that `tsc --noEmit` succeeded
-- `validateTransactionInput` has the same business rules as the backend `Amount` / `Transaction` (amount of at least 1 yen, title of at most 100 characters)
+- `validateTransactionInput` has the same business rules as the backend `Amount` / `Transaction`, that is, an amount of at least 1 yen and a title of at most 100 characters
 
-When the checks pass, type "Proceed to the next checkpoint" in Claude Code. (Next: CP5-4)
+When the checks pass, type "Proceed to the next checkpoint" in Claude Code. Next is CP5-4.
 
 ---
 
-## CP5-4 [Implementation] Layer 2: Use Cases (Repository interface and custom hook)
+## CP5-4 [Implementation] Layer 2: Use Cases, Repository interface and custom hook
 
-In layer 2 (`usecase/`), you implement the `TransactionRepository` interface (Output Port), which represents the communication contract with the external API, and the custom hook `useTransactions`, which controls the screen state transitions and the use case steps.
+In `usecase/` of layer 2, you implement the `TransactionRepository` interface, the Output Port that represents the communication contract with the external API, and the custom hook `useTransactions`, which controls the screen state transitions and the use case steps.
 
 The key point is that `useTransactions.ts` never directly `import`s the concrete implementation under `adapter/`. By receiving the interface as an argument, the frontend also realizes the Dependency Inversion Principle.
 
 ### Implementation code and design points
 
-#### `TransactionRepository.ts` (Output Port)
+#### `TransactionRepository.ts`: Output Port
 `frontend/src/features/transaction/usecase/TransactionRepository.ts`
 
 ```ts
@@ -355,7 +355,7 @@ export interface TransactionRepository {
 }
 ```
 
-#### `useTransactions.ts` (screen use case hook)
+#### `useTransactions.ts`: screen use case hook
 `frontend/src/features/transaction/usecase/useTransactions.ts`
 
 ```ts
@@ -457,16 +457,16 @@ export function useTransactions(repository: TransactionRepository) {
 ### Points to check
 
 - `TransactionRepository.ts` and `useTransactions.ts` are created in `usecase/`
-- `useTransactions.ts` does not import `adapter` (Claude Code's report includes the grep result)
+- `useTransactions.ts` does not import `adapter`, and Claude Code's report includes the grep result
 - `repository` is held in a `useRef`, so that the implementation does not make `useEffect` loop infinitely
 
-When the checks pass, type "Proceed to the next checkpoint" in Claude Code. (Next: CP5-5)
+When the checks pass, type "Proceed to the next checkpoint" in Claude Code. Next is CP5-5.
 
 ---
 
-## CP5-5 [Implementation] Layer 3: Adapter (API client)
+## CP5-5 [Implementation] Layer 3: Adapter, API client
 
-In `adapter/` of layer 3, you implement the `TransactionRepository` interface defined in layer 2, and encapsulate the HTTP communication (`fetch`) with the Spring Boot backend and the parsing of error responses.
+In `adapter/` of layer 3, you implement the `TransactionRepository` interface defined in layer 2, and keep the HTTP communication through `fetch` with the Spring Boot backend, and the parsing of error responses, inside this layer.
 
 ### Implementation code and design points
 
@@ -533,11 +533,11 @@ export const transactionApi: TransactionRepository = {
 - `adapter/transactionApi.ts` is created and implements `TransactionRepository`
 - On a POST / DELETE error, it extracts `message` from the response JSON and throws an `Error`
 
-When the checks pass, type "Proceed to the next checkpoint" in Claude Code. (Next: CP5-6)
+When the checks pass, type "Proceed to the next checkpoint" in Claude Code. Next is CP5-6.
 
 ---
 
-## CP5-6 [Implementation] Layer 3: Presentation (display formatting and UI parts)
+## CP5-6 [Implementation] Layer 3: Presentation, display formatting and UI parts
 
 `presentation/` of layer 3 holds the display formatting function and the React UI components. No `fetch` is written inside the components; they only bind the data and handler functions received from the `useTransactions` hook to the screen.
 
@@ -593,7 +593,7 @@ export function BalanceSummaryCard({ summary }: BalanceSummaryCardProps) {
 ```
 
 #### `TransactionForm.tsx`
-`new Date().toISOString()` is based on UTC, so running it between 00:00 and 09:00 Japan time (UTC+9) returns the previous day's date. Use `getTodayLocalDate()` to set today's date in the local time zone as the initial value.
+`new Date().toISOString()` is based on UTC, so running it between 00:00 and 09:00 Japan time, which is UTC+9, returns the previous day's date. Use `getTodayLocalDate()` to set today's date in the local time zone as the initial value.
 
 `frontend/src/features/transaction/presentation/TransactionForm.tsx`
 
@@ -837,21 +837,21 @@ export function TransactionList({ transactions, onDelete }: TransactionListProps
 ### Points to check
 
 - `BalanceSummaryCard`, `TransactionForm`, `TransactionList`, and `utils/formatCurrency.ts` are created in `presentation/`
-- The three display components do not import `adapter` (Claude Code's report includes the grep result)
-- The initial value of the transaction date in `TransactionForm` is based on the local time zone, not on `toISOString()` (UTC)
+- The three display components do not import `adapter`, and Claude Code's report includes the grep result
+- The initial value of the transaction date in `TransactionForm` is based on the local time zone, not on the UTC-based `toISOString()`
 
-When the checks pass, type "Proceed to the next checkpoint" in Claude Code. (Next: CP5-7)
+When the checks pass, type "Proceed to the next checkpoint" in Claude Code. Next is CP5-7.
 
 ---
 
-## CP5-7 [Implementation] Layer 3: Presentation (`TransactionSection`: Composition Root)
+## CP5-7 [Implementation] Layer 3: Presentation, `TransactionSection` and the Composition Root
 
 Have Claude Code implement the screen coordination component that ties the display parts together and injects `transactionApi` into the `useTransactions` hook. `TransactionSection` is the only place allowed to import `adapter`.
 
 ### Implementation code and design points
 
-#### `TransactionSection.tsx` (Composition Root and screen coordination)
-Only this component injects `transactionApi` (the concrete implementation) into `useTransactions` (the Use Case). When a communication error occurs, it also shows an error banner at the top while keeping the screen structure of the form and the list.
+#### `TransactionSection.tsx`: Composition Root and screen coordination
+Only this component injects the concrete implementation `transactionApi` into the Use Case `useTransactions`. When a communication error occurs, it keeps the structure of the form and the list and shows an error banner at the top.
 
 `frontend/src/features/transaction/presentation/TransactionSection.tsx`
 
@@ -913,7 +913,7 @@ export function TransactionSection({ repository = transactionApi }: TransactionS
 - The default argument of `repository` is `transactionApi`
 - On error, the whole screen does not disappear and an error banner is displayed at the top of the screen
 
-When the checks pass, type "Proceed to the next checkpoint" in Claude Code. (Next: CP5-8)
+When the checks pass, type "Proceed to the next checkpoint" in Claude Code. Next is CP5-8.
 
 ---
 
@@ -961,7 +961,7 @@ export default function HomePage() {
 - `app/transactions/page.tsx` is created and `app/page.tsx` redirects to `/transactions`
 - `pnpm build` succeeds
 
-When the checks pass, type "Proceed to the next checkpoint" in Claude Code. (Next: CP5-9)
+When the checks pass, type "Proceed to the next checkpoint" in Claude Code. Next is CP5-9.
 
 ---
 
@@ -974,7 +974,7 @@ Once the implementation is complete, have Claude Code review the frontend for de
 - Claude Code's report shows 0 violations of the four-layer dependency constraints
 - `pnpm build` succeeds
 
-When the checks pass, type "Proceed to the next checkpoint" in Claude Code. (Next: CP5-10)
+When the checks pass, type "Proceed to the next checkpoint" in Claude Code. Next is CP5-10.
 
 ---
 
@@ -982,17 +982,17 @@ When the checks pass, type "Proceed to the next checkpoint" in Claude Code. (Nex
 
 From here on, you verify each screen feature in the browser. You do the checks in the browser yourself, and Claude Code is responsible for starting the servers and keeping them running.
 
-Open `http://localhost:3000/transactions` in the browser (`http://localhost:3000` also redirects to `/transactions`).
+Open `http://localhost:3000/transactions` in the browser. `http://localhost:3000` also redirects to `/transactions`.
 
 ### Points to check
 
-- Claude Code's report shows that PostgreSQL, the backend (8080), and the frontend (3000) are all running
-- The three cards "総収入" (Total income), "総支出" (Total expense), and "現在の残高" (Current balance) all display `￥0`
-- The transaction list shows "登録された明細がありません。" (No transactions registered.)
+- Claude Code's report shows that PostgreSQL, the backend on port 8080, and the frontend on port 3000 are all running
+- The three cards "総収入", "総支出", and "現在の残高", meaning total income, total expense, and current balance, all display `￥0`
+- The transaction list shows "登録された明細がありません。", meaning no transactions are registered
 - The category select in the registration form shows the five categories fetched from the backend
-- The initial value of the transaction date in the registration form is today's date (local date)
+- The initial value of the transaction date in the registration form is today's date in the local time zone
 
-When the checks pass, type "Proceed to the next checkpoint" in Claude Code. (Next: CP5-11)
+When the checks pass, type "Proceed to the next checkpoint" in Claude Code. Next is CP5-11.
 
 ---
 
@@ -1002,24 +1002,24 @@ Perform the following operations in the browser in order and confirm that the sc
 
 ### Points to check
 
-- **Registration (income)**: With the category "給与（収入）" (Salary (income)), the title "月給" (Monthly salary), and the amount "300000", press "登録する" (Register). One row is added to the list, and total income and current balance become `￥300,000`
-- **Registration (expense)**: Register with the category "食費（支出）" (Food (expense)), the title "ランチ" (Lunch), and the amount "1500". Total expense is updated to `￥1,500` and current balance to `￥298,500`
+- **Registration, income**: With the income category "給与", meaning salary, the title "月給", meaning monthly salary, and the amount "300000", press "登録する", meaning register. One row is added to the list, and total income and current balance become `￥300,000`
+- **Registration, expense**: Register with the expense category "食費", meaning food, the title "ランチ", meaning lunch, and the amount "1500". Total expense is updated to `￥1,500` and current balance to `￥298,500`
 - **Input errors**: If you try to register with the title and amount left empty, validation errors are displayed and the list does not change
-- **Deletion**: Pressing the "削除" (Delete) button in the list removes that row and recalculates the summary amounts (after deleting both entries, the screen returns to `￥0` and "登録された明細がありません。" (No transactions registered.))
+- **Deletion**: Pressing the "削除" button, meaning delete, in the list removes that row and recalculates the summary amounts. After deleting both entries, the screen returns to `￥0` and "登録された明細がありません。", meaning no transactions are registered
 
-When the checks pass, type "Proceed to the next checkpoint" in Claude Code. (Next: CP5-12)
+When the checks pass, type "Proceed to the next checkpoint" in Claude Code. Next is CP5-12.
 
 ---
 
 ## CP5-12 [Verification] Error display when the backend is stopped
 
-Have Claude Code stop only the backend, and check how the screen behaves on a communication error.
+Have Claude Code stop only the backend, and check how the screen responds on a communication error.
 
 ### Points to check
 
-- When you reload the browser, an error banner "エラーが発生しました: …" (An error occurred: …) is displayed at the top of the screen
+- When you reload the browser, an error banner "エラーが発生しました: …", meaning an error occurred, is displayed at the top of the screen
 - Even while the error banner is shown, the screen structure such as the form and the list does not disappear
 
-When the checks are finished, instruct Claude Code with "起動中のサーバーをすべて停止して" (Stop all running servers).
+When the checks are finished, instruct Claude Code with "起動中のサーバーをすべて停止して", meaning stop all running servers.
 
 Once you have confirmed the list, registration, input error, deletion, and communication error behavior on the frontend screen, the frontend implementation is complete. In the next chapter, Chapter 6, you will implement frontend domain unit tests and screen integration tests with Vitest + MSW.

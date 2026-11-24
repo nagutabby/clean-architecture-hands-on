@@ -50,7 +50,6 @@
   .tag.t-lec { background: #000; } .tag.t-be { background: #1c7ed6; } .tag.t-test { background: #2f9e44; }
   .tag.t-fe { background: #e67700; } .tag.t-ai { background: #7048e8; } .tag.t-ops { background: #000; }
   h1.title { font-size: 60px; line-height: 1.25; font-weight: 800; margin-bottom: 8px; }
-  .lead { font-size: 32px; color: var(--muted); margin-bottom: 26px; }
   .foot {
     position: absolute; left: 110px; right: 110px; bottom: 26px; display: flex;
     justify-content: space-between; font-size: 20px; color: #000;
@@ -141,24 +140,23 @@
 <section class="slide" data-title="進め方">
   <span class="tag">オープニング</span>
   <h1 class="title">人が規約を定め、AI が実装する</h1>
-  <p class="lead">人が設計ルールを定義し、Claude Code に層ごとに実装させ、結果を検証する</p>
   <svg viewBox="0 0 1700 520" width="1700" height="520" role="img" aria-label="人とAIの役割分担">
     <defs><marker id="a1" markerUnits="userSpaceOnUse" markerWidth="20" markerHeight="20" refX="18" refY="10" orient="auto"><path d="M0,0 L20,10 L0,20 z" fill="#000"/></marker></defs>
     <rect x="0" y="20" width="520" height="470" rx="22" fill="#fff" stroke="#1c7ed6" stroke-width="4"/>
     <text x="260" y="76" text-anchor="middle" font-size="36" font-weight="800" fill="#1c7ed6">人</text>
     <g font-size="29" fill="#000">
-      <text x="44" y="140">・アーキテクチャ規約を定義</text><text x="62" y="180" fill="#000" font-size="24">CLAUDE.md / .claude/rules/</text>
-      <text x="44" y="236">・スキルとフックを作成</text><text x="62" y="276" fill="#000" font-size="24">SKILL.md / verify-changes.mjs</text>
+      <text x="44" y="140">・アーキテクチャ規約を決める</text><text x="62" y="180" fill="#000" font-size="24">CLAUDE.md / .claude/rules/</text>
+      <text x="44" y="236">・スキルとフックを作る</text><text x="62" y="276" fill="#000" font-size="24">SKILL.md / verify-changes.mjs</text>
       <text x="44" y="332">・プロンプトを入力</text>
-      <text x="44" y="388">・出力を検証し、差異を指摘</text><text x="62" y="428" fill="#000" font-size="24">依存方向・テスト結果・動作</text>
+      <text x="44" y="388">・出力を確認し、ずれを指摘</text><text x="62" y="428" fill="#000" font-size="24">依存方向・テスト結果・動作</text>
     </g>
     <rect x="1180" y="20" width="520" height="470" rx="22" fill="#fff" stroke="#7048e8" stroke-width="4"/>
-    <text x="1440" y="76" text-anchor="middle" font-size="36" font-weight="800" fill="#7048e8">Claude Code（AI）</text>
+    <text x="1440" y="76" text-anchor="middle" font-size="36" font-weight="800" fill="#7048e8">AI の Claude Code</text>
     <g font-size="29" fill="#000">
-      <text x="1204" y="140">・環境構築（/setup-env）</text>
+      <text x="1204" y="140">・環境構築 /setup-env</text>
       <text x="1204" y="196">・層ごとの実装</text><text x="1222" y="228" fill="#000" font-size="23">domain → usecase →</text><text x="1222" y="258" fill="#000" font-size="23">adapter → framework</text>
       <text x="1204" y="292">・単体／統合／アーキテクチャテスト</text>
-      <text x="1204" y="348">・機能追加（/add-usecase）</text>
+      <text x="1204" y="348">・機能追加 /add-usecase</text>
       <text x="1204" y="404">・フックの検証結果で自己修正</text>
     </g>
     <rect x="590" y="150" width="500" height="220" rx="22" fill="#fff" stroke="#000" stroke-width="3"/>
@@ -168,77 +166,14 @@
     <line x1="520" y1="260" x2="586" y2="260" stroke="#000" stroke-width="4" marker-end="url(#a1)"/>
     <line x1="1094" y1="260" x2="1176" y2="260" stroke="#000" stroke-width="4" marker-end="url(#a1)"/>
   </svg>
-  <div class="note" style="margin-top:12px"><ul class="pts" style="font-size:26px"><li>各章に開始プロンプト、実装コード例、確認ポイントがあり、AI はチェックポイントごとに停止する</li></ul></div>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
-</section>
-
-<!-- チェックポイント運用 -->
-<section class="slide" data-title="チェックポイント運用">
-  <span class="tag">オープニング</span>
-  <h1 class="title">チェックポイント運用では 1 つずつ進め、停止して確認する</h1>
-  <p class="lead">作業を設計・実装・テスト・動作確認のチェックポイント（CP）に区切り、1 つずつ進める</p>
-  <svg viewBox="0 0 1700 300" width="1700" height="300" role="img" aria-label="チェックポイントの進め方">
-    <defs><marker id="acp" markerUnits="userSpaceOnUse" markerWidth="20" markerHeight="20" refX="18" refY="10" orient="auto"><path d="M0,0 L20,10 L0,20 z" fill="#000"/></marker></defs>
-    <g text-anchor="middle" font-weight="800">
-      <rect x="0" y="20" width="380" height="150" rx="18" fill="#fff" stroke="#1c7ed6" stroke-width="4"/>
-      <text x="190" y="82" font-size="30" fill="#1c7ed6">人</text><text x="190" y="126" font-size="26" font-weight="700" fill="#000">開始プロンプトを入力</text>
-      <rect x="440" y="20" width="380" height="150" rx="18" fill="#fff" stroke="#7048e8" stroke-width="4"/>
-      <text x="630" y="82" font-size="30" fill="#7048e8">AI</text><text x="630" y="126" font-size="26" font-weight="700" fill="#000">CP を 1 つだけ実施</text>
-      <rect x="880" y="20" width="380" height="150" rx="18" fill="#fff" stroke="#7048e8" stroke-width="4"/>
-      <text x="1070" y="82" font-size="30" fill="#7048e8">AI</text><text x="1070" y="126" font-size="26" font-weight="700" fill="#000">結果を報告して停止</text>
-      <rect x="1320" y="20" width="380" height="150" rx="18" fill="#fff" stroke="#1c7ed6" stroke-width="4"/>
-      <text x="1510" y="82" font-size="30" fill="#1c7ed6">人</text><text x="1510" y="126" font-size="26" font-weight="700" fill="#000">確認して次へ進める</text>
-    </g>
-    <g stroke="#000" stroke-width="4" fill="none" marker-end="url(#acp)"><line x1="384" y1="95" x2="436" y2="95"/><line x1="824" y1="95" x2="876" y2="95"/><line x1="1264" y1="95" x2="1316" y2="95"/><path d="M1510,176 V250 H630 V176"/></g>
-    <text x="1070" y="284" text-anchor="middle" font-size="26" font-weight="700" fill="#1c7ed6">「次のチェックポイントに進む」と入力</text>
-  </svg>
-  <table class="t" style="margin-top:20px">
-    <tr><th style="width:200px">種別</th><th>AI がやること</th><th style="width:560px">人が見るもの</th></tr>
-    <tr><td class="n">設計</td><td>コードを書かず、クラス構成・依存方向・API を提示</td><td>規約との整合、依存方向</td></tr>
-    <tr><td class="n">実装</td><td>1 つの層（または部品）を実装し、コンパイル・型チェック</td><td>依存ルール違反がないこと</td></tr>
-    <tr><td class="n">テスト</td><td>テストを追加して実行、ルール違反を検査</td><td>実行件数と成功</td></tr>
-    <tr><td class="n">動作確認</td><td>サーバーを起動し、機能ごとに API・画面を確認</td><td>期待する値・表示になること</td></tr>
-  </table>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
-</section>
-
-<!-- チェックポイントごとの状態（バックエンド） -->
-<section class="slide" data-title="CP ごとのアプリの状態（環境構築・バックエンド）">
-  <span class="tag">全体像</span>
-  <h1 class="title">CP ごとのアプリの状態（環境構築・バックエンド）</h1>
-  <table class="t" style="font-size:28px">
-    <tr><th style="width:260px">完了した CP</th><th style="width:640px">この時点で増えるもの</th><th>この時点の状態</th></tr>
-    <tr><td class="n"><span class="tag t-ops" style="margin:0;font-size:24px;padding:0 14px">Ch2</span></td><td>雛形、DB、CLAUDE.md・rules・スキル</td><td>DB に初期データ 5 件、ビルド成功、アプリの機能はまだない</td></tr>
-    <tr><td class="n"><span class="tag t-be" style="margin:0;font-size:24px;padding:0 14px">CP3-2</span></td><td>domain 6 ファイル</td><td>外部ライブラリなしでコンパイルできる</td></tr>
-    <tr><td class="n"><span class="tag t-be" style="margin:0;font-size:24px;padding:0 14px">CP3-3</span></td><td>usecase 10 ファイル（Port・Interactor）</td><td>コンパイルのみで、DB・HTTP とはまだつながらない</td></tr>
-    <tr><td class="n"><span class="tag t-be" style="margin:0;font-size:24px;padding:0 14px">CP3-4〜5</span></td><td>adapter 12 ファイル（JPA・DTO・Controller）</td><td>HTTP と DB につながり、起動できる状態になる</td></tr>
-    <tr><td class="n"><span class="tag t-be" style="margin:0;font-size:24px;padding:0 14px">CP3-6〜10</span></td><td>framework 1 ファイル（計 29）</td><td>API 4 本が動作する（一覧・登録・削除・入力エラー 400）</td></tr>
-    <tr><td class="n"><span class="tag t-test" style="margin:0;font-size:24px;padding:0 14px">CP4-2〜4</span></td><td>domain・usecase・Controller のテスト 16 件</td><td>DB を使わず、ミリ秒単位で業務ルールを検証できる</td></tr>
-    <tr><td class="n"><span class="tag t-test" style="margin:0;font-size:24px;padding:0 14px">CP4-5〜7</span></td><td>アーキテクチャテスト（Konsist）4 件</td><td>計 20 件が通過し、依存方向の違反を自動で検出できる</td></tr>
-  </table>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
-</section>
-
-<!-- チェックポイントごとの状態（フロントエンド・拡張） -->
-<section class="slide" data-title="CP ごとのアプリの状態（フロントエンド・機能追加）">
-  <span class="tag">全体像</span>
-  <h1 class="title">CP ごとのアプリの状態（フロントエンド・機能追加）</h1>
-  <table class="t" style="font-size:28px">
-    <tr><th style="width:260px">完了した CP</th><th style="width:640px">この時点で増えるもの</th><th>この時点の状態</th></tr>
-    <tr><td class="n"><span class="tag t-fe" style="margin:0;font-size:24px;padding:0 14px">CP5-2〜5</span></td><td>共通 UI、domain、usecase、adapter</td><td>型チェックのみで、まだ画面は出ない</td></tr>
-    <tr><td class="n"><span class="tag t-fe" style="margin:0;font-size:24px;padding:0 14px">CP5-6〜9</span></td><td>presentation、app ページ</td><td>ビルドが成功し、画面を表示できる</td></tr>
-    <tr><td class="n"><span class="tag t-fe" style="margin:0;font-size:24px;padding:0 14px">CP5-10〜12</span></td><td>（コードの追加なし）</td><td>画面で一覧・登録・削除・エラー表示を確認済み</td></tr>
-    <tr><td class="n"><span class="tag t-test" style="margin:0;font-size:24px;padding:0 14px">CP6-2〜7</span></td><td>MSW、Vitest、単体・結合テスト 13 件</td><td>バックエンドなしで画面全体を自動テストできる</td></tr>
-    <tr><td class="n"><span class="tag t-ai" style="margin:0;font-size:24px;padding:0 14px">CP7-2〜3</span></td><td>更新 API（PUT）とそのテスト</td><td>フックが依存違反を自動検出し、バックエンドの全テストが通る</td></tr>
-    <tr><td class="n"><span class="tag t-ai" style="margin:0;font-size:24px;padding:0 14px">CP7-4〜7</span></td><td>編集 UI とそのテスト</td><td>画面で登録 → 編集 → 削除ができ、全テストが通る</td></tr>
-  </table>
+  <div class="note" style="margin-top:12px"><ul class="pts" style="font-size:26px"><li>各章に開始プロンプト、実装コード例、確認ポイントがある</li></ul></div>
   <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
 </section>
 
 <!-- 4. 作るもの -->
 <section class="slide" data-title="作るアプリ">
   <span class="tag">オープニング</span>
-  <h1 class="title">作成するアプリはシンプルな家計簿（Budget App）</h1>
+  <h1 class="title">作るのはBudget App というシンプルな家計簿アプリ</h1>
   <svg viewBox="0 0 1700 330" width="1700" height="330" role="img" aria-label="システム構成">
     <defs><marker id="a2" markerUnits="userSpaceOnUse" markerWidth="20" markerHeight="20" refX="18" refY="10" orient="auto"><path d="M0,0 L20,10 L0,20 z" fill="#000"/></marker></defs>
     <g font-weight="800" text-anchor="middle">
@@ -271,12 +206,12 @@
   <span class="tag t-be">Spring Boot</span>
   <h1 class="title">Spring Boot は「設定より規約」で、動くサーバーを素早く組み立てる</h1>
   <div class="cols" style="gap:24px">
-    <div class="card " style="font-size:26px"><h3>自動構成</h3>クラスパスにあるライブラリを見て Bean と設定を自動で用意する。入口は <code class="i">@SpringBootApplication</code></div>
-    <div class="card " style="font-size:26px"><h3>DI（依存性注入）</h3>Spring がオブジェクトを生成し、コンストラクタの型に合う実装を渡す。このアプリでは Controller に Interactor が渡される</div>
+    <div class="card " style="font-size:26px"><h3>自動構成</h3><ul class="pts"><li>クラスパスにあるライブラリを見て Bean と設定を自動で用意する</li><li>入口は <code class="i">@SpringBootApplication</code></li></ul></div>
+    <div class="card " style="font-size:26px"><h3>DI、つまり依存性注入</h3><ul class="pts"><li>Spring がオブジェクトを生成し、コンストラクタの型に合う実装を渡す</li><li>このアプリでは Controller に Interactor が渡される</li></ul></div>
     <div class="card " style="font-size:26px"><h3>スターターと組み込みサーバー</h3><code class="i">spring-boot-starter-*</code> で依存をまとめて追加し、Web サーバーを内蔵して <code class="i">./gradlew bootRun</code> だけで起動する</div>
     <div class="card " style="font-size:26px"><h3>外部化設定</h3>接続先などは <code class="i">application.yml</code> に出し、コードに埋め込まない</div>
   </div>
-  <div class="note " style="margin-top:24px;font-size:28px">Spring の DI コンテナは「実装を外から渡す」仕組みなので、クリーンアーキテクチャの依存性逆転（DIP）と相性が良い</div>
+  <div class="note " style="margin-top:24px;font-size:28px">Spring の DI コンテナは「実装を外から渡す」仕組みなので、クリーンアーキテクチャの依存性逆転 DIP と相性が良い</div>
   <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
 </section>
 
@@ -284,9 +219,9 @@
   <span class="tag t-fe">Next.js・フロントエンド</span>
   <h1 class="title">Next.js はファイル配置を規約にし、サーバーとブラウザの境界を明示する</h1>
   <div class="cols" style="gap:24px">
-    <div class="card " style="font-size:26px"><h3>ファイルシステムルーティング</h3><code class="i">app/transactions/page.tsx</code> が <code class="i">/transactions</code> になる。<code class="i">layout.tsx</code> は共通の枠になる</div>
-    <div class="card " style="font-size:26px"><h3>Server Component が既定</h3>App Router のコンポーネントは既定でサーバーで描画される。状態やイベントが必要な部品だけを Client Component にする</div>
-    <div class="card " style="font-size:26px"><h3><code class="i">'use client'</code> が境界</h3>ファイル先頭に <code class="i">'use client'</code> を書くと、そのファイルから先がブラウザで動く。フックや onClick はここでのみ使える</div>
+    <div class="card " style="font-size:26px"><h3>ファイルシステムルーティング</h3><ul class="pts"><li><code class="i">app/transactions/page.tsx</code> が <code class="i">/transactions</code> になる</li><li><code class="i">layout.tsx</code> は共通の枠になる</li></ul></div>
+    <div class="card " style="font-size:26px"><h3>Server Component が既定</h3><ul class="pts"><li>App Router のコンポーネントは既定でサーバーで描画される</li><li>状態やイベントが必要な部品だけを Client Component にする</li></ul></div>
+    <div class="card " style="font-size:26px"><h3><code class="i">'use client'</code> が境界</h3><ul class="pts"><li>ファイル先頭に <code class="i">'use client'</code> を書くと、そのファイルから先がブラウザで動く</li><li>フックや onClick はここでのみ使える</li></ul></div>
   </div>
   <div class="note " style="margin-top:24px;font-size:28px">Next.js は「画面をどう配信するか」を決めるフレームワークで、業務ルールを置く場所ではない</div>
   <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
@@ -294,18 +229,17 @@
 
 <!-- 6. なぜCA -->
 <section class="slide" data-title="なぜクリーンアーキテクチャか">
-  <span class="tag t-lec">講義（Chapter 0・1）</span>
+  <span class="tag t-lec">講義 Chapter 0・1</span>
   <h1 class="title">なぜクリーンアーキテクチャを採用するのか</h1>
-  <p class="lead">ビジネスロジックとフレームワーク・DB のコードが混ざると、次の問題が生じる</p>
   <svg viewBox="0 0 1700 470" width="1700" height="470" role="img" aria-label="課題と解決">
     <defs><marker id="a3" markerUnits="userSpaceOnUse" markerWidth="20" markerHeight="20" refX="18" refY="10" orient="auto"><path d="M0,0 L20,10 L0,20 z" fill="#000"/></marker></defs>
     <g font-size="27">
       <rect x="0" y="10" width="780" height="130" rx="16" fill="#fff" stroke="#e67700" stroke-width="3"/>
-      <text x="30" y="62" font-weight="800" fill="#e67700">① 乗り換えに弱い</text><text x="30" y="108">DB・ライブラリの更新でロジックまで修正が必要</text>
+      <text x="30" y="62" font-weight="800" fill="#e67700">① 乗り換えに弱い</text><text x="30" y="108">DB やライブラリの更新で、ロジックも直すことになる</text>
       <rect x="0" y="170" width="780" height="130" rx="16" fill="#fff" stroke="#e67700" stroke-width="3"/>
-      <text x="30" y="222" font-weight="800" fill="#e67700">② テストが遅い</text><text x="30" y="268">単体テストのたびに Web サーバーや DB を起動</text>
+      <text x="30" y="222" font-weight="800" fill="#e67700">② テストが遅い</text><text x="30" y="268">単体テストのたびに Web サーバーや DB を起動する</text>
       <rect x="0" y="330" width="780" height="130" rx="16" fill="#fff" stroke="#e67700" stroke-width="3"/>
-      <text x="30" y="382" font-weight="800" fill="#e67700">③ 責務が曖昧</text><text x="30" y="428">1 クラス・1 コンポーネントが肥大化</text>
+      <text x="30" y="382" font-weight="800" fill="#e67700">③ 責務が曖昧</text><text x="30" y="428">1 つのクラスやコンポーネントが肥大化する</text>
     </g>
     <line x1="800" y1="235" x2="900" y2="235" stroke="#000" stroke-width="5" marker-end="url(#a3)"/>
     <rect x="920" y="10" width="780" height="450" rx="20" fill="#fff" stroke="#2f9e44" stroke-width="4"/>
@@ -322,7 +256,7 @@
 
 <!-- 7. 同心円 -->
 <section class="slide" data-title="4つの同心円">
-  <span class="tag t-lec">講義（Chapter 0・1）</span>
+  <span class="tag t-lec">講義 Chapter 0・1</span>
   <h1 class="title">4 つの同心円では、中心ほどビジネスの本質に近い</h1>
   <div class="cols" style="align-items:center;gap:40px">
     <svg viewBox="0 0 760 760" width="740" height="740" style="flex:none" role="img" aria-label="4つの同心円">
@@ -345,7 +279,7 @@
         <tr><td class="n"><span class="pill l3">3</span> Adapters</td><td><code class="i">adapter</code></td><td><code class="i">adapter/</code><br><code class="i">presentation/</code></td></tr>
         <tr><td class="n"><span class="pill l4">4</span> Frameworks</td><td><code class="i">framework</code></td><td><code class="i">app/</code></td></tr>
       </table>
-      <div class="note" style="margin-top:22px">フロントエンドの <code class="i">adapter</code>（API 通信）と <code class="i">presentation</code>（UI）は、どちらも内側と外部をつなぐため、同じ第 3 層になる</div>
+      <div class="note" style="margin-top:22px">フロントエンドの <code class="i">adapter</code> の API 通信と <code class="i">presentation</code> の UI は、どちらも内側と外部をつなぐため、同じ第 3 層になる</div>
     </div>
   </div>
   <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
@@ -353,69 +287,64 @@
 
 <section class="slide" data-title="第1層 Entities">
   <span class="tag t-lec">層の解説 1／4</span>
-  <h1 class="title"><span class="pill l1">第1層</span> Entities（domain）は、業務の本質的なルールを持つ</h1>
-  <p class="lead">最も変わりにくく、どの技術にも依存しない。アプリが変わっても残る知識を置く</p>
+  <h1 class="title"><span class="pill l1">第1層</span> domain 層の Entities は、業務の本質的なルールを持つ</h1>
   <table class="t" style="font-size:25px">
-    <tr><th style="width:190px">項目</th><th>バックエンド（Kotlin）</th><th>フロントエンド（TypeScript）</th></tr>
+    <tr><th style="width:190px">項目</th><th>バックエンド Kotlin</th><th>フロントエンド TypeScript</th></tr>
     <tr><td class="n">置くもの</td><td><code class="i">Amount</code>・<code class="i">Transaction</code>・<code class="i">Category</code>・<code class="i">BalanceSummary</code>・<code class="i">DomainException</code></td><td><code class="i">types.ts</code> の型と <code class="i">validateTransaction</code></td></tr>
-    <tr><td class="n">置かないもの</td><td><code class="i">@Entity</code>・<code class="i">@Component</code>、Spring・JPA の import</td><td>React・fetch・表示整形（formatCurrency は presentation）</td></tr>
-    <tr><td class="n">依存してよい先</td><td>なし（言語の標準ライブラリのみ）</td><td>なし</td></tr>
+    <tr><td class="n">置かないもの</td><td><code class="i">@Entity</code>・<code class="i">@Component</code>、Spring・JPA の import</td><td>React・fetch・表示整形 formatCurrency は presentation</td></tr>
+    <tr><td class="n">依存してよい先</td><td>言語の標準ライブラリのみ</td><td>なし</td></tr>
     <tr><td class="n">このアプリの例</td><td>金額は 1 円以上、タイトルは必須で 100 文字以内、残高 ＝ 総収入 − 総支出</td><td>登録フォームの入力を同じ業務ルールで検証</td></tr>
   </table>
-  <div class="note " style="margin-top:16px;font-size:26px">テストはモック不要の単体テスト（JUnit 5 / Vitest）で、ミリ秒単位で終わる</div>
+  <div class="note " style="margin-top:16px;font-size:26px">テストは JUnit 5 / Vitest によるモック不要の単体テストで、ミリ秒単位で終わる</div>
   <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
 </section>
 
 <section class="slide" data-title="第2層 Use Cases">
   <span class="tag t-lec">層の解説 2／4</span>
-  <h1 class="title"><span class="pill l2">第2層</span> Use Cases（usecase）は、アプリ固有の操作手順を持つ</h1>
-  <p class="lead">domain を組み合わせて「何をするか」を表す。外部とは interface（Port）だけで話す</p>
+  <h1 class="title"><span class="pill l2">第2層</span> usecase 層の Use Cases は、アプリ固有の操作手順を持つ</h1>
   <table class="t" style="font-size:25px">
-    <tr><th style="width:190px">項目</th><th>バックエンド（Kotlin）</th><th>フロントエンド（TypeScript）</th></tr>
-    <tr><td class="n">置くもの</td><td>入口 <code class="i">input/*UseCase</code>、出口 <code class="i">output/*Repository</code>、実装 <code class="i">interactor/*Interactor</code></td><td><code class="i">TransactionRepository</code>（interface）と <code class="i">useTransactions</code> フック</td></tr>
+    <tr><th style="width:190px">項目</th><th>バックエンド Kotlin</th><th>フロントエンド TypeScript</th></tr>
+    <tr><td class="n">置くもの</td><td>入口 <code class="i">input/*UseCase</code>、出口 <code class="i">output/*Repository</code>、実装 <code class="i">interactor/*Interactor</code></td><td><code class="i">TransactionRepository</code> interface と <code class="i">useTransactions</code> フック</td></tr>
     <tr><td class="n">置かないもの</td><td>HTTP・JSON・JPA、Controller や RepositoryImpl の import</td><td>fetch、<code class="i">transactionApi</code> の import、JSX</td></tr>
     <tr><td class="n">依存してよい先</td><td>domain</td><td>domain</td></tr>
     <tr><td class="n">このアプリの例</td><td><code class="i">CreateTransactionInteractor</code>：カテゴリ取得 → <code class="i">Transaction</code> 生成 → <code class="i">save</code></td><td>取得・登録・削除の状態管理と再取得</td></tr>
   </table>
-  <div class="note " style="margin-top:16px;font-size:26px">実用上の例外：Interactor は Spring の @Service / @Transactional、フックは React の状態 API を使う。外部の入出力はこの層に入れない</div>
+  <div class="note " style="margin-top:16px;font-size:26px"><ul class="pts"><li>実用上の例外：Interactor は Spring の @Service / @Transactional、フックは React の状態 API を使う</li><li>外部の入出力はこの層に入れない</li></ul></div>
   <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
 </section>
 
 <section class="slide" data-title="第3層 Adapters">
   <span class="tag t-lec">層の解説 3／4</span>
-  <h1 class="title"><span class="pill l3">第3層</span> Adapters は、内側と外部の形式を相互に変換する</h1>
-  <p class="lead">HTTP・DB・画面といった外部技術の詳細を、この層に閉じ込める</p>
+  <h1 class="title"><span class="pill l3">第3層</span> Adapters は、内側と外部のデータ形式を変換する</h1>
   <table class="t" style="font-size:25px">
-    <tr><th style="width:190px">項目</th><th>バックエンド（Kotlin）</th><th>フロントエンド（TypeScript）</th></tr>
-    <tr><td class="n">置くもの</td><td>Controller・dto・<code class="i">GlobalExceptionHandler</code>、<code class="i">RepositoryImpl</code>・<code class="i">JpaEntity</code>・<code class="i">Jpa*Repository</code></td><td><code class="i">transactionApi</code>（fetch 実装）、presentation の UI 部品・<code class="i">formatCurrency</code>・<code class="i">TransactionSection</code></td></tr>
-    <tr><td class="n">置かないもの</td><td>業務ルールの判定、framework の参照</td><td>業務ルール（domain）と状態管理ロジック（usecase）</td></tr>
-    <tr><td class="n">依存してよい先</td><td>domain・usecase</td><td>domain・usecase（adapter を組み立てるのは TransactionSection のみ）</td></tr>
+    <tr><th style="width:190px">項目</th><th>バックエンド Kotlin</th><th>フロントエンド TypeScript</th></tr>
+    <tr><td class="n">置くもの</td><td>Controller・dto・<code class="i">GlobalExceptionHandler</code>、<code class="i">RepositoryImpl</code>・<code class="i">JpaEntity</code>・<code class="i">Jpa*Repository</code></td><td><code class="i">transactionApi</code> の fetch 実装、presentation の UI 部品・<code class="i">formatCurrency</code>・<code class="i">TransactionSection</code></td></tr>
+    <tr><td class="n">置かないもの</td><td>業務ルールの判定、framework の参照</td><td>domain の業務ルールと usecase の状態管理ロジック</td></tr>
+    <tr><td class="n">依存してよい先</td><td>domain・usecase</td><td>domain・usecase、adapter を組み立てるのは TransactionSection のみ</td></tr>
     <tr><td class="n">このアプリの例</td><td><code class="i">TransactionRepositoryImpl</code> が JPA Entity と <code class="i">Transaction</code> を変換し、usecase の interface を実装</td><td><code class="i">transactionApi</code> が fetch で <code class="i">TransactionRepository</code> を実装</td></tr>
   </table>
-  <div class="note " style="margin-top:16px;font-size:26px">フロントエンドでは、API 通信（adapter）と UI（presentation）の 2 つが、どちらも第 3 層に入る</div>
+  <div class="note " style="margin-top:16px;font-size:26px">フロントエンドでは、API 通信の adapter と UI の presentation の 2 つが、どちらも第 3 層に入る</div>
   <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
 </section>
 
 <section class="slide" data-title="第4層 Frameworks">
   <span class="tag t-lec">層の解説 4／4</span>
   <h1 class="title"><span class="pill l4">第4層</span> Frameworks は、起動と組み立てだけを担う</h1>
-  <p class="lead">最も外側で最も変わりやすい。ロジックを持たず、内側の層を呼び出して配線する</p>
   <table class="t" style="font-size:25px">
-    <tr><th style="width:190px">項目</th><th>バックエンド（Kotlin）</th><th>フロントエンド（TypeScript）</th></tr>
+    <tr><th style="width:190px">項目</th><th>バックエンド Kotlin</th><th>フロントエンド TypeScript</th></tr>
     <tr><td class="n">置くもの</td><td>起動クラス <code class="i">BudgetappApplication</code>、<code class="i">framework/config/CorsConfig</code></td><td><code class="i">app/</code>：<code class="i">layout.tsx</code>・<code class="i">page.tsx</code>・ルーティング</td></tr>
     <tr><td class="n">置かないもの</td><td>業務ルール・変換処理・DB アクセス</td><td>状態管理・API 通信・業務ルール</td></tr>
     <tr><td class="n">依存してよい先</td><td>すべての内側の層</td><td>すべての内側の層</td></tr>
     <tr><td class="n">このアプリの例</td><td><code class="i">CorsConfig</code> が <code class="i">localhost:3000</code> からの呼び出しを許可</td><td><code class="i">page.tsx</code> は <code class="i"><TransactionSection/></code> を置くだけ</td></tr>
   </table>
-  <div class="note " style="margin-top:16px;font-size:26px">フレームワークは交換可能な道具として扱う。Spring Boot も Next.js も、この層より内側には入れない</div>
+  <div class="note " style="margin-top:16px;font-size:26px"><ul class="pts"><li>フレームワークは交換可能な道具として扱う</li><li>Spring Boot も Next.js も、この層より内側には入れない</li></ul></div>
   <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
 </section>
 
 <!-- 8. 依存性ルール -->
 <section class="slide" data-title="依存性のルール">
-  <span class="tag t-lec">講義（Chapter 0・1）</span>
+  <span class="tag t-lec">講義 Chapter 0・1</span>
   <h1 class="title">依存の矢印は常に外側から内側へ向かう</h1>
-  <p class="lead">ここでの「依存」は、自分たちが書いたパッケージ間の <code class="i">import</code> を指す</p>
   <svg viewBox="0 0 1700 300" width="1700" height="300" role="img" aria-label="層の依存方向">
     <defs><marker id="a4" markerUnits="userSpaceOnUse" markerWidth="20" markerHeight="20" refX="18" refY="10" orient="auto"><path d="M0,0 L20,10 L0,20 z" fill="#000"/></marker></defs>
     <g font-weight="800" text-anchor="middle">
@@ -425,11 +354,11 @@
       <rect x="1362" y="40" width="338" height="150" rx="18" fill="#fff" stroke="#2f9e44" stroke-width="4"/><text x="1531" y="100" font-size="32">domain</text><text x="1531" y="144" font-size="23" fill="#000" font-weight="500">第1層・ルール</text>
     </g>
     <g stroke="#000" stroke-width="5" marker-end="url(#a4)"><line x1="344" y1="115" x2="450" y2="115"/><line x1="798" y1="115" x2="904" y2="115"/><line x1="1252" y1="115" x2="1358" y2="115"/></g>
-    <text x="850" y="262" text-anchor="middle" font-size="28" fill="#000" font-weight="700">import の向き ＝ 依存の向き（逆向きは禁止）</text>
+    <text x="850" y="262" text-anchor="middle" font-size="28" fill="#000" font-weight="700">import の向き ＝ 依存の向き、逆向きは禁止</text>
   </svg>
   <div class="cols" style="margin-top:8px">
     <div class="card l1"><h3>domain は他に依存しない</h3>他の層・Spring・JPA を参照せず、<code class="i">@Entity</code> も付けない</div>
-    <div class="card l2"><h3>usecase は domain のみ</h3>adapter・framework を参照しない（<code class="i">@Service</code> / <code class="i">@Transactional</code> は実用上の例外）</div>
+    <div class="card l2"><h3>usecase は domain のみ</h3>adapter・framework を参照しない、ただし <code class="i">@Service</code> / <code class="i">@Transactional</code> は実用上の例外</div>
     <div class="card l3"><h3>adapter は内側のみ</h3>domain と usecase だけを参照し、JPA Entity と Repository 実装もここに置く</div>
   </div>
   <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
@@ -437,13 +366,12 @@
 
 <!-- 依存性ルール違反の例 -->
 <section class="slide" data-title="依存性ルール違反の例">
-  <span class="tag t-lec">講義（Chapter 0・1）</span>
+  <span class="tag t-lec">講義 Chapter 0・1</span>
   <h1 class="title">違反コードは、内側が外側の技術を知ってしまう</h1>
-  <p class="lead">AI が生成しがちな 2 つの違反と、規約どおりの形を比べる</p>
   <div class="cols" style="gap:36px">
     <div>
       <div class="note ng" style="font-size:28px;margin-bottom:14px"><b>NG</b>　内側が外側に依存している</div>
-<pre class="code" style="font-size:25px"><span class="c">// domain（第1層）</span>
+<pre class="code" style="font-size:25px"><span class="c">// domain 第1層</span>
 <span class="k">@Entity</span>
 <span class="k">class</span> Transaction(...)
 
@@ -462,7 +390,7 @@
 <span class="k">class</span> TransactionController(
   <span class="k">val</span> useCase: CreateTransactionUseCase
 )</pre>
-      <ul class="pts" style="font-size:27px"><li>JPA Entity は adapter に別クラスで置く</li><li>Controller は usecase の入口（Input Port）だけを呼ぶ</li></ul>
+      <ul class="pts" style="font-size:27px"><li>JPA Entity は adapter に別クラスで置く</li><li>Controller は usecase の入口、つまり Input Port だけを呼ぶ</li></ul>
     </div>
   </div>
   <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
@@ -470,8 +398,8 @@
 
 <!-- 9. DIP -->
 <section class="slide" data-title="依存性逆転 DIP">
-  <span class="tag t-lec">講義（Chapter 0・1）</span>
-  <h1 class="title">依存性逆転（DIP）では、実行時の流れと import の向きが逆になる</h1>
+  <span class="tag t-lec">講義 Chapter 0・1</span>
+  <h1 class="title">依存性逆転 DIP では、実行時の流れと import の向きが逆になる</h1>
   <svg viewBox="0 0 1700 560" width="1700" height="560" role="img" aria-label="実行時の流れと依存の向き">
     <defs><marker id="a5" markerUnits="userSpaceOnUse" markerWidth="20" markerHeight="20" refX="18" refY="10" orient="auto"><path d="M0,0 L20,10 L0,20 z" fill="#000"/></marker></defs>
     <text x="0" y="34" font-size="28" font-weight="800" fill="#000">実行時の処理の流れ</text>
@@ -484,7 +412,7 @@
     </g>
     <g stroke="#000" stroke-width="4" marker-end="url(#a5)"><line x1="274" y1="99" x2="353" y2="99"/><line x1="631" y1="99" x2="710" y2="99"/><line x1="988" y1="99" x2="1067" y2="99"/><line x1="1345" y1="99" x2="1424" y2="99"/></g>
 
-    <text x="0" y="262" font-size="28" font-weight="800" fill="#000">ソースコードの依存方向（import の向き）</text>
+    <text x="0" y="262" font-size="28" font-weight="800" fill="#000">ソースコードの依存方向、つまり import の向き</text>
     <g font-size="26" font-weight="800" text-anchor="middle">
       <rect x="0" y="290" width="250" height="86" rx="14" fill="#fff" stroke="#e67700" stroke-width="3"/><text x="125" y="344">Controller</text>
       <rect x="326" y="290" width="250" height="86" rx="14" fill="#fff" stroke="#1c7ed6" stroke-width="3"/><text x="451" y="344">InputPort</text>
@@ -502,9 +430,9 @@
     <text x="614" y="412" text-anchor="middle" font-size="21" fill="#000">実装する</text>
     <text x="940" y="412" text-anchor="middle" font-size="21" fill="#000">呼び出す</text>
     <text x="1266" y="412" text-anchor="middle" font-size="21" fill="#000">実装する</text>
-    <text x="1502" y="412" text-anchor="middle" font-size="22" fill="#000">→ JpaRepository（adapter 内）</text>
+    <text x="1502" y="412" text-anchor="middle" font-size="22" fill="#000">→ adapter 内の JpaRepository</text>
     <path d="M326 436 L326 454 L1228 454 L1228 436" fill="none" stroke="#1c7ed6" stroke-width="4"/>
-    <text x="777" y="504" text-anchor="middle" font-size="28" font-weight="800" fill="#1c7ed6">この 3 つが usecase 層（インターフェースを内側に置く）</text>
+    <text x="777" y="504" text-anchor="middle" font-size="28" font-weight="800" fill="#1c7ed6">この 3 つが usecase 層、インターフェースは内側に置く</text>
   </svg>
   <div class="cols" style="margin-top:6px">
     <div class="note ok" style="font-size:27px">利点 1　Interactor のテストは Repository を MockK に差し替えるだけで済み、DB が不要</div>
@@ -515,24 +443,23 @@
 
 <!-- 境界を越えるデータ -->
 <section class="slide" data-title="境界を越えるデータ">
-  <span class="tag t-lec">講義（Chapter 0・1）</span>
+  <span class="tag t-lec">講義 Chapter 0・1</span>
   <h1 class="title">境界ごとに専用のデータ型を使い、変換は外側で行う</h1>
-  <p class="lead">内側の型は外側の型を知らない。外側が内側の型へ変換して渡す</p>
   <table class="t" style="font-size:27px">
     <tr><th style="width:430px">境界</th><th>使う型</th><th style="width:210px">置き場所</th></tr>
-    <tr><td>HTTP → Controller</td><td><code class="i">TransactionRequest</code>（JSON と入力検証）</td><td><span class="pill l3">adapter</span></td></tr>
-    <tr><td>Controller → UseCase</td><td><code class="i">CreateTransactionInput</code>（<code class="i">toUseCaseInput()</code> で変換）</td><td><span class="pill l2">usecase</span></td></tr>
-    <tr><td>UseCase ⇄ Repository</td><td><code class="i">Transaction</code>（domain モデル）</td><td><span class="pill l1">domain</span></td></tr>
-    <tr><td>RepositoryImpl ⇄ DB</td><td><code class="i">TransactionJpaEntity</code>（テーブル構造）</td><td><span class="pill l3">adapter</span></td></tr>
-    <tr><td>Controller → HTTP</td><td><code class="i">TransactionItemResponse</code>（<code class="i">fromDomain()</code> で変換）</td><td><span class="pill l3">adapter</span></td></tr>
+    <tr><td>HTTP → Controller</td><td><code class="i">TransactionRequest</code>、JSON と入力検証</td><td><span class="pill l3">adapter</span></td></tr>
+    <tr><td>Controller → UseCase</td><td><code class="i">CreateTransactionInput</code>、<code class="i">toUseCaseInput()</code> で変換</td><td><span class="pill l2">usecase</span></td></tr>
+    <tr><td>UseCase ⇄ Repository</td><td><code class="i">Transaction</code>、domain モデル</td><td><span class="pill l1">domain</span></td></tr>
+    <tr><td>RepositoryImpl ⇄ DB</td><td><code class="i">TransactionJpaEntity</code>、テーブル構造</td><td><span class="pill l3">adapter</span></td></tr>
+    <tr><td>Controller → HTTP</td><td><code class="i">TransactionItemResponse</code>、<code class="i">fromDomain()</code> で変換</td><td><span class="pill l3">adapter</span></td></tr>
   </table>
-  <div class="note" style="margin-top:22px">DTO や JPA Entity を内側へ持ち込まないので、API 形式やテーブル構造の変更が domain に波及しない</div>
+  <div class="note" style="margin-top:22px">DTO や JPA Entity を内側へ持ち込まないので、API 形式やテーブル構造の変更が domain に及ばない</div>
   <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
 </section>
 
 <!-- 10. バックエンド構成 + DB -->
 <section class="slide" data-title="バックエンド構成">
-  <span class="tag t-lec">講義（Chapter 0・1）</span>
+  <span class="tag t-lec">講義 Chapter 0・1</span>
   <h1 class="title">バックエンドの構成</h1>
   <div class="cols" style="gap:40px">
 <pre class="tree" style="flex:1;font-size:32px"><span class="cm">com.example.budgetapp/</span>
@@ -541,8 +468,8 @@
 │  │         TransactionType・BalanceSummary
 │  └ exception/ DomainException
 ├ <span class="l2">usecase/</span>
-│  ├ input/  *UseCase（入口の契約）
-│  ├ output/ *Repository（出口の契約）
+│  ├ input/  *UseCase: 入口の契約
+│  ├ output/ *Repository: 出口の契約
 │  └ interactor/ *Interactor
 ├ <span class="l3">adapter/</span>
 │  ├ controller/ Controller・dto/・advice/
@@ -557,13 +484,13 @@
 
 <!-- リクエストの流れとエラー処理 -->
 <section class="slide" data-title="リクエストの流れとエラー処理">
-  <span class="tag t-lec">講義（Chapter 0・1）</span>
+  <span class="tag t-lec">講義 Chapter 0・1</span>
   <h1 class="title">POST /api/transactions は 4 層を順に通り、エラーは外側で HTTP に変換する</h1>
   <div class="cols" style="gap:40px">
     <ol class="steps" style="font-size:28px">
       <li><span class="pill l3">adapter</span> Controller が <code class="i">@Valid</code> で形式を検証し、Input に変換</li>
       <li><span class="pill l2">usecase</span> Interactor がカテゴリを取得し、<code class="i">Transaction</code> を生成</li>
-      <li><span class="pill l1">domain</span> <code class="i">init</code> が不変条件（金額・タイトル）を検証</li>
+      <li><span class="pill l1">domain</span> <code class="i">init</code> が金額・タイトルの不変条件を検証</li>
       <li><span class="pill l2">usecase</span> <code class="i">TransactionRepository.save</code> を呼ぶ</li>
       <li><span class="pill l3">adapter</span> RepositoryImpl が JPA Entity に変換して保存し、201 を返す</li>
     </ol>
@@ -581,17 +508,17 @@
   <table class="t" style="font-size:26px">
     <tr><th style="width:250px">観点</th><th>Spring 標準 3 層</th><th>このハンズオン</th></tr>
     <tr><td class="n">構成</td><td>Controller → Service → Repository</td><td>Controller → UseCase → Repository interface ← RepositoryImpl</td></tr>
-    <tr><td class="n">Service の依存先</td><td>JPA Repository（具体）</td><td>Repository の interface（usecase 内）</td></tr>
+    <tr><td class="n">Service の依存先</td><td>具体の JPA Repository</td><td>usecase 内の Repository interface</td></tr>
     <tr><td class="n">Entity</td><td>JPA Entity をそのまま業務ロジックに使う</td><td>domain モデルと JPA Entity を分ける</td></tr>
     <tr><td class="n">テスト</td><td>DB かスライステストが必要になりやすい</td><td>Interactor は MockK だけで検証</td></tr>
   </table>
-  <div class="note " style="margin-top:18px;font-size:26px">Spring Boot の機能（DI・JPA・MVC）は adapter と framework で使い、domain と usecase は Spring の都合を持ち込まない</div>
+  <div class="note " style="margin-top:18px;font-size:26px">Spring Boot の DI・JPA・MVC の機能は adapter と framework で使い、domain と usecase は Spring の都合を持ち込まない</div>
   <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
 </section>
 
 <!-- 11. フロント構成 -->
 <section class="slide" data-title="フロントエンド構成">
-  <span class="tag t-lec">講義（Chapter 0・1）</span>
+  <span class="tag t-lec">講義 Chapter 0・1</span>
   <h1 class="title">フロントエンドも <code class="i" style="font-size:.8em">features/transaction</code> で同じ 4 層に分ける</h1>
   <div class="cols" style="gap:40px">
 <pre class="tree" style="flex:1"><span class="cm">src/</span>
@@ -606,14 +533,14 @@
 │  ├ <span class="l3">adapter/</span>
 │  │   transactionApi.ts
 │  └ <span class="l3">presentation/</span>
-│      TransactionSection.tsx（組み立て役）
+│      TransactionSection.tsx: 組み立て役
 │      Form・List・SummaryCard
 │      utils/formatCurrency.ts
-└ mocks/  handlers.ts・server.ts（MSW）</pre>
+└ mocks/  MSW: handlers.ts・server.ts</pre>
     <div>
-      <div class="card l1" style="margin-bottom:18px"><h3>domain に置くもの</h3>型定義と入力バリデーション（業務ルール）を置き、React・fetch・表示整形は入れない</div>
-      <div class="card l3" style="margin-bottom:18px"><h3>presentation に置くもの</h3>UI と表示整形（通貨フォーマットの <code class="i">formatCurrency</code> を含む）を置く</div>
-      <div class="card l2"><h3>usecase のフック</h3><code class="i">useTransactions</code> は <code class="i">adapter</code> を import せず、<code class="i">TransactionRepository</code>（interface）経由で通信する</div>
+      <div class="card l1" style="margin-bottom:18px"><h3>domain に置くもの</h3>型定義と、業務ルールである入力バリデーションを置き、React・fetch・表示整形は入れない</div>
+      <div class="card l3" style="margin-bottom:18px"><h3>presentation に置くもの</h3>UI と、通貨フォーマットの <code class="i">formatCurrency</code> を含む表示整形を置く</div>
+      <div class="card l2"><h3>usecase のフック</h3><code class="i">useTransactions</code> は <code class="i">adapter</code> を import せず、<code class="i">TransactionRepository</code> interface 経由で通信する</div>
     </div>
   </div>
   <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
@@ -625,11 +552,11 @@
   <table class="t" style="font-size:26px">
     <tr><th style="width:440px">Next.js の要素</th><th style="width:230px">置き場所</th><th>このアプリでの扱い</th></tr>
     <tr><td class="n">page.tsx・layout.tsx</td><td><span class="pill l4">app/</span></td><td>Server Component のまま、<code class="i"><TransactionSection/></code> を置くだけ</td></tr>
-    <tr><td class="n">Client Component（状態・イベント）</td><td><span class="pill l3">presentation</span></td><td><code class="i">TransactionSection</code> の先頭に <code class="i">'use client'</code> を付ける</td></tr>
-    <tr><td class="n">データ取得（fetch）</td><td><span class="pill l3">adapter</span></td><td>ブラウザから Spring Boot の API を <code class="i">transactionApi</code> で呼ぶ</td></tr>
+    <tr><td class="n">状態・イベントを扱う Client Component</td><td><span class="pill l3">presentation</span></td><td><code class="i">TransactionSection</code> の先頭に <code class="i">'use client'</code> を付ける</td></tr>
+    <tr><td class="n">fetch によるデータ取得</td><td><span class="pill l3">adapter</span></td><td>ブラウザから Spring Boot の API を <code class="i">transactionApi</code> で呼ぶ</td></tr>
     <tr><td class="n">状態管理のフック</td><td><span class="pill l2">usecase</span></td><td><code class="i">useTransactions</code> が interface 経由で通信する</td></tr>
   </table>
-  <div class="note " style="margin-top:18px;font-size:26px">Server Component は関数を含むオブジェクトを Client Component に渡せない。そのため依存の注入は Client 側の TransactionSection で行う</div>
+  <div class="note " style="margin-top:18px;font-size:26px"><ul class="pts"><li>Server Component は関数を含むオブジェクトを Client Component に渡せない</li><li>そのため、依存は Client 側の TransactionSection で注入する</li></ul></div>
   <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
 </section>
 
@@ -639,12 +566,12 @@
   <table class="t" style="font-size:25px">
     <tr><th style="width:170px">層</th><th style="width:270px">置き場所</th><th>import してよい先</th><th style="width:480px">役割</th></tr>
     <tr><td class="n"><span class="pill l4">第4層</span></td><td>app/</td><td>presentation</td><td>ルーティングと配信</td></tr>
-    <tr><td class="n"><span class="pill l3">第3層</span></td><td>presentation/</td><td>usecase・domain（組み立て役のみ adapter も）</td><td>UI と表示整形</td></tr>
+    <tr><td class="n"><span class="pill l3">第3層</span></td><td>presentation/</td><td>usecase・domain、組み立て役のみ adapter も</td><td>UI と表示整形</td></tr>
     <tr><td class="n"><span class="pill l3">第3層</span></td><td>adapter/</td><td>usecase・domain</td><td>fetch による API 通信</td></tr>
     <tr><td class="n"><span class="pill l2">第2層</span></td><td>usecase/</td><td>domain</td><td>画面の操作手順と状態</td></tr>
     <tr><td class="n"><span class="pill l1">第1層</span></td><td>domain/</td><td>なし</td><td>型と入力検証</td></tr>
   </table>
-  <div class="note ng" style="margin-top:18px;font-size:26px">Backend と違い、フロントエンドの依存ルールはアーキテクチャテストで自動検査していない（CP ごとの目視確認と tsc に頼る）</div>
+  <div class="note ng" style="margin-top:18px;font-size:26px">Backend と違い、フロントエンドの依存ルールはアーキテクチャテストで自動検査していない、CP ごとの目視確認と tsc に頼る</div>
   <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
 </section>
 
@@ -656,7 +583,7 @@
     <tr><td class="n">1</td><td><span class="pill l3">presentation</span></td><td><code class="i">TransactionForm</code> が入力を受け、<code class="i">onSubmit</code> で <code class="i">addTransaction</code> を呼ぶ</td></tr>
     <tr><td class="n">2</td><td><span class="pill l2">usecase</span></td><td><code class="i">useTransactions</code> が <code class="i">repository.createTransaction</code> を呼び、完了後に一覧を再取得する</td></tr>
     <tr><td class="n">3</td><td><span class="pill l3">adapter</span></td><td><code class="i">transactionApi</code> が <code class="i">POST /api/transactions</code> を送り、JSON を型に変換する</td></tr>
-    <tr><td class="n">4</td><td><span class="pill l2">usecase</span></td><td>フックの state（<code class="i">transactions</code>・<code class="i">summary</code>）が更新される</td></tr>
+    <tr><td class="n">4</td><td><span class="pill l2">usecase</span></td><td>フックの state、<code class="i">transactions</code>・<code class="i">summary</code> が更新される</td></tr>
     <tr><td class="n">5</td><td><span class="pill l3">presentation</span></td><td><code class="i">TransactionList</code> と <code class="i">BalanceSummaryCard</code> が再描画される</td></tr>
   </table>
   <div class="note " style="margin-top:18px;font-size:26px">画面部品は state とコールバックを受け取るだけで、通信の方法を知らない</div>
@@ -665,9 +592,8 @@
 
 <!-- 12. ガードレール -->
 <section class="slide" data-title="AIへの規約適用">
-  <span class="tag t-ai">講義（Chapter 0・1）</span>
+  <span class="tag t-ai">講義 Chapter 0・1</span>
   <h1 class="title">AI には 4 つの仕組みで規約を守らせる</h1>
-  <p class="lead">指示が曖昧だと、「domain に JPA アノテーションを付ける」「Controller から Repository を直接呼ぶ」といった違反が起きやすい</p>
   <svg viewBox="0 0 1700 480" width="1700" height="480" role="img" aria-label="ガードレール">
     <defs><marker id="a6" markerUnits="userSpaceOnUse" markerWidth="20" markerHeight="20" refX="18" refY="10" orient="auto"><path d="M0,0 L20,10 L0,20 z" fill="#000"/></marker></defs>
     <g text-anchor="middle">
@@ -679,12 +605,12 @@
       <text x="631" y="124" font-size="25">領域別の詳細規約</text><text x="631" y="164" font-size="23" fill="#000">backend.md / frontend.md</text><text x="631" y="204" font-size="23" fill="#000">対象ファイル編集時に適用</text>
       <rect x="872" y="20" width="390" height="300" rx="18" fill="#fff" stroke="#7048e8" stroke-width="4"/>
       <text x="1067" y="76" font-size="30" font-weight="800">Skills</text>
-      <text x="1067" y="124" font-size="25">作業手順書</text><text x="1067" y="164" font-size="23" fill="#000">/setup-env（Ch2）</text><text x="1067" y="204" font-size="23" fill="#000">/add-usecase（Ch7）</text>
+      <text x="1067" y="124" font-size="25">作業手順書</text><text x="1067" y="164" font-size="23" fill="#000">Ch2 の /setup-env</text><text x="1067" y="204" font-size="23" fill="#000">Ch7 の /add-usecase</text>
       <rect x="1308" y="20" width="392" height="300" rx="18" fill="#fff" stroke="#7048e8" stroke-width="4"/>
       <text x="1504" y="76" font-size="30" font-weight="800">Hooks</text>
       <text x="1504" y="124" font-size="25">自動検証</text><text x="1504" y="164" font-size="23" fill="#000">編集の直後に実行</text><text x="1504" y="204" font-size="23" fill="#000">失敗は AI へ返る</text>
       <rect x="0" y="352" width="1700" height="110" rx="18" fill="#fff" stroke="#000" stroke-width="3"/>
-      <text x="850" y="402" font-size="28" font-weight="800">＋ Konsist アーキテクチャテスト（Ch4）</text>
+      <text x="850" y="402" font-size="28" font-weight="800">＋ Ch4 の Konsist アーキテクチャテスト</text>
       <text x="850" y="442" font-size="25" fill="#000">ルール違反を <code>./gradlew test</code> の失敗として検出する</text>
     </g>
     <text x="195" y="270" text-anchor="middle" font-size="22" fill="#7048e8" font-weight="700">伝える</text>
@@ -699,7 +625,7 @@
   <span class="tag t-lec">利点の具体例</span>
   <h1 class="title">層がないと、1 つのクラスに業務ルールも DB も入り込む</h1>
   <div class="cols" style="gap:28px">
-<div><div style="font-weight:700;font-size:24px;margin-bottom:6px">アンチパターンの例（本ハンズオンのコードではない）</div><pre class="code" style="font-size:22px"><span class="k">@RestController</span>
+<div><div style="font-weight:700;font-size:24px;margin-bottom:6px">アンチパターンの例、本ハンズオンのコードではない</div><pre class="code" style="font-size:22px"><span class="k">@RestController</span>
 <span class="k">class</span> TransactionController(
   <span class="k">val</span> jpa: JpaTransactionRepository
 ) {
@@ -711,7 +637,7 @@
     <span class="k">return</span> jpa.save(e)                      <span class="c">// DB 直結</span>
   }
 }</pre></div>
-<div><div class="note ng" style="font-size:27px"><ul class="pts" style="font-size:27px"><li>金額のルールが Controller にあり、更新 API でも同じ判定を書き直す</li><li>DB の列を変えると Controller まで修正が必要</li><li>テストに Spring と DB が必要で、実行が遅い</li><li>機能が増えるほどクラスが肥大化し、影響範囲が読めない</li></ul></div></div>
+<div><div class="note ng" style="font-size:27px"><ul class="pts" style="font-size:27px"><li>金額のルールが Controller にあり、更新 API でも同じ判定を書き直す</li><li>DB の列を変えると、Controller まで直す必要がある</li><li>テストに Spring と DB が必要で、実行が遅い</li><li>機能が増えるほどクラスが肥大化し、影響範囲が読めなくなる</li></ul></div></div>
   </div>
   <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
 </section>
@@ -733,7 +659,7 @@
 <div>  <table class="t" style="font-size:26px">
     <tr><th style="width:190px">層</th><th>変更</th></tr>
     <tr><td class="n"><span class="pill l1">domain</span></td><td>なし</td></tr>
-    <tr><td class="n"><span class="pill l2">usecase</span></td><td>なし（interface のまま）</td></tr>
+    <tr><td class="n"><span class="pill l2">usecase</span></td><td>なし、interface のまま</td></tr>
     <tr><td class="n"><span class="pill l3">adapter</span></td><td>RepositoryImpl を差し替え</td></tr>
     <tr><td class="n"><span class="pill l4">framework</span></td><td>接続設定のみ</td></tr>
   </table></div>
@@ -759,14 +685,14 @@
 <div><div class="note ok" style="font-size:27px"><ul class="pts" style="font-size:27px"><li>Interactor・Controller・JPA Entity は変更しない</li><li><code class="i">Transaction</code> 生成と <code class="i">Amount</code> 生成のどの経路でも新ルールが効く</li><li>修正するテストは <code class="i">AmountTest</code> などの domain テストだけ</li></ul></div></div>
   </div>
   <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
-  <div class="note ng" style="margin-top:18px;font-size:26px">注意：adapter の入力検証（<code class="i">@Positive</code>）は形式の確認で、業務ルールの最終防衛は domain が担う</div>
+  <div class="note ng" style="margin-top:18px;font-size:26px">注意：adapter の入力検証 <code class="i">@Positive</code> は形式のチェックで、業務ルールを最後に守るのは domain</div>
 </section>
 
 <section class="slide" data-title="場面3 テストの容易さ">
   <span class="tag t-lec">利点の具体例</span>
   <h1 class="title">場面 3　DB なしで、Interactor の振る舞いをテストできる</h1>
   <div class="cols" style="gap:28px">
-<div><div style="font-weight:700;font-size:24px;margin-bottom:6px">バックエンド（MockK）</div><pre class="code" style="font-size:21px"><span class="k">private val</span> transactionRepository = mockk&lt;TransactionRepository&gt;()
+<div><div style="font-weight:700;font-size:24px;margin-bottom:6px">バックエンド MockK</div><pre class="code" style="font-size:21px"><span class="k">private val</span> transactionRepository = mockk&lt;TransactionRepository&gt;()
 <span class="k">private val</span> categoryRepository = mockk&lt;CategoryRepository&gt;()
 <span class="k">private val</span> interactor = CreateTransactionInteractor(
     transactionRepository, categoryRepository)
@@ -799,11 +725,11 @@ verify(exactly = 0) { transactionRepository.save(any()) }</pre></div>
     <tr><th style="width:340px">利点</th><th>効く仕組み</th><th>このハンズオンでの確認</th></tr>
     <tr><td class="n">保存先の変更に強い</td><td>usecase の Repository interface</td><td>RepositoryImpl だけが JPA を知る</td></tr>
     <tr><td class="n">ルール変更が 1 か所</td><td>domain の不変条件</td><td>Amount・Transaction の init</td></tr>
-    <tr><td class="n">テストが速く DB 不要</td><td>依存性逆転（DIP）</td><td>MockK・MockMvc・MSW のテスト</td></tr>
-    <tr><td class="n">機能追加が追加中心</td><td>内側から外側へ実装</td><td>Chapter 7 の更新（PUT）機能</td></tr>
-    <tr><td class="n">AI の違反を検出</td><td>Konsist アーキテクチャテスト</td><td>ArchitectureTest 4 件・フック</td></tr>
+    <tr><td class="n">テストが速く DB 不要</td><td>依存性逆転 DIP</td><td>MockK・MockMvc・MSW のテスト</td></tr>
+    <tr><td class="n">機能追加は新規追加が中心</td><td>内側から外側へ実装</td><td>Chapter 7 の PUT による更新機能</td></tr>
+    <tr><td class="n">AI の規約違反を検出できる</td><td>Konsist アーキテクチャテスト</td><td>ArchitectureTest 4 件・フック</td></tr>
   </table>
-  <div class="note " style="margin-top:18px;font-size:27px">コストは層とファイルの増加。変更が多い・長く使う・チームで開発するアプリほど、見返りが大きい</div>
+  <div class="note " style="margin-top:18px;font-size:27px"><ul class="pts"><li>コストは、層とファイルが増えること</li><li>変更が多い・長く使う・チームで開発するアプリほど、見返りが大きい</li></ul></div>
   <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
 </section>
 
@@ -815,9 +741,9 @@ verify(exactly = 0) { transactionRepository.save(any()) }</pre></div>
     <tr><td class="n"><span class="pill l1">domain</span></td><td>Amount・Transaction・Category</td><td>types.ts・validateTransaction.ts</td></tr>
     <tr><td class="n"><span class="pill l2">usecase</span></td><td>CreateTransactionUseCase<br>TransactionRepository<br>CreateTransactionInteractor</td><td>TransactionRepository.ts<br>useTransactions.ts</td></tr>
     <tr><td class="n"><span class="pill l3">adapter</span></td><td>TransactionController・TransactionRequest<br>TransactionRepositoryImpl・TransactionJpaEntity</td><td>transactionApi.ts<br>TransactionForm・TransactionSection</td></tr>
-    <tr><td class="n"><span class="pill l4">framework</span></td><td>Spring の DI が配線（BudgetappApplication）</td><td>app/transactions/page.tsx</td></tr>
+    <tr><td class="n"><span class="pill l4">framework</span></td><td>BudgetappApplication で Spring の DI が配線</td><td>app/transactions/page.tsx</td></tr>
   </table>
-  <div class="note " style="margin-top:18px;font-size:27px">実装の順序：domain → usecase → adapter → framework。内側のファイルは外側のファイルを知らないまま完成する</div>
+  <div class="note " style="margin-top:18px;font-size:27px"><ul class="pts"><li>実装は domain → usecase → adapter → framework の順に進める</li><li>内側のファイルは外側のファイルを知らないまま完成する</li></ul></div>
   <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
 </section>
 
@@ -825,12 +751,12 @@ verify(exactly = 0) { transactionRepository.save(any()) }</pre></div>
   <span class="tag t-lec">実装の具体例</span>
   <h1 class="title">usecase は入口と出口の interface を定義し、Interactor が手順を書く</h1>
   <div class="cols" style="gap:28px">
-<div><pre class="code" style="font-size:21px"><span class="c">// 入口 Port（Controller が呼ぶ）</span>
+<div><pre class="code" style="font-size:21px"><span class="c">// 入口 Port、Controller が呼ぶ</span>
 <span class="k">interface</span> CreateTransactionUseCase {
   <span class="k">fun</span> execute(input: CreateTransactionInput): Transaction
 }
 
-<span class="c">// 出口 Port（Interactor が呼ぶ）</span>
+<span class="c">// 出口 Port、Interactor が呼ぶ</span>
 <span class="k">interface</span> TransactionRepository {
   <span class="k">fun</span> findById(id: Long): Transaction?
   <span class="k">fun</span> save(transaction: Transaction): Transaction
@@ -848,14 +774,14 @@ verify(exactly = 0) { transactionRepository.save(any()) }</pre></div>
 }</pre></div>
   </div>
   <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
-  <div class="note " style="margin-top:18px;font-size:26px">Interactor は interface と domain だけを import する（@Service などの Spring 注釈は除く）</div>
+  <div class="note " style="margin-top:18px;font-size:26px">Interactor は interface と domain だけを import する、ただし @Service などの Spring 注釈は除く</div>
 </section>
 
 <section class="slide" data-title="実装例 adapter">
   <span class="tag t-lec">実装の具体例</span>
   <h1 class="title">adapter は HTTP と DB の形式を、内側の型へ変換する</h1>
   <div class="cols" style="gap:28px">
-<div><div style="font-weight:700;font-size:24px;margin-bottom:6px">Controller（HTTP → UseCase）</div><pre class="code" style="font-size:22px"><span class="k">@PostMapping</span> <span class="k">@ResponseStatus</span>(CREATED)
+<div><div style="font-weight:700;font-size:24px;margin-bottom:6px">Controller: HTTP → UseCase</div><pre class="code" style="font-size:22px"><span class="k">@PostMapping</span> <span class="k">@ResponseStatus</span>(CREATED)
 <span class="k">fun</span> create(
   <span class="k">@Valid @RequestBody</span> request: TransactionRequest
 ): TransactionItemResponse {
@@ -863,7 +789,7 @@ verify(exactly = 0) { transactionRepository.save(any()) }</pre></div>
       .execute(request.toUseCaseInput())
   <span class="k">return</span> TransactionItemResponse.fromDomain(created)
 }</pre></div>
-<div><div style="font-weight:700;font-size:24px;margin-bottom:6px">RepositoryImpl（domain ⇄ JPA）</div><pre class="code" style="font-size:22px"><span class="k">@Component</span>
+<div><div style="font-weight:700;font-size:24px;margin-bottom:6px">RepositoryImpl: domain ⇄ JPA</div><pre class="code" style="font-size:22px"><span class="k">@Component</span>
 <span class="k">class</span> TransactionRepositoryImpl(...)
     : TransactionRepository {
   <span class="k">override fun</span> save(t: Transaction): Transaction {
@@ -905,7 +831,7 @@ verify(exactly = 0) { transactionRepository.save(any()) }</pre></div>
 repository = transactionApi</pre></div>
   </div>
   <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
-  <div class="note " style="margin-top:18px;font-size:26px">useTransactions は fetch を知らず、transactionApi は React を知らない。両者をつなぐのは TransactionSection の既定引数だけ</div>
+  <div class="note " style="margin-top:18px;font-size:26px"><ul class="pts"><li>useTransactions は fetch を知らず、transactionApi は React を知らない</li><li>両者をつなぐのは TransactionSection の既定引数だけ</li></ul></div>
 </section>
 
 <section class="slide" data-title="どの層に置くかの判断">
@@ -920,23 +846,6 @@ repository = transactionApi</pre></div>
     <tr><td class="n">「¥1,000」の表示整形</td><td><span class="pill l3">presentation</span></td><td>画面表示の都合</td></tr>
     <tr><td class="n">CORS・起動設定</td><td><span class="pill l4">framework</span></td><td>フレームワークの設定</td></tr>
   </table>
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
-</section>
-
-<!-- 13. Ch3 進行 -->
-<section class="slide" data-title="Chapter 3 進行">
-  <span class="tag t-be">Chapter 3 バックエンド実装</span>
-  <h1 class="title">内側の層から順に、チェックポイントを 1 つずつ実行</h1>
-  <p class="lead">4 層を一度に作らず、チェックポイントごとに AI が停止して依存ルールを確認する</p>
-  <table class="t" style="font-size:28px">
-    <tr><th style="width:400px">チェックポイント</th><th>作るもの</th><th style="width:520px">確認すること</th></tr>
-    <tr><td class="n">CP3-2 <span class="pill l1">domain</span></td><td>Amount・Transaction・BalanceSummary</td><td>Spring / JPA の import がない</td></tr>
-    <tr><td class="n">CP3-3 <span class="pill l2">usecase</span></td><td>Input / Output Port・Interactor</td><td>adapter・JPA を import していない</td></tr>
-    <tr><td class="n">CP3-4・5 <span class="pill l3">adapter</span></td><td>JPA Entity・Repository・DTO・Controller</td><td>framework を参照していない</td></tr>
-    <tr><td class="n">CP3-6 <span class="pill l4">framework</span></td><td>CorsConfig</td><td>:3000 からの CORS 許可</td></tr>
-    <tr><td class="n">CP3-7〜10</td><td>自己レビュー・compileKotlin・curl 疎通</td><td>機能ごとに API が動く</td></tr>
-  </table>
-  <div class="note " style="margin-top:20px;font-size:28px">AI が CP を 1 つ実施して停止 → 確認 →「次のチェックポイントに進む」</div>
   <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
 </section>
 
@@ -968,11 +877,11 @@ repository = transactionApi</pre></div>
 }</pre>
     <div>
       <ul class="pts">
-        <li>不変条件として、不正な状態の <code class="i">Transaction</code> はどの経路でも作れない</li>
-        <li>値オブジェクトとして、<code class="i">Int</code> のままにせず <code class="i">Amount</code> にする</li>
-        <li>JPA Entity は別のクラスにし、テーブル構造がドメイン設計に影響しないよう adapter で相互変換する</li>
+        <li>不変条件があるので、不正な状態の <code class="i">Transaction</code> はどの経路でも作れない</li>
+        <li>金額は <code class="i">Int</code> のままにせず、値オブジェクト <code class="i">Amount</code> にする</li>
+        <li>JPA Entity は別のクラスにし、テーブル構造がドメイン設計に影響しないよう、adapter で相互に変換する</li>
       </ul>
-      <div class="note ng" style="margin-top:18px;font-size:26px">NG 例　domain に <code class="i">@Entity</code> や <code class="i">@Component</code> を付けると、第 1 層に外部技術への依存が生じる</div>
+      <div class="note ng" style="margin-top:18px;font-size:26px">NG 例　domain に <code class="i">@Entity</code> や <code class="i">@Component</code> を付けると、第 1 層が外部技術に依存してしまう</div>
     </div>
   </div>
   <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
@@ -981,27 +890,27 @@ repository = transactionApi</pre></div>
 <!-- 16. Ch4 テスト4種 -->
 <section class="slide" data-title="Chapter 4 テストの種類">
   <span class="tag t-test">Chapter 4 バックエンドのテスト</span>
-  <h1 class="title">性質の異なる 4 種類のテストを層ごとに配置</h1>
+  <h1 class="title">性質の異なる 4 種類のテストを、層ごとに置く</h1>
   <div class="cols" style="gap:36px;align-items:center">
     <svg viewBox="0 0 800 640" width="760" height="610" style="flex:none" role="img" aria-label="テストの層">
       <g text-anchor="middle" font-weight="800">
         <polygon points="400,10 540,140 260,140" fill="#fff" stroke="#7048e8" stroke-width="4"/>
         <text x="400" y="106" font-size="26">Konsist</text>
         <polygon points="260,150 540,150 650,270 150,270" fill="#fff" stroke="#e67700" stroke-width="4"/>
-        <text x="400" y="222" font-size="26">MockMvc（Controller）</text>
+        <text x="400" y="222" font-size="26">MockMvc: Controller</text>
         <polygon points="150,280 650,280 760,400 40,400" fill="#fff" stroke="#1c7ed6" stroke-width="4"/>
-        <text x="400" y="352" font-size="26">MockK（Interactor）</text>
+        <text x="400" y="352" font-size="26">MockK: Interactor</text>
         <polygon points="40,410 760,410 800,530 0,530" fill="#fff" stroke="#2f9e44" stroke-width="4"/>
-        <text x="400" y="480" font-size="26">JUnit 5（domain）</text>
+        <text x="400" y="480" font-size="26">JUnit 5: domain</text>
       </g>
       <text x="400" y="590" text-anchor="middle" font-size="24" fill="#000">下ほど速く・外部に依存しない</text>
     </svg>
     <table class="t" style="font-size:26px">
       <tr><th>テスト</th><th>検証すること</th></tr>
-      <tr><td class="n"><span class="pill l1">domain</span></td><td>Amount・Transaction・BalanceSummary を対象とし、モックは不要</td></tr>
+      <tr><td class="n"><span class="pill l1">domain</span></td><td>Amount・Transaction・BalanceSummary を検証し、モックは不要</td></tr>
       <tr><td class="n"><span class="pill l2">usecase</span></td><td>Repository を MockK でモックし、存在しない ID は例外になり <code class="i">save</code> は呼ばれないことを確認</td></tr>
       <tr><td class="n"><span class="pill l3">controller</span></td><td><code class="i">@WebMvcTest</code> でステータス・バリデーション・例外ハンドリングを確認し、UseCase は <code class="i">@TestConfiguration</code> でモックする</td></tr>
-      <tr><td class="n"><span class="pill l4">arch</span></td><td>ソースの <code class="i">import</code> を走査し、依存ルール違反を検出</td></tr>
+      <tr><td class="n"><span class="pill l4">arch</span></td><td>ソースの <code class="i">import</code> を調べ、依存ルール違反を検出</td></tr>
     </table>
   </div>
   <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
@@ -1025,23 +934,6 @@ framework.dependsOn(domain, usecase, adapter)</pre>
   <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
 </section>
 
-<!-- 18. Ch5 進行 -->
-<section class="slide" data-title="Chapter 5 進行">
-  <span class="tag t-fe">Chapter 5・6 フロントエンド</span>
-  <h1 class="title">Chapter 5 フロントエンドも内側から外側へ実装する</h1>
-  <table class="t" style="font-size:27px">
-    <tr><th style="width:400px">チェックポイント</th><th>作るもの</th><th style="width:520px">確認すること</th></tr>
-    <tr><td class="n">CP5-2 <span class="pill n">共通 UI</span></td><td>Button・Input</td><td>型チェックが通る</td></tr>
-    <tr><td class="n">CP5-3 <span class="pill l1">domain</span></td><td>types・validateTransaction</td><td>React・fetch の import がない</td></tr>
-    <tr><td class="n">CP5-4 <span class="pill l2">usecase</span></td><td>TransactionRepository・useTransactions</td><td>フックが adapter を import していない</td></tr>
-    <tr><td class="n">CP5-5 <span class="pill l3">adapter</span></td><td>transactionApi</td><td>interface を実装している</td></tr>
-    <tr><td class="n">CP5-6〜7 <span class="pill l3">presentation</span></td><td>UI 部品・formatCurrency</td><td>通信の詳細を持たない</td></tr>
-    <tr><td class="n">CP5-8 <span class="pill l4">app</span></td><td>page.tsx</td><td>ビルドが成功する</td></tr>
-  </table>
-
-  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
-</section>
-
 <!-- 19. フロントDIP -->
 <section class="slide" data-title="フロントエンドの依存性逆転">
   <span class="tag t-fe">Chapter 5・6 フロントエンド</span>
@@ -1050,10 +942,10 @@ framework.dependsOn(domain, usecase, adapter)</pre>
     <defs><marker id="a9" markerUnits="userSpaceOnUse" markerWidth="20" markerHeight="20" refX="18" refY="10" orient="auto"><path d="M0,0 L20,10 L0,20 z" fill="#000"/></marker>
     <marker id="a9b" markerUnits="userSpaceOnUse" markerWidth="20" markerHeight="20" refX="18" refY="10" orient="auto"><path d="M0,0 L20,10 L0,20 z" fill="#e67700"/></marker></defs>
     <g font-size="25" font-weight="800" text-anchor="middle">
-      <rect x="0" y="30" width="400" height="120" rx="16" fill="#fff" stroke="#e67700" stroke-width="4"/><text x="200" y="82">TransactionSection</text><text x="200" y="120" font-size="21" font-weight="500" fill="#000">Composition Root（presentation）</text>
-      <rect x="520" y="30" width="400" height="120" rx="16" fill="#fff" stroke="#1c7ed6" stroke-width="4"/><text x="720" y="82">useTransactions</text><text x="720" y="120" font-size="21" font-weight="500" fill="#000">画面ユースケース（usecase）</text>
-      <rect x="1040" y="30" width="400" height="120" rx="16" fill="#fff" stroke="#1c7ed6" stroke-width="4" stroke-dasharray="10 6"/><text x="1240" y="82">TransactionRepository</text><text x="1240" y="120" font-size="21" font-weight="500" fill="#000">interface（usecase）</text>
-      <rect x="1040" y="300" width="400" height="120" rx="16" fill="#fff" stroke="#e67700" stroke-width="4"/><text x="1240" y="352">transactionApi</text><text x="1240" y="390" font-size="21" font-weight="500" fill="#000">fetch 実装（adapter）</text>
+      <rect x="0" y="30" width="400" height="120" rx="16" fill="#fff" stroke="#e67700" stroke-width="4"/><text x="200" y="82">TransactionSection</text><text x="200" y="120" font-size="21" font-weight="500" fill="#000">presentation の Composition Root</text>
+      <rect x="520" y="30" width="400" height="120" rx="16" fill="#fff" stroke="#1c7ed6" stroke-width="4"/><text x="720" y="82">useTransactions</text><text x="720" y="120" font-size="21" font-weight="500" fill="#000">usecase の画面ユースケース</text>
+      <rect x="1040" y="30" width="400" height="120" rx="16" fill="#fff" stroke="#1c7ed6" stroke-width="4" stroke-dasharray="10 6"/><text x="1240" y="82">TransactionRepository</text><text x="1240" y="120" font-size="21" font-weight="500" fill="#000">usecase の interface</text>
+      <rect x="1040" y="300" width="400" height="120" rx="16" fill="#fff" stroke="#e67700" stroke-width="4"/><text x="1240" y="352">transactionApi</text><text x="1240" y="390" font-size="21" font-weight="500" fill="#000">adapter の fetch 実装</text>
       <rect x="1500" y="300" width="200" height="120" rx="16" fill="#fff" stroke="#000" stroke-width="3"/><text x="1600" y="372">fetch</text>
     </g>
     <g stroke="#000" stroke-width="4" marker-end="url(#a9)">
@@ -1081,7 +973,7 @@ framework.dependsOn(domain, usecase, adapter)</pre>
       <rect x="0" y="40" width="250" height="110" rx="14" fill="#fff" stroke="#2f9e44" stroke-width="4"/><text x="125" y="86">Testing Library</text><text x="125" y="120" font-size="20" font-weight="500" fill="#000">render / click</text>
       <rect x="340" y="40" width="270" height="110" rx="14" fill="#fff" stroke="#e67700" stroke-width="3"/><text x="475" y="86">TransactionSection</text><text x="475" y="120" font-size="20" font-weight="500" fill="#000">presentation</text>
       <rect x="700" y="40" width="250" height="110" rx="14" fill="#fff" stroke="#1c7ed6" stroke-width="3"/><text x="825" y="86">useTransactions</text><text x="825" y="120" font-size="20" font-weight="500" fill="#000">usecase</text>
-      <rect x="1040" y="40" width="250" height="110" rx="14" fill="#fff" stroke="#e67700" stroke-width="3"/><text x="1165" y="86">transactionApi</text><text x="1165" y="120" font-size="20" font-weight="500" fill="#000">adapter（fetch）</text>
+      <rect x="1040" y="40" width="250" height="110" rx="14" fill="#fff" stroke="#e67700" stroke-width="3"/><text x="1165" y="86">transactionApi</text><text x="1165" y="120" font-size="20" font-weight="500" fill="#000">fetch の adapter</text>
       <rect x="1380" y="40" width="320" height="110" rx="14" fill="#2f9e44" stroke="#2f9e44"/><text x="1540" y="86" fill="#fff">MSW サーバー</text><text x="1540" y="120" font-size="20" font-weight="500" fill="#fff">インメモリのハンドラー</text>
     </g>
     <g stroke="#000" stroke-width="4" marker-end="url(#a10)"><line x1="254" y1="95" x2="336" y2="95"/><line x1="614" y1="95" x2="696" y2="95"/><line x1="954" y1="95" x2="1036" y2="95"/><line x1="1294" y1="95" x2="1376" y2="95"/></g>
@@ -1094,7 +986,7 @@ framework.dependsOn(domain, usecase, adapter)</pre>
 <!-- 22. Skills x Hooks -->
 <section class="slide" data-title="Skills × Hooks">
   <span class="tag t-ai">Chapter 7 Skills × Hooks</span>
-  <h1 class="title">ファイルを編集するたびに自動検証が実行される</h1>
+  <h1 class="title">ファイルを編集するたびに、自動で検証が走る</h1>
   <svg viewBox="0 0 1700 580" width="1700" height="580" role="img" aria-label="フックによる自動検証">
     <defs><marker id="a11" markerUnits="userSpaceOnUse" markerWidth="20" markerHeight="20" refX="18" refY="10" orient="auto"><path d="M0,0 L20,10 L0,20 z" fill="#000"/></marker>
     <marker id="a11r" markerUnits="userSpaceOnUse" markerWidth="20" markerHeight="20" refX="18" refY="10" orient="auto"><path d="M0,0 L20,10 L0,20 z" fill="#e67700"/></marker></defs>
@@ -1113,8 +1005,8 @@ framework.dependsOn(domain, usecase, adapter)</pre>
     <text x="1350" y="442" text-anchor="middle" font-size="22" font-family="monospace">pnpm exec tsc --noEmit</text>
     <line x1="1450" y1="164" x2="1450" y2="226" stroke="#000" stroke-width="4" marker-end="url(#a11)"/>
     <g font-size="24" font-weight="800">
-      <rect x="0" y="230" width="640" height="100" rx="14" fill="#fff" stroke="#2f9e44" stroke-width="3"/><text x="320" y="288" text-anchor="middle" fill="#2f9e44">成功（exit 0）の場合は次の作業へ進む</text>
-      <rect x="0" y="360" width="640" height="100" rx="14" fill="#fff" stroke="#e67700" stroke-width="3"/><text x="320" y="406" text-anchor="middle" fill="#e67700">失敗（exit 2 と stderr）</text><text x="320" y="442" text-anchor="middle" font-size="22" font-weight="500" fill="#000">エラー内容が AI に返され、AI が自ら修正する</text>
+      <rect x="0" y="230" width="640" height="100" rx="14" fill="#fff" stroke="#2f9e44" stroke-width="3"/><text x="320" y="288" text-anchor="middle" fill="#2f9e44">exit 0 で成功の場合は次の作業へ進む</text>
+      <rect x="0" y="360" width="640" height="100" rx="14" fill="#fff" stroke="#e67700" stroke-width="3"/><text x="320" y="406" text-anchor="middle" fill="#e67700">exit 2 と stderr で失敗</text><text x="320" y="442" text-anchor="middle" font-size="22" font-weight="500" fill="#000">エラー内容が AI に返され、AI が自ら修正する</text>
       <rect x="745" y="290" width="190" height="100" rx="14" fill="#fff" stroke="#000" stroke-width="3"/><text x="840" y="348" text-anchor="middle">検証結果</text>
     </g>
     <line x1="996" y1="285" x2="940" y2="325" stroke="#000" stroke-width="4" marker-end="url(#a11)"/>
@@ -1128,28 +1020,69 @@ framework.dependsOn(domain, usecase, adapter)</pre>
 <!-- 23. 更新機能演習 -->
 <section class="slide" data-title="更新機能の演習">
   <span class="tag t-ai">Chapter 7 Skills × Hooks</span>
-  <h1 class="title">演習として明細の編集（更新）機能を全層に追加する</h1>
-  <p class="lead">起動は <code class="i">/add-usecase</code> の 1 回で、以降は「次のチェックポイントに進む」と入力する</p>
+  <h1 class="title">演習として明細の編集、つまり更新の機能を全層に追加する</h1>
   <table class="t" style="font-size:26px">
     <tr><th style="width:250px">層</th><th>追加・変更するもの</th></tr>
     <tr><td class="n"><span class="pill l2">usecase</span></td><td><code class="i">UpdateTransactionUseCase</code> / <code class="i">UpdateTransactionInteractor</code></td></tr>
     <tr><td class="n"><span class="pill l3">adapter</span></td><td><code class="i">PUT /api/transactions/{id}</code>、DTO から入力への変換</td></tr>
     <tr><td class="n"><span class="pill n">frontend</span></td><td><code class="i">TransactionRepository</code> に <code class="i">updateTransaction</code>、<code class="i">useTransactions</code>、「編集」ボタンと編集フォーム</td></tr>
-    <tr><td class="n"><span class="pill n">テスト</span></td><td>Interactor（MockK）、Controller（MockMvc）、MSW の PUT ハンドラーと結合テスト</td></tr>
+    <tr><td class="n"><span class="pill n">テスト</span></td><td>Interactor は MockK、Controller は MockMvc、MSW の PUT ハンドラーと結合テスト</td></tr>
   </table>
+  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+</section>
+
+<!-- 自由演習 -->
+<section class="slide" data-title="自由演習">
+  <span class="tag t-ai">Chapter 7 Skills × Hooks</span>
+  <h1 class="title">自由に機能を考えて、全層に実装してみる</h1>
+  <div class="cols" style="gap:40px">
+    <ol class="steps" style="font-size:28px">
+      <li>1 機能を決める</li>
+      <li>どの層に何を足すか書き出す</li>
+      <li><code class="i">/add-usecase</code> で内側の層から実装</li>
+      <li>テストとフックで検証</li>
+      <li>発表の準備</li>
+    </ol>
+    <div>
+      <table class="t" style="font-size:24px">
+        <tr><th>機能例</th><th>主に足す層</th></tr>
+        <tr><td>カテゴリ別の支出集計</td><td><span class="pill l2">usecase</span> <span class="pill l3">adapter</span> <span class="pill n">UI</span></td></tr>
+        <tr><td>月別の収支サマリ</td><td><span class="pill l2">usecase</span> <span class="pill l3">adapter</span></td></tr>
+        <tr><td>明細のキーワード検索</td><td><span class="pill l2">usecase</span> <span class="pill l3">adapter</span> <span class="pill n">UI</span></td></tr>
+        <tr><td>月ごとの予算設定と超過表示</td><td><span class="pill l1">domain</span> <span class="pill l2">usecase</span> <span class="pill l3">adapter</span></td></tr>
+        <tr><td>CSV 出力</td><td><span class="pill l2">usecase</span> <span class="pill l3">adapter</span></td></tr>
+        <tr><td>定期的な明細の自動登録</td><td><span class="pill l1">domain</span> <span class="pill l2">usecase</span> <span class="pill l4">framework</span></td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+</section>
+
+<!-- 発表 -->
+<section class="slide" data-title="発表">
+  <span class="tag t-ai">Chapter 7 Skills × Hooks</span>
+  <h1 class="title">やったことと、その理由を発表する</h1>
+  <table class="t" style="font-size:27px">
+    <tr><th style="width:430px">発表する項目</th><th>話す内容</th></tr>
+    <tr><td class="n">何を作ったか</td><td>追加した機能と、画面や API での動き</td></tr>
+    <tr><td class="n">なぜその機能にしたか</td><td>選んだ理由と、使う場面</td></tr>
+    <tr><td class="n">どの層に何を置いたか</td><td>層ごとに置いたものと、その層にした理由</td></tr>
+    <tr><td class="n">依存ルールをどう守ったか</td><td>AI が違反しかけた点と、その直し方</td></tr>
+  </table>
+  <div class="note" style="margin-top:22px">時間の目安は 1 人あたり 3〜5 分で、作ったものの紹介に 1 分、層の置き方と依存ルールの説明に 2〜3 分、質問に 1 分を使う</div>
   <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
 </section>
 
 <!-- 変更の影響範囲 -->
 <section class="slide" data-title="変更の影響範囲">
-  <span class="tag t-lec">講義（Chapter 0・1）</span>
+  <span class="tag t-lec">講義 Chapter 0・1</span>
   <h1 class="title">変更の影響は、変わりやすい外側の層に閉じる</h1>
   <table class="t" style="font-size:27px">
     <tr><th style="width:430px">変更</th><th>修正する層</th><th style="width:420px">変更不要な層</th></tr>
     <tr><td>DB 製品・テーブル構造</td><td><span class="pill l3">adapter</span> の Repository 実装</td><td>domain・usecase</td></tr>
     <tr><td>API の JSON 形式・画面</td><td><span class="pill l3">adapter</span> の DTO・presentation</td><td>domain・usecase</td></tr>
-    <tr><td>業務ルール（例: 金額の上限）</td><td><span class="pill l1">domain</span> とそのテスト</td><td>adapter の実装方式</td></tr>
-    <tr><td>機能追加（例: 明細の更新）</td><td>usecase → adapter → UI の順に追加</td><td>既存の Interactor</td></tr>
+    <tr><td>業務ルール、例えば金額の上限</td><td><span class="pill l1">domain</span> とそのテスト</td><td>adapter の実装方式</td></tr>
+    <tr><td>機能追加、例えば明細の更新</td><td>usecase → adapter → UI の順に追加</td><td>既存の Interactor</td></tr>
   </table>
   <div class="note" style="margin-top:22px">依存の向きを守っているので、内側の層は外側の変更を知らずにテストできる</div>
   <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
@@ -1157,15 +1090,15 @@ framework.dependsOn(domain, usecase, adapter)</pre>
 
 <!-- トレードオフ -->
 <section class="slide" data-title="設計上のトレードオフ">
-  <span class="tag t-lec">講義（Chapter 0・1）</span>
+  <span class="tag t-lec">講義 Chapter 0・1</span>
   <h1 class="title">4 層構成にはコストがあり、このハンズオンでは簡略化もしている</h1>
   <div class="cols" style="gap:36px">
     <div class="card l3"><h3>コスト</h3>
-      <ul class="pts" style="font-size:27px"><li>家計簿アプリでも 29 ファイル（バックエンド）になる</li><li>型の変換コードが増える</li><li>小規模・短命なアプリでは過剰になりうる</li></ul></div>
+      <ul class="pts" style="font-size:27px"><li>家計簿アプリでも、バックエンドは 29 ファイルになる</li><li>型の変換コードが増える</li><li>小規模・短命なアプリでは過剰になりうる</li></ul></div>
     <div class="card l2"><h3>このハンズオンの簡略化</h3>
       <ul class="pts" style="font-size:27px"><li>Interactor に <code class="i">@Service</code> と <code class="i">@Transactional</code> を付け、usecase が Spring に依存する</li><li>UseCase の戻り値に domain モデルをそのまま使う</li></ul></div>
   </div>
-  <div class="note" style="margin-top:26px">採用は、業務ルールの複雑さ・寿命・チーム規模で判断する。簡略化をどこまで許すかはチームで決める</div>
+  <div class="note" style="margin-top:26px"><ul class="pts"><li>採用するかは、業務ルールの複雑さ・寿命・チーム規模で判断する</li><li>簡略化をどこまで許すかはチームで決める</li></ul></div>
   <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
 </section>
 
@@ -1175,7 +1108,7 @@ framework.dependsOn(domain, usecase, adapter)</pre>
   <h1 class="title">実践した 4 つのこと</h1>
   <div class="cols" style="gap:30px;margin-top:10px">
     <div class="card l1" style="min-height:340px"><h3>① 4 層の分離</h3>ビジネスルール・手順・変換・技術詳細を分け、依存は外側から内側へ一方向にする</div>
-    <div class="card l2" style="min-height:340px"><h3>② 依存性逆転</h3>usecase にインターフェースを置き、実装を外側から注入する（バックエンドもフロントエンドも同じ形）</div>
+    <div class="card l2" style="min-height:340px"><h3>② 依存性逆転</h3>usecase にインターフェースを置き、実装を外側から注入する、バックエンドもフロントエンドも同じ形</div>
     <div class="card l3" style="min-height:340px"><h3>③ 多層の自動テスト</h3>JUnit・MockK・MockMvc・Vitest・MSW、そして Konsist でルール違反を自動検出する</div>
     <div class="card l4" style="min-height:340px"><h3>④ AI に規約を守らせる仕組み</h3>CLAUDE.md・rules・Skills・Hooks で、AI に規約を守らせながら実装と検証を進める</div>
   </div>
@@ -1188,13 +1121,118 @@ framework.dependsOn(domain, usecase, adapter)</pre>
   <div class="hero" style="top:360px">
     <h1>質疑応答・振り返り</h1>
     <div class="sub">うまくいった点と詰まった点の共有</div>
-    <div class="meta">次のステップとして、別のユースケース（カテゴリ管理・月別集計）の追加を <code style="font-family:var(--mono)">/add-usecase</code> で試す</div>
+    <div class="meta">次のステップとして、カテゴリ管理・月別集計など別のユースケースの追加を <code style="font-family:var(--mono)">/add-usecase</code> で試す</div>
   </div>
   <div class="foot" style="left:130px;right:130px"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
 </section>
 
+<!-- Appendix -->
+<section class="slide dark" data-title="Appendix">
+  <div class="hero" style="top:360px">
+    <h1>Appendix</h1>
+    <div class="sub">チェックポイント運用</div>
+    <div class="meta">進め方・各 CP の状態・Chapter 3 と 5 の進行表</div>
+  </div>
+  <div class="foot" style="left:130px;right:130px"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+</section>
+
+<!-- チェックポイント運用 -->
+<section class="slide" data-title="チェックポイント運用">
+  <span class="tag">Appendix</span>
+  <h1 class="title">チェックポイント運用では 1 つずつ進め、停止して確認する</h1>
+  <svg viewBox="0 0 1700 300" width="1700" height="300" role="img" aria-label="チェックポイントの進め方">
+    <defs><marker id="acp" markerUnits="userSpaceOnUse" markerWidth="20" markerHeight="20" refX="18" refY="10" orient="auto"><path d="M0,0 L20,10 L0,20 z" fill="#000"/></marker></defs>
+    <g text-anchor="middle" font-weight="800">
+      <rect x="0" y="20" width="380" height="150" rx="18" fill="#fff" stroke="#1c7ed6" stroke-width="4"/>
+      <text x="190" y="82" font-size="30" fill="#1c7ed6">人</text><text x="190" y="126" font-size="26" font-weight="700" fill="#000">開始プロンプトを入力</text>
+      <rect x="440" y="20" width="380" height="150" rx="18" fill="#fff" stroke="#7048e8" stroke-width="4"/>
+      <text x="630" y="82" font-size="30" fill="#7048e8">AI</text><text x="630" y="126" font-size="26" font-weight="700" fill="#000">CP を 1 つだけ実施</text>
+      <rect x="880" y="20" width="380" height="150" rx="18" fill="#fff" stroke="#7048e8" stroke-width="4"/>
+      <text x="1070" y="82" font-size="30" fill="#7048e8">AI</text><text x="1070" y="126" font-size="26" font-weight="700" fill="#000">結果を報告して停止</text>
+      <rect x="1320" y="20" width="380" height="150" rx="18" fill="#fff" stroke="#1c7ed6" stroke-width="4"/>
+      <text x="1510" y="82" font-size="30" fill="#1c7ed6">人</text><text x="1510" y="126" font-size="26" font-weight="700" fill="#000">確認して次へ進める</text>
+    </g>
+    <g stroke="#000" stroke-width="4" fill="none" marker-end="url(#acp)"><line x1="384" y1="95" x2="436" y2="95"/><line x1="824" y1="95" x2="876" y2="95"/><line x1="1264" y1="95" x2="1316" y2="95"/><path d="M1510,176 V250 H630 V176"/></g>
+    <text x="1070" y="284" text-anchor="middle" font-size="26" font-weight="700" fill="#1c7ed6">「次のチェックポイントに進む」と入力</text>
+  </svg>
+  <table class="t" style="margin-top:20px">
+    <tr><th style="width:200px">種別</th><th>AI がやること</th><th style="width:560px">人が見るもの</th></tr>
+    <tr><td class="n">設計</td><td>コードを書かず、クラス構成・依存方向・API を示す</td><td>規約に合っているか、依存の向き</td></tr>
+    <tr><td class="n">実装</td><td>1 つの層または部品を実装し、コンパイルと型チェックを行う</td><td>依存ルール違反がないこと</td></tr>
+    <tr><td class="n">テスト</td><td>テストを追加して実行し、ルール違反を検査する</td><td>実行件数と、すべて成功したか</td></tr>
+    <tr><td class="n">動作確認</td><td>サーバーを起動し、機能ごとに API・画面を確認</td><td>期待する値・表示になること</td></tr>
+  </table>
+  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+</section>
+
+<!-- チェックポイントごとの状態、バックエンド -->
+<section class="slide" data-title="CP ごとのアプリの状態、環境構築・バックエンド">
+  <span class="tag">Appendix</span>
+  <h1 class="title">CP ごとのアプリの状態、環境構築・バックエンド</h1>
+  <table class="t" style="font-size:28px">
+    <tr><th style="width:260px">完了した CP</th><th style="width:640px">この時点で増えるもの</th><th>この時点の状態</th></tr>
+    <tr><td class="n"><span class="tag t-ops" style="margin:0;font-size:24px;padding:0 14px">Ch2</span></td><td>雛形、DB、CLAUDE.md・rules・スキル</td><td>DB に初期データ 5 件、ビルド成功、アプリの機能はまだない</td></tr>
+    <tr><td class="n"><span class="tag t-be" style="margin:0;font-size:24px;padding:0 14px">CP3-2</span></td><td>domain 6 ファイル</td><td>外部ライブラリなしでコンパイルできる</td></tr>
+    <tr><td class="n"><span class="tag t-be" style="margin:0;font-size:24px;padding:0 14px">CP3-3</span></td><td>usecase 10 ファイル、Port・Interactor</td><td>コンパイルのみで、DB・HTTP とはまだつながらない</td></tr>
+    <tr><td class="n"><span class="tag t-be" style="margin:0;font-size:24px;padding:0 14px">CP3-4〜5</span></td><td>adapter 12 ファイル、JPA・DTO・Controller</td><td>HTTP と DB につながり、起動できる状態になる</td></tr>
+    <tr><td class="n"><span class="tag t-be" style="margin:0;font-size:24px;padding:0 14px">CP3-6〜10</span></td><td>framework 1 ファイル、計 29</td><td>API 4 本が動作する、一覧・登録・削除・入力エラー 400</td></tr>
+    <tr><td class="n"><span class="tag t-test" style="margin:0;font-size:24px;padding:0 14px">CP4-2〜4</span></td><td>domain・usecase・Controller のテスト 16 件</td><td>DB を使わず、ミリ秒単位で業務ルールを検証できる</td></tr>
+    <tr><td class="n"><span class="tag t-test" style="margin:0;font-size:24px;padding:0 14px">CP4-5〜7</span></td><td>Konsist のアーキテクチャテスト 4 件</td><td>計 20 件が通過し、依存方向の違反を自動で検出できる</td></tr>
+  </table>
+  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+</section>
+
+<!-- チェックポイントごとの状態、フロントエンド・拡張 -->
+<section class="slide" data-title="CP ごとのアプリの状態、フロントエンド・機能追加">
+  <span class="tag">Appendix</span>
+  <h1 class="title">CP ごとのアプリの状態、フロントエンド・機能追加</h1>
+  <table class="t" style="font-size:28px">
+    <tr><th style="width:260px">完了した CP</th><th style="width:640px">この時点で増えるもの</th><th>この時点の状態</th></tr>
+    <tr><td class="n"><span class="tag t-fe" style="margin:0;font-size:24px;padding:0 14px">CP5-2〜5</span></td><td>共通 UI、domain、usecase、adapter</td><td>型チェックのみで、まだ画面は出ない</td></tr>
+    <tr><td class="n"><span class="tag t-fe" style="margin:0;font-size:24px;padding:0 14px">CP5-6〜9</span></td><td>presentation、app ページ</td><td>ビルドが成功し、画面を表示できる</td></tr>
+    <tr><td class="n"><span class="tag t-fe" style="margin:0;font-size:24px;padding:0 14px">CP5-10〜12</span></td><td>コードの追加なし</td><td>画面で一覧・登録・削除・エラー表示を確認済み</td></tr>
+    <tr><td class="n"><span class="tag t-test" style="margin:0;font-size:24px;padding:0 14px">CP6-2〜7</span></td><td>MSW、Vitest、単体・結合テスト 13 件</td><td>バックエンドなしで画面全体を自動テストできる</td></tr>
+    <tr><td class="n"><span class="tag t-ai" style="margin:0;font-size:24px;padding:0 14px">CP7-2〜3</span></td><td>PUT の更新 API とそのテスト</td><td>フックが依存違反を自動検出し、バックエンドの全テストが通る</td></tr>
+    <tr><td class="n"><span class="tag t-ai" style="margin:0;font-size:24px;padding:0 14px">CP7-4〜7</span></td><td>編集 UI とそのテスト</td><td>画面で登録 → 編集 → 削除ができ、全テストが通る</td></tr>
+  </table>
+  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+</section>
+
+<!-- 13. Ch3 進行 -->
+<section class="slide" data-title="Chapter 3 進行">
+  <span class="tag">Appendix</span>
+  <h1 class="title">内側の層から順に、チェックポイントを 1 つずつ実行</h1>
+  <table class="t" style="font-size:28px">
+    <tr><th style="width:400px">チェックポイント</th><th>作るもの</th><th style="width:520px">確認すること</th></tr>
+    <tr><td class="n">CP3-2 <span class="pill l1">domain</span></td><td>Amount・Transaction・BalanceSummary</td><td>Spring / JPA の import がない</td></tr>
+    <tr><td class="n">CP3-3 <span class="pill l2">usecase</span></td><td>Input / Output Port・Interactor</td><td>adapter・JPA を import していない</td></tr>
+    <tr><td class="n">CP3-4・5 <span class="pill l3">adapter</span></td><td>JPA Entity・Repository・DTO・Controller</td><td>framework を参照していない</td></tr>
+    <tr><td class="n">CP3-6 <span class="pill l4">framework</span></td><td>CorsConfig</td><td>:3000 からの CORS 許可</td></tr>
+    <tr><td class="n">CP3-7〜10</td><td>自己レビュー・compileKotlin・curl 疎通</td><td>機能ごとに API が動く</td></tr>
+  </table>
+  <div class="note " style="margin-top:20px;font-size:28px">AI が CP を 1 つ実施して停止 → 確認 →「次のチェックポイントに進む」</div>
+  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+</section>
+
+<!-- 18. Ch5 進行 -->
+<section class="slide" data-title="Chapter 5 進行">
+  <span class="tag">Appendix</span>
+  <h1 class="title">Chapter 5 フロントエンドも内側から外側へ実装する</h1>
+  <table class="t" style="font-size:27px">
+    <tr><th style="width:400px">チェックポイント</th><th>作るもの</th><th style="width:520px">確認すること</th></tr>
+    <tr><td class="n">CP5-2 <span class="pill n">共通 UI</span></td><td>Button・Input</td><td>型チェックが通る</td></tr>
+    <tr><td class="n">CP5-3 <span class="pill l1">domain</span></td><td>types・validateTransaction</td><td>React・fetch の import がない</td></tr>
+    <tr><td class="n">CP5-4 <span class="pill l2">usecase</span></td><td>TransactionRepository・useTransactions</td><td>フックが adapter を import していない</td></tr>
+    <tr><td class="n">CP5-5 <span class="pill l3">adapter</span></td><td>transactionApi</td><td>interface を実装している</td></tr>
+    <tr><td class="n">CP5-6〜7 <span class="pill l3">presentation</span></td><td>UI 部品・formatCurrency</td><td>通信の詳細を持たない</td></tr>
+    <tr><td class="n">CP5-8 <span class="pill l4">app</span></td><td>page.tsx</td><td>ビルドが成功する</td></tr>
+  </table>
+
+  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+</section>
+
 </div>
-<div class="ui-hint" id="hint">← → / Space で移動 ・ Ctrl/⌘+P で PDF 保存（1920×1080）</div>
+<div class="ui-hint" id="hint">← → / Space で移動 ・ Ctrl/⌘+P で 1920×1080 の PDF 保存</div>
 
 <script>
 (function () {
