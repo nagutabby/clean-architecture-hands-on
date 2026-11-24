@@ -89,7 +89,6 @@ Chapter 3 以降の各章は、次の順に書かれています。
 | :--- | :--- |
 | `checkpoint/start` | ドキュメントだけの状態（プロジェクトなし） |
 | `checkpoint/cp2-0` | 人が行う準備が終わった状態（`mise.toml`、`CLAUDE.md`、rules、`setup-env` スキル） |
-| `checkpoint/cp2-1` 〜 `cp2-5` | Chapter 2 の環境構築 |
 | `checkpoint/cp3-1` 〜 `cp3-10` | Chapter 3 のバックエンド実装 |
 | `checkpoint/cp4-1` 〜 `cp4-7` | Chapter 4 のバックエンドのテスト |
 | `checkpoint/cp5-1` 〜 `cp5-12` | Chapter 5 のフロントエンド実装 |
@@ -97,9 +96,10 @@ Chapter 3 以降の各章は、次の順に書かれています。
 | `checkpoint/cp7-0` | 人が行う準備が終わった状態（`add-usecase` スキル、フック） |
 | `checkpoint/cp7-1` 〜 `cp7-7` | Chapter 7 の更新機能 |
 
+- Chapter 2 にチェックポイントはありません。`checkpoint/cp3-1` が、Chapter 2 の環境構築（`/setup-env`）を終えた状態です。
 - 設計の CP などファイルの変更がない CP は、直前のブランチと同じ内容の空コミットです。
 - 先に進めなくなったときに、該当ブランチの状態と自分の作業を見比べたり、そこから再開したりできます。
-- ブランチを切り替えたあとは、依存パッケージが入っていないので、`cd frontend && pnpm install` を実行してください。PostgreSQL は `docker compose up -d` で起動します（`checkpoint/cp2-2` 以降）。
+- ブランチを切り替えたあとは、依存パッケージが入っていないので、`cd frontend && pnpm install` を実行してください。PostgreSQL は `docker compose up -d` で起動します（`checkpoint/cp3-1` 以降）。
 - `main` ブランチのプロジェクトは、Chapter 6 までを終えた状態です。明細の編集機能（Chapter 7）まで含めた最終状態は `checkpoint/cp7-7` です。
 
 ## スライド

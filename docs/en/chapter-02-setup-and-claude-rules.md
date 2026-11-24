@@ -6,7 +6,7 @@ In this chapter, you build the development environment with a clear division of 
 
 - 2-0 (done by a person): Install Homebrew, Rancher Desktop (Docker-compatible), and mise on the system.
 - 2-1 (done by a person): Create the working directory, install languages and runtimes with mise, create the environment setup skill (`SKILL.md`), and place the Clean Architecture design rules (`CLAUDE.md` / `.claude/rules/`).
-- 2-2 (done by the AI): Have Claude Code load the skill and rules the person created, then have the AI set up PostgreSQL 18, Spring Boot 4, and Next.js 16, through the initial build and migration check, stopping at each checkpoint.
+- 2-2 (done by the AI): Have Claude Code load the skill and rules the person created, then have the AI set up PostgreSQL 18, Spring Boot 4, and Next.js 16, through the initial build and migration check, running all the way through without stopping (Chapter 2 has no checkpoints).
 
 ---
 
@@ -74,7 +74,7 @@ mkdir -p budget-app-handson/.claude/rules
 cd budget-app-handson
 ```
 
-Place the `.env.example` distributed at the workshop directly under this root directory (`budget-app-handson`). It holds the DB connection settings (user name, password and DB name), and in CP2-2 you copy (or rename) it to `.env`.
+Place the `.env.example` distributed at the workshop directly under this root directory (`budget-app-handson`). It holds the DB connection settings (user name, password and DB name), and in Step 2 you copy (or rename) it to `.env`.
 
 ```text
 DB_NAME=budget_db
@@ -122,25 +122,25 @@ disable-model-invocation: true
 
 # Budget App Environment Setup Procedure
 
-When invoked by the user with `/setup-env`, run every command relative to the project root (`budget-app-handson`) and proceed through the following checkpoints (CP) in order to build the development environment.
+When invoked by the user with `/setup-env`, run every command relative to the project root (`budget-app-handson`) and proceed through the following Steps in order to build the development environment.
 
-Follow "Checkpoint operation" in CLAUDE.md: after finishing each CP, report the result and stop, and do not start the next CP until the user types "Proceed to the next checkpoint". Perform only CP2-1 at first.
+Chapter 2 environment setup has no checkpoints (CP). As an exception to "Checkpoint operation" in CLAUDE.md, do not stop after each Step; run continuously to the end. Stop only when a prerequisite tool is missing, a port conflicts, or a difference from an existing file needs confirmation; in that case report the reason and wait for the user's decision.
 
 ## Idempotency principle
 `/setup-env` must succeed no matter how many times it is run, and must not break existing artifacts on the second and later runs. Each step is "check the current state, then do only what is missing".
 - Do not overwrite files or directories that already exist. Even if their content differs from the step, do not overwrite them; report the difference and wait for the user's decision (so that files edited in later chapters are not destroyed).
 - Skip a step that has already reached its goal. A skip is not an error and counts as success.
-- In each CP report, separate the steps that were run from the steps that were skipped (with the reason).
+- In the final completion report, separate the steps that were run from the steps that were skipped (with the reason).
 
-## CP2-1 [Design] Preliminary checks
+## Step 1 Preliminary checks
 1. Confirm that the current working directory is the project root (`budget-app-handson`).
 2. Check that `docker --version` (dockerd from Rancher Desktop), `java -version` (Java 25 required), `node -v` (v26), and `pnpm -v` (v11) are available. If Java is not 25 or a prerequisite tool is not installed, stop and direct the user to "install the prerequisite tools in 2-0 / 2-1".
 3. Check with `lsof -nP -iTCP:<port> -sTCP:LISTEN` that the ports to be used (PostgreSQL: 5432, Spring Boot: 8080, Next.js: 3000) are not in use by other processes.
-   - If the process occupying 5432 is this project's own container `budget-app-db` (check with `docker ps`), treat it as a re-run: do not stop, report the result, and wait for the CP2-2 instruction.
+   - If the process occupying 5432 is this project's own container `budget-app-db` (check with `docker ps`), treat it as a re-run: do not stop, and proceed to Step 2.
    - If any other port is already in use, do not terminate or delete the existing process or container on your own. Report the occupying process information (PID, command name, port number) to the user and stop.
    - Tell the user to stop the process themselves and then run `/setup-env` again.
 
-## CP2-2 [Implementation + Verification] Build and start PostgreSQL 18
+## Step 2 Build and start PostgreSQL 18
 1. Check that the distributed `.env.example` exists directly under the root directory. If `.env` does not exist, create it with `cp .env.example .env` (do not overwrite an existing `.env`). If `.env.example` is missing, stop and ask the user to place it. Keep the DB user name, password and DB name only in this `.env`, and never write them in `compose.yaml` or `application.yml`.
 2. If the project is managed with Git, check that `.gitignore` contains `.env` and add it if missing.
 3. Create `compose.yaml` directly under the root directory with the following content. If it already exists with the same content, skip this step. If the content differs, do not overwrite it; report the difference and wait for confirmation.
@@ -171,7 +171,7 @@ volumes:
 4. Run `docker compose up -d` (if the container is already running, nothing changes).
 5. Run `docker compose ps` and wait until the status of `budget-app-db` becomes `healthy`, then confirm it.
 
-## CP2-3 [Implementation + Verification] Set up the backend (Spring Boot 4 / Kotlin)
+## Step 3 Set up the backend (Spring Boot 4 / Kotlin)
 1. If `backend/build.gradle.kts` already exists, skip this step (`tar` would overwrite the existing sources, so never run it). If it does not exist, run the following command in the root directory to generate the `backend` directory (this fetches the latest Spring Boot 4.x from Spring Initializr).
 
 ```bash
@@ -248,7 +248,7 @@ docker compose exec -T db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "
 docker compose exec -T db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "SELECT * FROM categories;"'
 ```
 
-## CP2-4 [Implementation + Verification] Set up the frontend (Next.js 16 / pnpm 11)
+## Step 4 Set up the frontend (Next.js 16 / pnpm 11)
 1. Confirm that `node = "26"` and `pnpm = "11"` are defined in `mise.toml` in the root directory.
 2. If `frontend/package.json` already exists, skip this step (generation and removing `.git`), because `create-next-app` cannot generate into a non-empty directory. If it does not exist, generate the `frontend` project directly under the root directory with non-interactive options.
 
@@ -285,8 +285,8 @@ mkdir -p frontend/src/components/ui \
 
 5. Run `pnpm --dir frontend build` and confirm that the Next.js build completes without errors.
 
-## CP2-5 [Verification] Completion report
-When all CPs are complete, report the following items to the user together with the verification results.
+## Step 5 Completion report
+When all Steps are complete, report the following items to the user together with the verification results.
 - Running status of the Docker container `budget-app-db`
 - Result of generating the Spring Boot project and creating the `categories` / `transactions` tables and the initial master data
 - Result of generating the Next.js project, its directory structure, and the build completion
@@ -322,7 +322,7 @@ In every implementation, strictly follow the Clean Architecture Dependency Rule 
 3. Keep tests in place: When adding a new class or use case, always write the corresponding unit or integration test and confirm that the tests pass.
 
 ## Checkpoint operation
-Work proceeds in units of checkpoints (CP).
+Work proceeds in units of checkpoints (CP). The exception is `/setup-env` in Chapter 2 (environment setup), which has no CPs and runs to the end in a single instruction.
 1. Perform only one CP per instruction. Do not run multiple CPs in succession.
 2. When a CP is complete, declare "CPx-y complete", report the files created or changed, the commands run and their results, and the name of the next CP, and then always stop.
 3. Do not start the next CP until the user types "Proceed to the next checkpoint".
@@ -430,21 +430,21 @@ Next, enter the following skill command in the Claude Code chat to have the AI p
 /setup-env
 ```
 
-Claude Code follows the procedure in `.claude/skills/setup-env/SKILL.md`, performs the following checkpoints (CP) one at a time, and reports and stops after each one. If it asks for permission to run a command, review the content and approve it.
+Claude Code follows the procedure in `.claude/skills/setup-env/SKILL.md`, runs the following Steps in order to the end, and then outputs a completion report. It does not stop after each Step. If it asks for permission to run a command, review the content and approve it.
 
-| CP | Kind | Content |
-| :--- | :--- | :--- |
-| CP2-1 | Design | Check the prerequisite tool versions and the availability of ports (5432, 8080, 3000) |
-| CP2-2 | Implementation + Verification | Create `.env`, generate `compose.yaml`, start PostgreSQL 18 with Docker, and run the health check |
-| CP2-3 | Implementation + Verification | Generate `backend` from Spring Initializr, add dependency libraries, place `application.yml` (which reads `.env`) and the Flyway SQL, and verify the tables and initial master data with `psql` |
-| CP2-4 | Implementation + Verification | Check `mise.toml`, generate `frontend`, install the test libraries, create the four-layer directories, and verify the build |
-| CP2-5 | Verification | Completion report |
+| Step | Content |
+| :--- | :--- |
+| Step 1 | Check the prerequisite tool versions and the availability of ports (5432, 8080, 3000) |
+| Step 2 | Create `.env`, generate `compose.yaml`, start PostgreSQL 18 with Docker, and run the health check |
+| Step 3 | Generate `backend` from Spring Initializr, add dependency libraries, place `application.yml` (which reads `.env`) and the Flyway SQL, and verify the tables and initial master data with `psql` |
+| Step 4 | Check `mise.toml`, generate `frontend`, install the test libraries, create the four-layer directories, and verify the build |
+| Step 5 | Completion report (a list of the steps that were run and skipped) |
 
-When Claude Code stops and shows its report, review the content and enter "Proceed to the next checkpoint".
+Claude Code stops midway only when a prerequisite tool is missing, a port conflicts, or a difference from an existing file needs confirmation. If it stops, review the reported reason, deal with it, and run `/setup-env` again (re-running is safe).
 
 ### 3. Checkpoints After the AI Completes the Setup
 
-When the CP2-5 completion report is output, confirm that the following state is in place.
+When the completion report is output, confirm that the following state is in place.
 
 - `.env`, `compose.yaml`, `backend/`, and `frontend/` have been created directly under the root directory.
 - `.env` is not tracked by Git (it does not appear in `git status`).
