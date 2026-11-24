@@ -6,11 +6,11 @@ With Clean Architecture, adding even one feature requires creating or changing f
 
 In this final chapter, you build Claude Code's extension features, Agent Skills in `.claude/skills/` and Hooks in `.claude/settings.json`, and use them to add the new feature "edit a budget transaction", that is, an update feature, across the full stack while the design rules and tests are enforced automatically.
 
-7-1 and 7-2 are preparation done by a person. When you run the `/add-usecase` skill in 7-3, Claude Code works through CP7-1 to CP7-7 one at a time.
+7-1 and 7-2 are preparation done by a person. When you run the `/add-feature` skill in 7-3, Claude Code works through CP7-1 to CP7-7 one at a time.
 
 | CP | Type | Content |
 | :--- | :--- | :--- |
-| 7-1 | Preparation by a person | Create the `add-usecase` skill |
+| 7-1 | Preparation by a person | Create the `add-feature` skill |
 | 7-2 | Preparation by a person | Configure the hook with `verify-changes.mjs` and `settings.json` |
 | CP7-1 | Design | Have the AI present the list of files to change across all layers, that is, the implementation plan, and approve it |
 | CP7-2 | Implementation | Backend: implement the update API in the order domain -> usecase -> adapter |
@@ -31,22 +31,22 @@ As with the `setup-env` skill created in Chapter 2, you define as a skill the pr
 Run the following command in the project root directory `budget-app-handson`.
 
 ```bash
-mkdir -p .claude/skills/add-usecase
+mkdir -p .claude/skills/add-feature
 ```
 
-### 2. Create `.claude/skills/add-usecase/SKILL.md`
+### 2. Create `.claude/skills/add-feature/SKILL.md`
 
-Create `.claude/skills/add-usecase/SKILL.md` and write the following content.
+Create `.claude/skills/add-feature/SKILL.md` and write the following content.
 
 ```markdown
 ---
-name: add-usecase
+name: add-feature
 description: A skill that adds a new use case following the four-layer structure of Clean Architecture (backend, frontend, and automated tests)
 ---
 
 # Procedure for implementing a new use case
 
-When the user invokes it with `/add-usecase <feature overview>`, strictly follow the dependency constraints in `.claude/rules/backend.md` and `.claude/rules/frontend.md`, and proceed through the following checkpoints (CP) in order.
+When the user invokes it with `/add-feature <feature overview>`, strictly follow the dependency constraints in `.claude/rules/backend.md` and `.claude/rules/frontend.md`, and proceed through the following checkpoints (CP) in order.
 
 Following "Checkpoint operation" in CLAUDE.md, report the result and stop each time you finish one CP, and do not start the next CP until the user types "Proceed to the next checkpoint". Perform only CP7-1 at first.
 
@@ -178,9 +178,9 @@ Create `.claude/settings.json` in the project root and write the configuration t
 
 ---
 
-## 7-3. Hands-on exercise: Implement the "transaction update feature" with the `/add-usecase` skill
+## 7-3. Hands-on exercise: Implement the "transaction update feature" with the `/add-feature` skill
 
-You now have the design rules in `CLAUDE.md` and `.claude/rules/`, the implementation procedure skill `add-usecase`, and the automatic verification hook `PostToolUse` all in place.
+You now have the design rules in `CLAUDE.md` and `.claude/rules/`, the implementation procedure skill `add-feature`, and the automatic verification hook `PostToolUse` all in place.
 
 Start Claude Code and add, as a new use case, "a feature to edit and update a registered budget transaction". The way of proceeding is the same as in Chapters 3 to 6: Claude Code stops each time it finishes one CP, so check the result and type "Proceed to the next checkpoint".
 
@@ -192,12 +192,12 @@ Start Claude Code in the root directory `budget-app-handson`. If it is already r
 claude
 ```
 
-### 2. Run the `/add-usecase` skill
+### 2. Run the `/add-feature` skill
 
 Enter the following command in the chat field and run it. Claude Code performs only the design in CP7-1 and stops.
 
 ```text
-/add-usecase Add a feature to edit (update) a budget transaction. On the backend, add a PUT /api/transactions/{id} endpoint (UpdateTransactionUseCase / UpdateTransactionInteractor), and throw DomainException when the category ID or the transaction ID does not exist. On the frontend, add an "Edit" button to each row of the transaction list, and implement a UI where clicking it lets you edit the content of that transaction and save it.
+/add-feature Add a feature to edit (update) a budget transaction. On the backend, add a PUT /api/transactions/{id} endpoint (UpdateTransactionUseCase / UpdateTransactionInteractor), and throw DomainException when the category ID or the transaction ID does not exist. On the frontend, add an "Edit" button to each row of the transaction list, and implement a UI where clicking it lets you edit the content of that transaction and save it.
 ```
 
 ### 3. Checks at each checkpoint

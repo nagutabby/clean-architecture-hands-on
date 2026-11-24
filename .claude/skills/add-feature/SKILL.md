@@ -1,11 +1,11 @@
 ---
-name: add-usecase
+name: add-feature
 description: クリーンアーキテクチャの4層構造（バックエンド・フロントエンド・自動テスト）に従って新しいユースケースを追加するスキル
 ---
 
 # 新規ユースケース実装手順
 
-ユーザーから `/add-usecase <機能概要>` で呼び出された場合、`.claude/rules/backend.md` および `.claude/rules/frontend.md` の依存制約を厳守し、以下のチェックポイント（CP）を順に進めてください。
+ユーザーから `/add-feature <機能概要>` で呼び出された場合、`.claude/rules/backend.md` および `.claude/rules/frontend.md` の依存制約を厳守し、以下のチェックポイント（CP）を順に進めてください。
 
 CLAUDE.md の「チェックポイント運用」に従い、1つの CP を終えるたびに結果を報告して停止し、ユーザーが「次のチェックポイントに進む」と入力するまで次の CP に着手しないこと。最初は CP7-1 だけを実施する。
 

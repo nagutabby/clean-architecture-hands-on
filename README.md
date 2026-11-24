@@ -93,7 +93,7 @@ Chapter 3 以降の各章は、次の順に書かれています。
 | `checkpoint/cp4-1` 〜 `cp4-7` | Chapter 4 のバックエンドのテスト |
 | `checkpoint/cp5-1` 〜 `cp5-12` | Chapter 5 のフロントエンド実装 |
 | `checkpoint/cp6-1` 〜 `cp6-7` | Chapter 6 のフロントエンドのテスト |
-| `checkpoint/cp7-0` | 人が行う準備が終わった状態（`add-usecase` スキル、フック） |
+| `checkpoint/cp7-0` | 人が行う準備が終わった状態（`add-feature` スキル、フック） |
 | `checkpoint/cp7-1` 〜 `cp7-7` | Chapter 7 の更新機能 |
 
 - Chapter 2 にチェックポイントはありません。`checkpoint/cp3-1` が、Chapter 2 の環境構築（`/setup-env`）を終えた状態です。

@@ -139,7 +139,7 @@ AI コーディングエージェントの Claude Code で開発を進めると�
 2. Chapter 3〜6: 層ごとの段階的な実装と、テストによる自動検証
    内側の層から順に実装します。Konsist, MockK, MockMvc, Vitest, MSW によるテストコードで、ルール違反や不具合を自動的に検出します。
 3. Chapter 7: Agent Skills と Hooks による機能追加の演習
-   ユースケースを追加する手順を `.claude/skills/add-usecase/SKILL.md` に定義します。さらに、ファイル編集時に自動で検証を実行する `.claude/settings.json` に書く `PostToolUse` フックの設定例も組み合わせて、機能追加を試します。
+   ユースケースを追加する手順を `.claude/skills/add-feature/SKILL.md` に定義します。さらに、ファイル編集時に自動で検証を実行する `.claude/settings.json` に書く `PostToolUse` フックの設定例も組み合わせて、機能追加を試します。
 
 ### チェックポイント方式での進行
 

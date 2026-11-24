@@ -139,7 +139,7 @@ In this hands-on, you will use Claude Code features step by step in the followin
 2. Chapters 3 to 6: Step-by-step implementation per layer and automated verification through tests
    Implement from the innermost layer outward, and automatically detect rule violations and defects with test code using Konsist, MockK, MockMvc, Vitest, and MSW.
 3. Chapter 7: Feature-addition exercise with Agent Skills and Hooks
-   Define the steps for adding a use case in `.claude/skills/add-usecase/SKILL.md`. Then try adding a feature, combining it with an example configuration of a `PostToolUse` hook, written in `.claude/settings.json`, that runs automated verification when files are edited.
+   Define the steps for adding a use case in `.claude/skills/add-feature/SKILL.md`. Then try adding a feature, combining it with an example configuration of a `PostToolUse` hook, written in `.claude/settings.json`, that runs automated verification when files are edited.
 
 ### Proceeding with Checkpoints
 

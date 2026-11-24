@@ -6,11 +6,11 @@
 
 この最終チャプターでは、Claude Code の拡張機能である Agent Skills の `.claude/skills/` と Hooks の `.claude/settings.json`を構築し、設計ルールの遵守とテストを自動で保証しながら、新機能「家計簿明細の編集機能」、つまり更新機能をフルスタックで追加します。
 
-7-1・7-2 は人が実施する準備です。7-3 で `/add-usecase` スキルを実行すると、Claude Code が CP7-1〜CP7-7 を1つずつ進めます。
+7-1・7-2 は人が実施する準備です。7-3 で `/add-feature` スキルを実行すると、Claude Code が CP7-1〜CP7-7 を1つずつ進めます。
 
 | CP | 種別 | 内容 |
 | :--- | :--- | :--- |
-| 7-1 | 人による準備 | `add-usecase` スキルの作成 |
+| 7-1 | 人による準備 | `add-feature` スキルの作成 |
 | 7-2 | 人による準備 | `verify-changes.mjs` と `settings.json` によるフックの設定 |
 | CP7-1 | 設計 | 変更対象の全層のファイル一覧、つまり実装計画を提示させ、承認する |
 | CP7-2 | 実装 | バックエンド：domain → usecase → adapter の順に更新 API を実装 |
@@ -31,22 +31,22 @@ Chapter 2 で作成した `setup-env` スキルと同様に、新しいユース
 プロジェクトのルートディレクトリ `budget-app-handson`で以下のコマンドを実行します。
 
 ```bash
-mkdir -p .claude/skills/add-usecase
+mkdir -p .claude/skills/add-feature
 ```
 
-### 2. `.claude/skills/add-usecase/SKILL.md` の作成
+### 2. `.claude/skills/add-feature/SKILL.md` の作成
 
-`.claude/skills/add-usecase/SKILL.md` を新規作成し、以下の内容を記述してください。
+`.claude/skills/add-feature/SKILL.md` を新規作成し、以下の内容を記述してください。
 
 ```markdown
 ---
-name: add-usecase
+name: add-feature
 description: クリーンアーキテクチャの4層構造（バックエンド・フロントエンド・自動テスト）に従って新しいユースケースを追加するスキル
 ---
 
 # 新規ユースケース実装手順
 
-ユーザーから `/add-usecase <機能概要>` で呼び出された場合、`.claude/rules/backend.md` および `.claude/rules/frontend.md` の依存制約を厳守し、以下のチェックポイント（CP）を順に進めてください。
+ユーザーから `/add-feature <機能概要>` で呼び出された場合、`.claude/rules/backend.md` および `.claude/rules/frontend.md` の依存制約を厳守し、以下のチェックポイント（CP）を順に進めてください。
 
 CLAUDE.md の「チェックポイント運用」に従い、1つの CP を終えるたびに結果を報告して停止し、ユーザーが「次のチェックポイントに進む」と入力するまで次の CP に着手しないこと。最初は CP7-1 だけを実施する。
 
@@ -178,9 +178,9 @@ if (filePath.endsWith('.kt')) {
 
 ---
 
-## 7-3. 実践演習：`/add-usecase` スキルを使った「明細更新機能」の実装
+## 7-3. 実践演習：`/add-feature` スキルを使った「明細更新機能」の実装
 
-ここまでで、設計ルールの `CLAUDE.md` と `.claude/rules/`、実装手順スキルの `add-usecase`、そして自動検証フックの `PostToolUse` がすべて揃いました。
+ここまでで、設計ルールの `CLAUDE.md` と `.claude/rules/`、実装手順スキルの `add-feature`、そして自動検証フックの `PostToolUse` がすべて揃いました。
 
 実際に Claude Code を起動し、新しいユースケースとして「登録済みの家計簿明細を編集・更新する機能」を追加します。進め方は Chapter 3〜6 と同じで、CP を1つ終えるたびに Claude Code が停止するので、確認して「次のチェックポイントに進む」と入力します。
 
@@ -192,12 +192,12 @@ if (filePath.endsWith('.kt')) {
 claude
 ```
 
-### 2. `/add-usecase` スキルの実行
+### 2. `/add-feature` スキルの実行
 
 チャット欄に以下のコマンドを入力して実行します。Claude Code は CP7-1 の設計だけを実施して停止します。
 
 ```text
-/add-usecase 家計簿明細の編集（更新）機能を追加してください。バックエンドには PUT /api/transactions/{id} エンドポイント（UpdateTransactionUseCase / UpdateTransactionInteractor）を追加し、存在しないカテゴリIDや存在しない明細IDの場合は DomainException をスローしてください。フロントエンドでは明細一覧の各行に「編集」ボタンを追加し、クリックするとその明細の内容を編集して保存できるUIを実装してください。
+/add-feature 家計簿明細の編集（更新）機能を追加してください。バックエンドには PUT /api/transactions/{id} エンドポイント（UpdateTransactionUseCase / UpdateTransactionInteractor）を追加し、存在しないカテゴリIDや存在しない明細IDの場合は DomainException をスローしてください。フロントエンドでは明細一覧の各行に「編集」ボタンを追加し、クリックするとその明細の内容を編集して保存できるUIを実装してください。
 ```
 
 ### 3. チェックポイントごとの確認
