@@ -10,6 +10,7 @@ import com.example.budgetapp.usecase.input.CreateTransactionUseCase
 import com.example.budgetapp.usecase.input.DeleteTransactionUseCase
 import com.example.budgetapp.usecase.input.GetTransactionsOutput
 import com.example.budgetapp.usecase.input.GetTransactionsUseCase
+import com.example.budgetapp.usecase.input.UpdateTransactionUseCase
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
@@ -25,6 +26,7 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.time.LocalDate
@@ -42,6 +44,9 @@ class TransactionControllerTest {
         fun createTransactionUseCase(): CreateTransactionUseCase = mockk()
 
         @Bean
+        fun updateTransactionUseCase(): UpdateTransactionUseCase = mockk()
+
+        @Bean
         fun deleteTransactionUseCase(): DeleteTransactionUseCase = mockk()
     }
 
@@ -55,11 +60,14 @@ class TransactionControllerTest {
     private lateinit var createTransactionUseCase: CreateTransactionUseCase
 
     @Autowired
+    private lateinit var updateTransactionUseCase: UpdateTransactionUseCase
+
+    @Autowired
     private lateinit var deleteTransactionUseCase: DeleteTransactionUseCase
 
     @BeforeEach
     fun setUp() {
-        clearMocks(getTransactionsUseCase, createTransactionUseCase, deleteTransactionUseCase)
+        clearMocks(getTransactionsUseCase, createTransactionUseCase, updateTransactionUseCase, deleteTransactionUseCase)
     }
 
     @Test
@@ -143,5 +151,45 @@ class TransactionControllerTest {
         mockMvc.perform(delete("/api/transactions/999"))
             .andExpect(status().isBadRequest)
             .andExpect(jsonPath("$.message").value("指定された明細が存在しません (ID: 999)"))
+    }
+
+    @Test
+    fun `PUT _api_transactions_10 で更新すると200 OKと更新後の明細が返ること`() {
+        val salary = Category(4L, "給与", TransactionType.INCOME)
+        val updated = Transaction(10L, salary, "賞与", Amount(500000), LocalDate.of(2026, 11, 25), null)
+        every { updateTransactionUseCase.execute(any()) } returns updated
+
+        mockMvc.perform(
+            put("/api/transactions/10")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"categoryId":4,"title":"賞与","amount":500000,"transactionDate":"2026-11-25"}""")
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.id").value(10))
+            .andExpect(jsonPath("$.title").value("賞与"))
+    }
+
+    @Test
+    fun `PUT _api_transactions_999 でDomainExceptionが発生すると400 Bad Requestが返ること`() {
+        every { updateTransactionUseCase.execute(any()) } throws DomainException("指定された明細が存在しません (ID: 999)")
+
+        mockMvc.perform(
+            put("/api/transactions/999")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"categoryId":1,"title":"x","amount":100,"transactionDate":"2026-11-25"}""")
+        )
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("$.message").value("指定された明細が存在しません (ID: 999)"))
+    }
+
+    @Test
+    fun `PUT で不正な値を送ると400 Bad Requestが返ること`() {
+        mockMvc.perform(
+            put("/api/transactions/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"categoryId":1,"title":"","amount":0,"transactionDate":"2026-11-25"}""")
+        )
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("$.details").isArray)
     }
 }
