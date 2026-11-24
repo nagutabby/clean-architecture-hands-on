@@ -1,0 +1,177 @@
+---
+name: setup-env
+description: Budget App（PostgreSQL 18, Spring Boot 4, Next.js 16）のローカル開発環境を構築し、起動確認までを実行するスキル
+disable-model-invocation: true
+---
+
+# Budget App 環境構築手順
+
+ユーザーから `/setup-env` で呼び出された場合、すべてのコマンドはプロジェクトルート（`budget-app-handson`）を基準に実行し、以下の Step を順に進めて開発環境を構築してください。
+
+Chapter 2 の環境構築にはチェックポイント（CP）を設けない。CLAUDE.md の「チェックポイント運用」の例外として、Step ごとに停止せず、最後まで連続して実行すること。中断するのは、前提ツールの不足・ポートの競合・既存ファイルとの差分の確認が必要なときだけで、中断した場合は理由を報告してユーザーの判断を待つ。
+
+## 冪等性の原則
+`/setup-env` は何度実行しても成功し、2 回目以降に既存の成果物を壊さないこと。各手順は「現状を確認し、足りない分だけ実行する」。
+- 作成済みのファイル・ディレクトリは上書きしない。内容が手順と異なる場合も上書きせず、差分を報告してユーザーの判断を待つ（後の章で編集したファイルを壊さないため）。
+- すでに目的の状態になっている手順は実行せずスキップする。スキップはエラーではなく、成功として扱う。
+- 最後の完了報告に、実行した手順とスキップした手順（理由つき）を分けて書く。
+
+## Step 1 事前確認
+1. 現在の作業ディレクトリがプロジェクトのルート（`budget-app-handson`）であることを確認する。
+2. `docker --version`（Rancher Desktop の dockerd）、`java -version`（Java 25 必須）、`node -v`（v26）、`pnpm -v`（v11）が利用可能か確認する。Java が 25 でない場合や前提ツールが未インストールの場合は中断し、ユーザーに「2-0 / 2-1 の前提ツール導入」を案内する。
+3. 使用するポート（PostgreSQL: 5432、Spring Boot: 8080、Next.js: 3000）が他のプロセスに使われていないか `lsof -nP -iTCP:<ポート> -sTCP:LISTEN` で確認する。
+   - 5432 を占有しているのが、このプロジェクト自身のコンテナ `budget-app-db`（`docker ps` で確認）である場合は、再実行とみなして中断せず、Step 2 へ進む。
+   - それ以外でいずれかのポートがすでに使用されている場合は、既存のプロセスやコンテナを勝手に終了・削除せず、占有しているプロセス情報（PID・コマンド名・ポート番号）をユーザーに報告して処理を中断する。
+   - ユーザー自身で該当プロセスを停止した後に、再度 `/setup-env` を実行するよう案内する。
+
+## Step 2 PostgreSQL 18 の構築と起動
+1. ルートディレクトリ直下に、配布された `.env.example` があることを確認する。`.env` が無ければ `cp .env.example .env` で作成する（`.env` が既にある場合は上書きしない）。`.env.example` が無い場合は中断し、ユーザーにファイルの配置を依頼する。DB のユーザー名・パスワード・DB 名はこの `.env` にだけ置き、`compose.yaml` や `application.yml` には書かない。
+2. Git で管理している場合は、`.gitignore` に `.env` が含まれていることを確認し、無ければ追記する。
+3. ルートディレクトリ直下に `compose.yaml` を以下の内容で作成する。すでに存在して内容が同じならスキップする。内容が異なる場合は上書きせず、差分を報告して確認を待つ。
+
+```yaml
+services:
+  db:
+    image: postgres:18
+    container_name: budget-app-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${DB_USERNAME:?Set DB_USERNAME in .env}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      POSTGRES_DB: ${DB_NAME:?Set DB_NAME in .env}
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+```
+
+4. `docker compose up -d` を実行する（コンテナがすでに稼働中なら、何も変更されない）。
+5. `docker compose ps` を実行し、`budget-app-db` の状態が `healthy` になるまで待機・確認する。
+
+## Step 3 バックエンド（Spring Boot 4 / Kotlin）のセットアップ
+1. `backend/build.gradle.kts` がすでに存在する場合は、この手順をスキップする（`tar` が既存のソースを上書きするため、実行してはならない）。存在しない場合は、ルートディレクトリで以下のコマンドを実行し、`backend` ディレクトリを生成する（Spring Initializr から最新の Spring Boot 4.x を取得する）。
+
+```bash
+curl -fsSL https://start.spring.io/starter.tgz \
+  -d type=gradle-project-kotlin \
+  -d language=kotlin \
+  -d javaVersion=25 \
+  -d dependencies=web,data-jpa,validation,flyway,postgresql \
+  -d groupId=com.example \
+  -d artifactId=budgetapp \
+  -d packageName=com.example.budgetapp \
+  -d baseDir=backend \
+  | tar -xzf -
+```
+
+2. `backend/build.gradle.kts` の `dependencies` ブロックを確認し、Flyway の PostgreSQL モジュールとテスト用ライブラリが含まれるよう以下を追記する（すでに記載されている行は重複させない）。
+
+```kotlin
+	runtimeOnly("org.flywaydb:flyway-database-postgresql")
+	testImplementation("io.mockk:mockk:1.14.11")
+	testImplementation("com.lemonappdev:konsist:0.18.1")
+```
+
+3. `backend/src/main/resources/application.properties` が存在する場合のみ削除し、`backend/src/main/resources/application.yml` を作成する。`application.yml` がすでに存在する場合は上書きせず、DB 接続情報が `${DB_NAME}` などの変数参照になっていることだけを確認する（認証情報が直書きなら報告する）。
+
+```yaml
+spring:
+  application:
+    name: budgetapp
+  config:
+    import: optional:file:../.env[.properties]  # DB 接続情報はルートの .env から読む（Gradle の実行ディレクトリは backend）
+  datasource:
+    url: jdbc:postgresql://localhost:5432/${DB_NAME}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+```
+
+4. `backend/src/main/resources/db/migration/V1__create_tables.sql` が存在しない場合のみ作成する。存在する場合は変更しない（適用済みの Flyway マイグレーションを変更すると、チェックサム不一致で起動に失敗する）。
+
+```sql
+CREATE TABLE categories (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    type VARCHAR(10) NOT NULL CHECK (type IN ('INCOME', 'EXPENSE'))
+);
+
+CREATE TABLE transactions (
+    id BIGSERIAL PRIMARY KEY,
+    category_id BIGINT NOT NULL,
+    title VARCHAR(100) NOT NULL,
+    amount INT NOT NULL CHECK (amount >= 1),
+    transaction_date DATE NOT NULL,
+    memo TEXT,
+    CONSTRAINT fk_categories FOREIGN KEY (category_id) REFERENCES categories(id)
+);
+
+INSERT INTO categories (name, type) VALUES ('食費', 'EXPENSE');
+INSERT INTO categories (name, type) VALUES ('日用品', 'EXPENSE');
+INSERT INTO categories (name, type) VALUES ('交通費', 'EXPENSE');
+INSERT INTO categories (name, type) VALUES ('給与', 'INCOME');
+INSERT INTO categories (name, type) VALUES ('副業', 'INCOME');
+```
+
+5. サブシェル `(cd backend && ./gradlew test)` を実行してビルドと初期テストの成功を確認する。
+6. 8080 が使用中でないことを確認したうえで、サブシェル `(cd backend && ./gradlew bootRun)` でバックエンドを一時起動し、起動完了後にプロセスを停止する（`lsof` で 8080 にプロセスが残っていないことを確認する）。マイグレーションは適用済みなら再実行されない。その後、以下のコマンドで Flyway によるテーブル作成と初期データ投入を直接確認する。
+
+```bash
+docker compose exec -T db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "\dt"'
+docker compose exec -T db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "SELECT * FROM categories;"'
+```
+
+## Step 4 フロントエンド（Next.js 16 / pnpm 11）のセットアップ
+1. ルートディレクトリの `mise.toml` に `node = "26"` と `pnpm = "11"` が定義されていることを確認する。
+2. `frontend/package.json` がすでに存在する場合は、この手順（生成と `.git` の削除）をスキップする（`create-next-app` は空でないディレクトリに生成できない）。存在しない場合は、非対話オプションを指定してルートディレクトリ直下に `frontend` プロジェクトを生成する。
+
+```bash
+pnpm create next-app@latest frontend \
+  --ts \
+  --tailwind \
+  --eslint \
+  --app \
+  --src-dir \
+  --import-alias "@/*" \
+  --use-pnpm \
+  --yes
+```
+
+   `create-next-app` は `frontend/.git` を生成するため、モノレポのルートで一括管理できるよう、生成した場合に限り `rm -rf frontend/.git` で削除する。
+
+3. `frontend/node_modules` が存在しない場合は、先に `pnpm --dir frontend install` で依存パッケージをインストールする（ブランチ切り替え直後など、`package.json` だけがある状態に対応する）。続いて、`frontend/package.json` の `devDependencies` を確認し、未導入のパッケージだけを追加する（導入済みのパッケージを再度 `add` して、バージョンを更新しない）。カレントディレクトリはルートに保ったまま、以下を実行する。
+
+```bash
+pnpm --dir frontend add -D vitest @vitejs/plugin-react jsdom @testing-library/react @testing-library/dom @testing-library/jest-dom msw
+```
+
+4. クリーンアーキテクチャ構成用のディレクトリを作成する。
+
+```bash
+mkdir -p frontend/src/components/ui \
+  frontend/src/features/transaction/domain \
+  frontend/src/features/transaction/usecase \
+  frontend/src/features/transaction/adapter \
+  frontend/src/features/transaction/presentation/utils \
+  frontend/src/mocks
+```
+
+5. `pnpm --dir frontend build` を実行し、Next.js のビルドがエラーなく完了することを確認する。
+
+## Step 5 完了報告
+すべての Step が完了したら、以下の項目を確認結果とともにユーザーへ報告する。
+- Docker コンテナ `budget-app-db` の稼働状況
+- Spring Boot プロジェクトの生成と `categories` / `transactions` テーブルおよび初期マスタデータの作成結果
+- Next.js プロジェクトの生成とディレクトリ構成・ビルド完了結果
+- 実行した手順とスキップした手順の一覧（再実行の場合は、スキップした理由を含める）
