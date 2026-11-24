@@ -215,6 +215,23 @@
   <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
 </section>
 
+<section class="slide" data-title="Spring Boot のアノテーション">
+  <span class="tag t-be">Spring Boot</span>
+  <h1 class="title">Spring Boot はアノテーションで、各クラスの役割を Spring に伝える</h1>
+  <table class="t" style="font-size:23px">
+    <tr><th style="width:640px">アノテーション</th><th>役割</th><th style="width:330px">このアプリの置き場所</th></tr>
+    <tr><td><code class="i">@SpringBootApplication</code> <code class="i">@Configuration</code></td><td>起動の入口と、Bean を定義する設定クラス</td><td class="n"><span class="pill l4">framework</span><br>BudgetappApplication と CorsConfig</td></tr>
+    <tr><td><code class="i">@RestController</code> <code class="i">@RequestMapping</code> <code class="i">@GetMapping</code> ほか</td><td>HTTP リクエストを受けて JSON を返す入口と、URL と HTTP メソッドの対応づけ</td><td class="n"><span class="pill l3">adapter</span><br>Controller</td></tr>
+    <tr><td><code class="i">@RestControllerAdvice</code> <code class="i">@ExceptionHandler</code> <code class="i">@ResponseStatus</code></td><td>例外を共通の HTTP エラー応答に変換する</td><td class="n"><span class="pill l3">adapter</span><br>GlobalExceptionHandler</td></tr>
+    <tr><td><code class="i">@field:NotBlank</code> <code class="i">@field:Positive</code> <code class="i">@field:Size</code></td><td>リクエスト DTO の入力形式を検証する</td><td class="n"><span class="pill l3">adapter</span><br>リクエスト DTO</td></tr>
+    <tr><td><code class="i">@Service</code> <code class="i">@Transactional</code></td><td>ユースケースを Bean にし、1 回の処理を 1 つのトランザクションにする</td><td class="n"><span class="pill l2">usecase</span><br>Interactor</td></tr>
+    <tr><td><code class="i">@Component</code> <code class="i">@Repository</code></td><td>Bean として登録する @Component と、Spring Data JPA のリポジトリを示す @Repository</td><td class="n"><span class="pill l3">adapter</span><br>RepositoryImpl と JpaRepository</td></tr>
+    <tr><td><code class="i">@Entity</code> <code class="i">@Table</code> <code class="i">@Id</code> ほか</td><td>クラスとテーブル、フィールドと列を対応づける</td><td class="n"><span class="pill l3">adapter</span><br>JPA Entity</td></tr>
+  </table>
+  <div class="note" style="margin-top:16px;font-size:26px"><ul class="pts"><li>domain には Spring のアノテーションを付けない</li><li>アノテーションは内側から外側への依存なので、付ける層を adapter・framework・usecase に絞る</li></ul></div>
+  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+</section>
+
 <section class="slide" data-title="Next.js の思想">
   <span class="tag t-fe">Next.js・フロントエンド</span>
   <h1 class="title">Next.js はファイル配置を規約にし、サーバーとブラウザの境界を明示する</h1>
@@ -224,6 +241,22 @@
     <div class="card " style="font-size:26px"><h3><code class="i">'use client'</code> が境界</h3><ul class="pts"><li>ファイル先頭に <code class="i">'use client'</code> を書くと、そのファイルから先がブラウザで動く</li><li>フックや onClick はここでのみ使える</li></ul></div>
   </div>
   <div class="note " style="margin-top:24px;font-size:28px">Next.js は「画面をどう配信するか」を決めるフレームワークで、業務ルールを置く場所ではない</div>
+  <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
+</section>
+
+<section class="slide" data-title="React Hooks">
+  <span class="tag t-fe">Next.js・フロントエンド</span>
+  <h1 class="title">React Hooks は、関数コンポーネントに状態と副作用を持たせる</h1>
+  <table class="t" style="font-size:25px">
+    <tr><th style="width:250px">フック</th><th>役割</th><th style="width:560px">このアプリの使い所</th></tr>
+    <tr><td class="n"><code class="i">useState</code></td><td>コンポーネントが持つ状態と、その更新関数</td><td>明細・集計・カテゴリ・読み込み中・エラーの 5 つの状態</td></tr>
+    <tr><td class="n"><code class="i">useEffect</code></td><td>描画の後に実行する処理で、依存配列が変わったときだけ再実行される</td><td>画面を開いたときの初期データ取得</td></tr>
+    <tr><td class="n"><code class="i">useCallback</code></td><td>関数を再生成せず、同じものを使い回す</td><td>明細の再取得 refreshTransactions</td></tr>
+    <tr><td class="n"><code class="i">useRef</code></td><td>再描画しても保たれる値の入れ物</td><td>最新の Repository を保持する</td></tr>
+    <tr><td class="n"><code class="i">useId</code></td><td>ラベルと入力欄をひも付ける一意の ID を作る</td><td>共通 UI の Input</td></tr>
+    <tr><td class="n">カスタムフック</td><td>フックを組み合わせて、名前を付けて切り出した関数</td><td>useTransactions が画面の状態と操作をまとめる</td></tr>
+  </table>
+  <div class="note" style="margin-top:16px;font-size:26px"><ul class="pts"><li>フックは Client Component でのみ使える</li><li>useTransactions は usecase 層に置き、fetch を知らず TransactionRepository の interface だけを使う</li></ul></div>
   <div class="foot"><span>クリーンアーキテクチャ実践ハンズオン</span><span class="pn"></span></div>
 </section>
 

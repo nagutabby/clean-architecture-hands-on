@@ -215,6 +215,23 @@
   <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
 </section>
 
+<section class="slide" data-title="Spring Boot annotations">
+  <span class="tag t-be">Spring Boot</span>
+  <h1 class="title">Spring Boot annotations tell Spring the role of each class</h1>
+  <table class="t" style="font-size:23px">
+    <tr><th style="width:640px">Annotation</th><th>Role</th><th style="width:330px">Where it is used</th></tr>
+    <tr><td><code class="i">@SpringBootApplication</code> <code class="i">@Configuration</code></td><td>The entry point and configuration classes that define beans</td><td class="n"><span class="pill l4">framework</span><br>BudgetappApplication and CorsConfig</td></tr>
+    <tr><td><code class="i">@RestController</code> <code class="i">@RequestMapping</code> <code class="i">@GetMapping</code> and more</td><td>The HTTP entry point that returns JSON, and the mapping from URL and method</td><td class="n"><span class="pill l3">adapter</span><br>Controller</td></tr>
+    <tr><td><code class="i">@RestControllerAdvice</code> <code class="i">@ExceptionHandler</code> <code class="i">@ResponseStatus</code></td><td>Convert exceptions into common HTTP error responses</td><td class="n"><span class="pill l3">adapter</span><br>GlobalExceptionHandler</td></tr>
+    <tr><td><code class="i">@field:NotBlank</code> <code class="i">@field:Positive</code> <code class="i">@field:Size</code></td><td>Validate the input format of request DTOs</td><td class="n"><span class="pill l3">adapter</span><br>Request DTOs</td></tr>
+    <tr><td><code class="i">@Service</code> <code class="i">@Transactional</code></td><td>Make a use case a bean and run one operation in one transaction</td><td class="n"><span class="pill l2">usecase</span><br>Interactor</td></tr>
+    <tr><td><code class="i">@Component</code> <code class="i">@Repository</code></td><td>Register a bean with @Component, and mark a Spring Data JPA repository with @Repository</td><td class="n"><span class="pill l3">adapter</span><br>RepositoryImpl と JpaRepository</td></tr>
+    <tr><td><code class="i">@Entity</code> <code class="i">@Table</code> <code class="i">@Id</code> and more</td><td>Map a class to a table and fields to columns</td><td class="n"><span class="pill l3">adapter</span><br>JPA Entity</td></tr>
+  </table>
+  <div class="note" style="margin-top:16px;font-size:26px"><ul class="pts"><li>No Spring annotation goes on domain classes</li><li>Annotations are dependencies on the framework, so they stay in usecase, adapter and framework</li></ul></div>
+  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+</section>
+
 <section class="slide" data-title="Next.js philosophy">
   <span class="tag t-fe">Next.js and frontend</span>
   <h1 class="title">Next.js uses file placement as convention and makes the server/browser boundary explicit</h1>
@@ -224,6 +241,22 @@
     <div class="card " style="font-size:26px"><h3><code class="i">'use client'</code> is the boundary</h3><ul class="pts"><li>Adding <code class="i">'use client'</code> at the top makes that file and its imports run in the browser</li><li>Hooks and onClick work only there</li></ul></div>
   </div>
   <div class="note " style="margin-top:24px;font-size:28px"><ul class="pts"><li>Next.js decides how screens are delivered</li><li>It is not the place for business rules</li></ul></div>
+  <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
+</section>
+
+<section class="slide" data-title="React Hooks">
+  <span class="tag t-fe">Next.js and frontend</span>
+  <h1 class="title">React Hooks give function components state and side effects</h1>
+  <table class="t" style="font-size:25px">
+    <tr><th style="width:250px">Hook</th><th>Role</th><th style="width:560px">Where it is used</th></tr>
+    <tr><td class="n"><code class="i">useState</code></td><td>State held by a component and its updater</td><td>Five states: transactions, summary, categories, loading and error</td></tr>
+    <tr><td class="n"><code class="i">useEffect</code></td><td>Work that runs after render and reruns only when its dependencies change</td><td>Fetching the initial data when the screen opens</td></tr>
+    <tr><td class="n"><code class="i">useCallback</code></td><td>Reuses the same function instead of recreating it</td><td>refreshTransactions, which refetches the list</td></tr>
+    <tr><td class="n"><code class="i">useRef</code></td><td>A container for a value that survives re-rendering</td><td>Holds the latest Repository</td></tr>
+    <tr><td class="n"><code class="i">useId</code></td><td>Creates a unique ID that links a label to its input</td><td>Input in the shared UI</td></tr>
+    <tr><td class="n">Custom hook</td><td>A function that combines hooks and is given a name</td><td>useTransactions bundles the screen state and operations</td></tr>
+  </table>
+  <div class="note" style="margin-top:16px;font-size:26px"><ul class="pts"><li>Hooks work only in Client Components</li><li>useTransactions sits in the usecase layer and knows only the TransactionRepository interface, not fetch</li></ul></div>
   <div class="foot"><span>Clean Architecture Hands-on</span><span class="pn"></span></div>
 </section>
 
