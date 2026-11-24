@@ -19,7 +19,9 @@ CLAUDE.md の「チェックポイント運用」に従い、1つの CP を終�
    - ユーザー自身で該当プロセスを停止した後に、再度 `/setup-env` を実行するよう案内する。
 
 ## CP2-2 〔実装・動作確認〕PostgreSQL 18 の構築と起動
-1. ルートディレクトリ直下に `compose.yaml` を以下の内容で作成する。
+1. ルートディレクトリ直下に、配布された `.env.example` があることを確認する。`.env` が無ければ `cp .env.example .env` で作成する（`.env` が既にある場合は上書きしない）。`.env.example` が無い場合は中断し、ユーザーにファイルの配置を依頼する。DB のユーザー名・パスワード・DB 名はこの `.env` にだけ置き、`compose.yaml` や `application.yml` には書かない。
+2. Git で管理している場合は、`.gitignore` に `.env` が含まれていることを確認し、無ければ追記する。
+3. ルートディレクトリ直下に `compose.yaml` を以下の内容で作成する。
 
 ```yaml
 services:
@@ -29,13 +31,13 @@ services:
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_USER: budget_user
-      POSTGRES_PASSWORD: budget_password
-      POSTGRES_DB: budget_db
+      POSTGRES_USER: ${DB_USERNAME:?Set DB_USERNAME in .env}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      POSTGRES_DB: ${DB_NAME:?Set DB_NAME in .env}
     volumes:
       - postgres_data:/var/lib/postgresql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U budget_user -d budget_db"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_NAME}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -44,8 +46,8 @@ volumes:
   postgres_data:
 ```
 
-2. `docker compose up -d` を実行する。
-3. `docker compose ps` を実行し、`budget-app-db` の状態が `healthy` になるまで待機・確認する。
+4. `docker compose up -d` を実行する。
+5. `docker compose ps` を実行し、`budget-app-db` の状態が `healthy` になるまで待機・確認する。
 
 ## CP2-3 〔実装・動作確認〕バックエンド（Spring Boot 4 / Kotlin）のセットアップ
 1. ルートディレクトリで以下のコマンドを実行し、`backend` ディレクトリを生成する（Spring Initializr から最新の Spring Boot 4.x を取得する）。
@@ -77,10 +79,12 @@ curl -fsSL https://start.spring.io/starter.tgz \
 spring:
   application:
     name: budgetapp
+  config:
+    import: optional:file:../.env[.properties]  # DB 接続情報はルートの .env から読む（Gradle の実行ディレクトリは backend）
   datasource:
-    url: jdbc:postgresql://localhost:5432/budget_db
-    username: budget_user
-    password: budget_password
+    url: jdbc:postgresql://localhost:5432/${DB_NAME}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -118,8 +122,8 @@ INSERT INTO categories (name, type) VALUES ('副業', 'INCOME');
 6. サブシェル `(cd backend && ./gradlew bootRun)` でバックエンドを一時起動し、起動完了後にプロセスを停止する。その後、以下のコマンドで Flyway によるテーブル作成と初期データ投入を直接確認する。
 
 ```bash
-docker compose exec -T db psql -U budget_user -d budget_db -c "\dt"
-docker compose exec -T db psql -U budget_user -d budget_db -c "SELECT * FROM categories;"
+docker compose exec -T db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "\dt"'
+docker compose exec -T db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "SELECT * FROM categories;"'
 ```
 
 ## CP2-4 〔実装・動作確認〕フロントエンド（Next.js 16 / pnpm 11）のセットアップ

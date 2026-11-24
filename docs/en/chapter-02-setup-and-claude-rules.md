@@ -74,6 +74,16 @@ mkdir -p budget-app-handson/.claude/rules
 cd budget-app-handson
 ```
 
+Place the `.env.example` distributed at the workshop directly under this root directory (`budget-app-handson`). It holds the DB connection settings (user name, password and DB name), and in CP2-2 you copy (or rename) it to `.env`.
+
+```text
+DB_NAME=budget_db
+DB_USERNAME=budget_user
+DB_PASSWORD=budget_password
+```
+
+The values in `.env.example` are for the workshop only. In your own projects, use a hard-to-guess password and never commit `.env` to Git.
+
 ### 2. Install Java 25 / Node.js 26 / pnpm 11 (`mise.toml`)
 
 Create `mise.toml` directly under the root directory (`budget-app-handson`), then pin and install the tool versions used by the project.
@@ -125,7 +135,9 @@ Follow "Checkpoint operation" in CLAUDE.md: after finishing each CP, report the 
    - Tell the user to stop the process themselves and then run `/setup-env` again.
 
 ## CP2-2 [Implementation + Verification] Build and start PostgreSQL 18
-1. Create `compose.yaml` directly under the root directory with the following content.
+1. Check that the distributed `.env.example` exists directly under the root directory. If `.env` does not exist, create it with `cp .env.example .env` (do not overwrite an existing `.env`). If `.env.example` is missing, stop and ask the user to place it. Keep the DB user name, password and DB name only in this `.env`, and never write them in `compose.yaml` or `application.yml`.
+2. If the project is managed with Git, check that `.gitignore` contains `.env` and add it if missing.
+3. Create `compose.yaml` directly under the root directory with the following content.
 
 ```yaml
 services:
@@ -135,13 +147,13 @@ services:
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_USER: budget_user
-      POSTGRES_PASSWORD: budget_password
-      POSTGRES_DB: budget_db
+      POSTGRES_USER: ${DB_USERNAME:?Set DB_USERNAME in .env}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      POSTGRES_DB: ${DB_NAME:?Set DB_NAME in .env}
     volumes:
       - postgres_data:/var/lib/postgresql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U budget_user -d budget_db"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_NAME}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -150,8 +162,8 @@ volumes:
   postgres_data:
 ```
 
-2. Run `docker compose up -d`.
-3. Run `docker compose ps` and wait until the status of `budget-app-db` becomes `healthy`, then confirm it.
+4. Run `docker compose up -d`.
+5. Run `docker compose ps` and wait until the status of `budget-app-db` becomes `healthy`, then confirm it.
 
 ## CP2-3 [Implementation + Verification] Set up the backend (Spring Boot 4 / Kotlin)
 1. Run the following command in the root directory to generate the `backend` directory (this fetches the latest Spring Boot 4.x from Spring Initializr).
@@ -183,10 +195,12 @@ curl -fsSL https://start.spring.io/starter.tgz \
 spring:
   application:
     name: budgetapp
+  config:
+    import: optional:file:../.env[.properties]  # Read DB settings from the root .env (Gradle runs in backend)
   datasource:
-    url: jdbc:postgresql://localhost:5432/budget_db
-    username: budget_user
-    password: budget_password
+    url: jdbc:postgresql://localhost:5432/${DB_NAME}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -224,8 +238,8 @@ INSERT INTO categories (name, type) VALUES ('副業', 'INCOME');
 6. Start the backend temporarily with the subshell `(cd backend && ./gradlew bootRun)`, and stop the process once startup completes. Then directly verify the table creation and initial data insertion by Flyway with the following commands.
 
 ```bash
-docker compose exec -T db psql -U budget_user -d budget_db -c "\dt"
-docker compose exec -T db psql -U budget_user -d budget_db -c "SELECT * FROM categories;"
+docker compose exec -T db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "\dt"'
+docker compose exec -T db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "SELECT * FROM categories;"'
 ```
 
 ## CP2-4 [Implementation + Verification] Set up the frontend (Next.js 16 / pnpm 11)
@@ -414,8 +428,8 @@ Claude Code follows the procedure in `.claude/skills/setup-env/SKILL.md`, perfor
 | CP | Kind | Content |
 | :--- | :--- | :--- |
 | CP2-1 | Design | Check the prerequisite tool versions and the availability of ports (5432, 8080, 3000) |
-| CP2-2 | Implementation + Verification | Generate `compose.yaml`, start PostgreSQL 18 with Docker, and run the health check |
-| CP2-3 | Implementation + Verification | Generate `backend` from Spring Initializr, add dependency libraries, place `application.yml` and the Flyway SQL, and verify the tables and initial master data with `psql` |
+| CP2-2 | Implementation + Verification | Create `.env`, generate `compose.yaml`, start PostgreSQL 18 with Docker, and run the health check |
+| CP2-3 | Implementation + Verification | Generate `backend` from Spring Initializr, add dependency libraries, place `application.yml` (which reads `.env`) and the Flyway SQL, and verify the tables and initial master data with `psql` |
 | CP2-4 | Implementation + Verification | Check `mise.toml`, generate `frontend`, install the test libraries, create the four-layer directories, and verify the build |
 | CP2-5 | Verification | Completion report |
 
@@ -425,7 +439,8 @@ When Claude Code stops and shows its report, review the content and enter "Proce
 
 When the CP2-5 completion report is output, confirm that the following state is in place.
 
-- `compose.yaml`, `backend/`, and `frontend/` have been created directly under the root directory.
+- `.env`, `compose.yaml`, `backend/`, and `frontend/` have been created directly under the root directory.
+- `.env` is not tracked by Git (it does not appear in `git status`).
 - The PostgreSQL 18 container (`budget-app-db`) is running, and the `categories` table (5 initial rows) and the `transactions` table have been created.
 - The backend's `./gradlew test` and the frontend's `pnpm --dir frontend build` have completed without errors.
 

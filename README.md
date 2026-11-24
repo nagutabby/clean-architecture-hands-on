@@ -123,6 +123,7 @@ frontend/        Next.js のプロジェクト（Chapter 6 まで終えた状態
 .claude/         Claude Code の設定（rules、skills、hooks）
 CLAUDE.md        Claude Code への共通ガイドライン
 compose.yaml     PostgreSQL 18 の定義
+.env.example     DB 接続情報のひな形（`.env` にコピーして使う。`.env` はコミットしない）
 mise.toml        Java・Node.js・pnpm のバージョン定義
 ```
 
@@ -130,9 +131,10 @@ mise.toml        Java・Node.js・pnpm のバージョン定義
 
 ## 動作確認の方法
 
-PostgreSQL、バックエンド、フロントエンドの順に起動します。
+先に `cp .env.example .env` で DB 接続情報の `.env` を作成します。続いて、PostgreSQL、バックエンド、フロントエンドの順に起動します。
 
 ```bash
+cp .env.example .env
 docker compose up -d
 cd backend && ./gradlew bootRun
 cd frontend && pnpm install && pnpm dev

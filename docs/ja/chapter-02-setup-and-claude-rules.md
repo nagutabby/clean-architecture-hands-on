@@ -74,6 +74,16 @@ mkdir -p budget-app-handson/.claude/rules
 cd budget-app-handson
 ```
 
+勉強会で配布された `.env.example` を、このルートディレクトリ（`budget-app-handson`）直下に置きます。DB の接続情報（ユーザー名・パスワード・DB 名）が書かれたファイルで、CP2-2 で `.env` にコピー（またはリネーム）して使います。
+
+```text
+DB_NAME=budget_db
+DB_USERNAME=budget_user
+DB_PASSWORD=budget_password
+```
+
+`.env.example` の値は勉強会専用です。自分のプロジェクトでは、パスワードを推測されにくい値に変え、`.env` を Git にコミットしないでください。
+
 ### 2. Java 25 / Node.js 26 / pnpm 11 の導入（`mise.toml`）
 
 ルートディレクトリ（`budget-app-handson`）直下に `mise.toml` を作成し、プロジェクトで使用するツールバージョンを固定してインストールします。
@@ -125,7 +135,9 @@ CLAUDE.md の「チェックポイント運用」に従い、1つの CP を終�
    - ユーザー自身で該当プロセスを停止した後に、再度 `/setup-env` を実行するよう案内する。
 
 ## CP2-2 〔実装・動作確認〕PostgreSQL 18 の構築と起動
-1. ルートディレクトリ直下に `compose.yaml` を以下の内容で作成する。
+1. ルートディレクトリ直下に、配布された `.env.example` があることを確認する。`.env` が無ければ `cp .env.example .env` で作成する（`.env` が既にある場合は上書きしない）。`.env.example` が無い場合は中断し、ユーザーにファイルの配置を依頼する。DB のユーザー名・パスワード・DB 名はこの `.env` にだけ置き、`compose.yaml` や `application.yml` には書かない。
+2. Git で管理している場合は、`.gitignore` に `.env` が含まれていることを確認し、無ければ追記する。
+3. ルートディレクトリ直下に `compose.yaml` を以下の内容で作成する。
 
 ```yaml
 services:
@@ -135,13 +147,13 @@ services:
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_USER: budget_user
-      POSTGRES_PASSWORD: budget_password
-      POSTGRES_DB: budget_db
+      POSTGRES_USER: ${DB_USERNAME:?Set DB_USERNAME in .env}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      POSTGRES_DB: ${DB_NAME:?Set DB_NAME in .env}
     volumes:
       - postgres_data:/var/lib/postgresql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U budget_user -d budget_db"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_NAME}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -150,8 +162,8 @@ volumes:
   postgres_data:
 ```
 
-2. `docker compose up -d` を実行する。
-3. `docker compose ps` を実行し、`budget-app-db` の状態が `healthy` になるまで待機・確認する。
+4. `docker compose up -d` を実行する。
+5. `docker compose ps` を実行し、`budget-app-db` の状態が `healthy` になるまで待機・確認する。
 
 ## CP2-3 〔実装・動作確認〕バックエンド（Spring Boot 4 / Kotlin）のセットアップ
 1. ルートディレクトリで以下のコマンドを実行し、`backend` ディレクトリを生成する（Spring Initializr から最新の Spring Boot 4.x を取得する）。
@@ -183,10 +195,12 @@ curl -fsSL https://start.spring.io/starter.tgz \
 spring:
   application:
     name: budgetapp
+  config:
+    import: optional:file:../.env[.properties]  # DB 接続情報はルートの .env から読む（Gradle の実行ディレクトリは backend）
   datasource:
-    url: jdbc:postgresql://localhost:5432/budget_db
-    username: budget_user
-    password: budget_password
+    url: jdbc:postgresql://localhost:5432/${DB_NAME}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -224,8 +238,8 @@ INSERT INTO categories (name, type) VALUES ('副業', 'INCOME');
 6. サブシェル `(cd backend && ./gradlew bootRun)` でバックエンドを一時起動し、起動完了後にプロセスを停止する。その後、以下のコマンドで Flyway によるテーブル作成と初期データ投入を直接確認する。
 
 ```bash
-docker compose exec -T db psql -U budget_user -d budget_db -c "\dt"
-docker compose exec -T db psql -U budget_user -d budget_db -c "SELECT * FROM categories;"
+docker compose exec -T db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "\dt"'
+docker compose exec -T db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "SELECT * FROM categories;"'
 ```
 
 ## CP2-4 〔実装・動作確認〕フロントエンド（Next.js 16 / pnpm 11）のセットアップ
@@ -414,8 +428,8 @@ Claude Code は `.claude/skills/setup-env/SKILL.md` の手順に従い、次の�
 | CP | 種別 | 内容 |
 | :--- | :--- | :--- |
 | CP2-1 | 設計 | 前提ツールのバージョンとポート（5432, 8080, 3000）の空き状況の確認 |
-| CP2-2 | 実装・動作確認 | `compose.yaml` の生成と Docker による PostgreSQL 18 の起動・ヘルスチェック |
-| CP2-3 | 実装・動作確認 | Spring Initializr からの `backend` 生成、依存ライブラリの追加、`application.yml` と Flyway SQL の配置、`psql` によるテーブルと初期マスタデータの確認 |
+| CP2-2 | 実装・動作確認 | `.env` の作成、`compose.yaml` の生成、Docker による PostgreSQL 18 の起動・ヘルスチェック |
+| CP2-3 | 実装・動作確認 | Spring Initializr からの `backend` 生成、依存ライブラリの追加、`.env` を参照する `application.yml` と Flyway SQL の配置、`psql` によるテーブルと初期マスタデータの確認 |
 | CP2-4 | 実装・動作確認 | `mise.toml` の確認、`frontend` の生成、テストライブラリの導入、4層用ディレクトリの作成、ビルド確認 |
 | CP2-5 | 動作確認 | 完了報告 |
 
@@ -425,7 +439,8 @@ Claude Code が停止して報告を出したら、内容を確認して「次�
 
 CP2-5 の完了報告が出力されたら、以下の状態になっていることを確認してください。
 
-- ルートディレクトリ直下に `compose.yaml`、`backend/`、`frontend/` が作成されていること。
+- ルートディレクトリ直下に `.env`、`compose.yaml`、`backend/`、`frontend/` が作成されていること。
+- `.env` が Git で追跡されていないこと（`git status` に表示されない）。
 - PostgreSQL 18 コンテナ（`budget-app-db`）が稼働中であり、`categories` テーブル（初期データ5件）と `transactions` テーブルが作成されていること。
 - バックエンドの `./gradlew test` およびフロントエンドの `pnpm --dir frontend build` がエラーなく完了していること。
 

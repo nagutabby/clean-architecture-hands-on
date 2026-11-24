@@ -1,10 +1,12 @@
 spring:
   application:
     name: budgetapp
+  config:
+    import: optional:file:../.env[.properties]
   datasource:
-    url: jdbc:postgresql://localhost:5432/budget_db
-    username: budget_user
-    password: budget_password
+    url: jdbc:postgresql://localhost:5432/${DB_NAME}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
