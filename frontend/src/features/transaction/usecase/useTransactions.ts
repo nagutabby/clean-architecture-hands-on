@@ -71,6 +71,16 @@ export function useTransactions(repository: TransactionRepository) {
     }
   };
 
+  const editTransaction = async (id: number, input: CreateTransactionInput) => {
+    await repositoryRef.current.updateTransaction(id, input);
+    try {
+      setError(null);
+      await refreshTransactions();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '一覧の再取得に失敗しました');
+    }
+  };
+
   const removeTransaction = async (id: number) => {
     try {
       setError(null);
@@ -88,6 +98,7 @@ export function useTransactions(repository: TransactionRepository) {
     isLoading,
     error,
     addTransaction,
+    editTransaction,
     removeTransaction,
   };
 }

@@ -1,12 +1,14 @@
 import { useState, FormEvent } from 'react';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
-import { Category, CreateTransactionInput } from '../domain/types';
+import { Category, CreateTransactionInput, TransactionItem } from '../domain/types';
 import { validateTransactionInput } from '../domain/validateTransaction';
 
 interface TransactionFormProps {
   categories: Category[];
   onSubmit: (data: CreateTransactionInput) => Promise<void>;
+  editing?: TransactionItem | null;
+  onCancelEdit?: () => void;
 }
 
 function getTodayLocalDate(): string {
@@ -17,12 +19,12 @@ function getTodayLocalDate(): string {
   return `${year}-${month}-${day}`;
 }
 
-export function TransactionForm({ categories, onSubmit }: TransactionFormProps) {
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string>('');
-  const [title, setTitle] = useState('');
-  const [amount, setAmount] = useState('');
-  const [date, setDate] = useState(getTodayLocalDate);
-  const [memo, setMemo] = useState('');
+export function TransactionForm({ categories, onSubmit, editing = null, onCancelEdit }: TransactionFormProps) {
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>(editing ? String(editing.categoryId) : '');
+  const [title, setTitle] = useState(editing?.title ?? '');
+  const [amount, setAmount] = useState(editing ? String(editing.amount) : '');
+  const [date, setDate] = useState(editing?.transactionDate ?? getTodayLocalDate());
+  const [memo, setMemo] = useState(editing?.memo ?? '');
   const [submitting, setSubmitting] = useState(false);
   const [formErrors, setFormErrors] = useState<string[]>([]);
 
@@ -50,9 +52,11 @@ export function TransactionForm({ categories, onSubmit }: TransactionFormProps) 
     setFormErrors([]);
     try {
       await onSubmit(input);
-      setTitle('');
-      setAmount('');
-      setMemo('');
+      if (!editing) {
+        setTitle('');
+        setAmount('');
+        setMemo('');
+      }
     } catch (err) {
       setFormErrors([err instanceof Error ? err.message : '登録に失敗しました']);
     } finally {
@@ -62,7 +66,7 @@ export function TransactionForm({ categories, onSubmit }: TransactionFormProps) 
 
   return (
     <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow space-y-4" noValidate>
-      <h2 className="text-lg font-bold text-gray-900">明細の追加</h2>
+      <h2 className="text-lg font-bold text-gray-900">{editing ? '明細の編集' : '明細の追加'}</h2>
 
       {formErrors.length > 0 && (
         <ul className="p-3 text-sm bg-red-50 text-red-700 rounded-md list-disc list-inside space-y-1">
@@ -120,8 +124,13 @@ export function TransactionForm({ categories, onSubmit }: TransactionFormProps) 
         placeholder="備考など"
       />
       <Button className="w-full" type="submit" disabled={submitting}>
-        {submitting ? '登録中...' : '登録する'}
+        {submitting ? (editing ? '保存中...' : '登録中...') : editing ? '保存する' : '登録する'}
       </Button>
+      {editing && (
+        <Button className="w-full" type="button" variant="secondary" onClick={onCancelEdit}>
+          キャンセル
+        </Button>
+      )}
     </form>
   );
 }

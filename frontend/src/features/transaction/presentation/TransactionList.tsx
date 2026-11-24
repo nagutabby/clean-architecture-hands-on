@@ -5,10 +5,11 @@ import { formatCurrency } from './utils/formatCurrency';
 
 interface TransactionListProps {
   transactions: TransactionItem[];
+  onEdit: (item: TransactionItem) => void;
   onDelete: (id: number) => Promise<void>;
 }
 
-export function TransactionList({ transactions, onDelete }: TransactionListProps) {
+export function TransactionList({ transactions, onEdit, onDelete }: TransactionListProps) {
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
   const handleDelete = async (id: number) => {
@@ -81,6 +82,14 @@ export function TransactionList({ transactions, onDelete }: TransactionListProps
                 </td>
                 <td className="px-4 py-3 text-sm text-gray-500">{t.memo || '-'}</td>
                 <td className="px-4 py-3 text-sm text-center">
+                  <Button
+                    className="mr-2 px-2.5 py-1 text-xs"
+                    type="button"
+                    variant="secondary"
+                    onClick={() => onEdit(t)}
+                  >
+                    編集
+                  </Button>
                   <Button
                     className="px-2.5 py-1 text-xs"
                     type="button"

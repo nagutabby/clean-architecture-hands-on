@@ -39,6 +39,20 @@ export const transactionApi: TransactionRepository = {
     return res.json();
   },
 
+  async updateTransaction(id: number, input: CreateTransactionInput): Promise<TransactionItem> {
+    const res = await fetch(`${API_BASE_URL}/transactions/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(input),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => null);
+      throw new Error(errorData?.message || '明細の更新に失敗しました');
+    }
+    return res.json();
+  },
+
   async deleteTransaction(id: number): Promise<void> {
     const res = await fetch(`${API_BASE_URL}/transactions/${id}`, {
       method: 'DELETE',

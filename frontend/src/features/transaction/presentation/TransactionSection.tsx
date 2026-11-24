@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+import { TransactionItem } from '../domain/types';
 import { TransactionRepository } from '../usecase/TransactionRepository';
 import { useTransactions } from '../usecase/useTransactions';
 import { transactionApi } from '../adapter/transactionApi';
@@ -19,8 +21,10 @@ export function TransactionSection({ repository = transactionApi }: TransactionS
     isLoading,
     error,
     addTransaction,
+    editTransaction,
     removeTransaction,
   } = useTransactions(repository);
+  const [editing, setEditing] = useState<TransactionItem | null>(null);
 
   if (isLoading) {
     return <p className="text-gray-500 text-center py-8">読み込み中...</p>;
@@ -37,11 +41,24 @@ export function TransactionSection({ repository = transactionApi }: TransactionS
       <BalanceSummaryCard summary={summary} />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-1">
-          <TransactionForm categories={categories} onSubmit={addTransaction} />
+          <TransactionForm
+            key={editing?.id ?? 'new'}
+            categories={categories}
+            editing={editing}
+            onCancelEdit={() => setEditing(null)}
+            onSubmit={async (input) => {
+              if (editing) {
+                await editTransaction(editing.id, input);
+                setEditing(null);
+              } else {
+                await addTransaction(input);
+              }
+            }}
+          />
         </div>
         <div className="md:col-span-2">
           <h2 className="text-xl font-bold text-gray-900 mb-4">家計簿明細一覧</h2>
-          <TransactionList transactions={transactions} onDelete={removeTransaction} />
+          <TransactionList transactions={transactions} onEdit={setEditing} onDelete={removeTransaction} />
         </div>
       </div>
     </div>
