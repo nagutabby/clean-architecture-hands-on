@@ -1,4 +1,0 @@
-[tools]
-java = "temurin-25"
-node = "26"
-pnpm = "11"
